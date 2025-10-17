@@ -1,3 +1,11 @@
+
+Hello everyone,
+
+As a part of the projects I am working on to keep myself busy during these weeks after the tragic passing of my parents, I am seeking assistance on this game I was coming up with a while ago. It was relaxing and enjoyable to work on and see it grow, and I would often keep my parents updated on the progress and they were happy to see that. If you want to contribute, open the html and play around, it's pretty easy to get started. Aside from playtest feedback, at the end of this readme there is a list of things I eventually want to add. If you have questions about your changes or they aren't obvious, make a new branch. 
+
+
+
+
 Welcome to Periodic Fable (name subject to change), a solo alchemy puzzle game. In this game you are trying to use elements to clear encounters, gain rewards, and fuse together elements to make new ones. In the same style of games such as Little Alchemy and Doodle God, you can combine two elements to make a new one, for example Fire + Earth would give you Rock. The goal of the first scenario is to create Gold. 
 
 Encounters
