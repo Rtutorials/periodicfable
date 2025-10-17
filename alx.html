@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALX - Alchemy & Encounters</title>
+<style>
+/* FONT REVERTED: Using standard, simple sans-serif/monospace stack */
+:root {
+  --bg:#080509;
+  --panel:#0f0812;
+  --accent:#c9a84a;
+  --muted:#b8a7c3;
+  --card:#17121b;
+  --radius:12px;
+  --glow:0 6px 30px rgba(201,168,74,0.15);
+  /* Define Element Colors for Outline Effect */
+  --color-default: var(--accent); /* Fallback Gold */
+  --color-fire: #FF6347;   /* Red */
+  --color-water: #4682B4;  /* Blue */
+  --color-air: #FFFFFF;    /* White */
+  --color-energy: #FFFF00; /* Yellow */
+  --color-dark: #A9A9A9;   /* Dark Grey (medium) */
+  --color-time: #8A2BE2;   /* Blue Violet (dark) */
+  --color-sky: #87CEEB;    /* Light Blue */
+  --color-dust-rope: #F5DEB3; /* Beige */
+  --color-pink: #FF69B4;   /* HotPink */
+  --color-silver: #C0C0C0; /* Silver */
+  --color-gold: #FFD700;   /* Gold */
+  --color-black: #000000;  /* Black */
+  --color-green: #228B22;  /* ForestGreen */
+  --color-brown: #A52A2A;  /* Brown */
+  --color-orange: #FFA500; /* Orange */
+  --color-purple: #800080; /* Purple */
+  --color-cyan: #00FFFF;   /* Cyan */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  /* FONT REVERTED: Simple sans-serif font */
+  font-family: Arial, sans-serif;
+  background:linear-gradient(180deg,#050306 0%,var(--bg) 60%);
+  color:#efe9f2;
+  /* Corrected Grid Layout: Main content | Sidebar (right) */
+  /* Main area is now centered and flexible, Sidebar is fixed */
+  grid-template-columns: 1fr minmax(650px, 900px) 260px 1fr;
+  grid-template-rows:1fr; /* Single row spanning the height */
+  height:100vh;
+  gap:10px;
+  padding:10px;
+  display: grid;
+  justify-content: center; /* Center the whole grid system */
+}
+/* SIDEBAR (Instructions Column) MOVED TO COLUMN 3 - It will now show up on the right */
+.sidebar{
+  grid-column:3/4; /* Fixed position */
+  grid-row:1/2;
+  background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);
+  border-radius:var(--radius);
+  padding:15px;
+  box-shadow:var(--glow);
+  border:1px solid rgba(255,255,255,0.04);
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  overflow-y:auto;
+}
+.logo{
+  width:50px;height:50px;
+  border-radius:12px;
+  background:conic-gradient(from 200deg at 50% 50%, rgba(201,168,74,0.2),rgba(255,255,255,0.03));
+  display:flex;align-items:center;justify-content:center;
+  /* FONT REVERTED: Using standard serif/monospace for stylized elements */
+  font-weight:800;font-family: 'Courier New', monospace;
+  font-size:18px;color:var(--accent);
+  box-shadow:var(--glow);
+}
+h1{font-size:18px;font-weight:800;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+p.subtitle{color:var(--muted);font-size:12px}
+
+/* INSTRUCTIONS BOX ADJUSTMENT */
+.instructions{
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.3;
+    overflow-y: auto;
+}
+
+/* --- Past Combinations Hover Text (Moved under buttons) --- */
+.combinations-wrap {
+    /* New wrapper for the past combinations text and list */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: auto; /* Allows the text to size naturally */
+    align-self: center; /* Center itself within the flex container */
+}
+.past-combinations-text {
+    /* Style for the text label - less button-like */
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: none; /* Removed underline */
+    padding: 2px 5px;
+    border-radius: 4px;
+    transition: color 0.2s;
+}
+.past-combinations-text:hover {
+    color: var(--accent);
+    /* Added subtle hover effect */
+    background: rgba(201,168,74,0.1);
+}
+.combinations-list {
+    position: absolute;
+    /* Position list relative to the text element */
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+    width: 280px; /* fixed width */
+    max-height: 250px;
+    overflow-y: auto;
+    background: var(--panel);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 8px;
+    box-shadow: var(--glow);
+    display: none; /* Hidden by default */
+    z-index: 10;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+}
+.combinations-list strong {
+    color: var(--accent);
+    font-weight: normal;
+}
+.combinations-wrap:hover .combinations-list {
+    display: block; /* Show on hover */
+}
+/* --- End Past Combinations Hover Text --- */
+
+/* MAIN AREA FOR MAP/PREVIEW/CARDS (Column 2) */
+.main{
+  grid-column:2/3; /* Center column */
+  grid-row: 1/2;
+  display:flex;
+  flex-direction:column;
+  align-items:center; /* Center all contents horizontally */
+  gap:10px;
+  padding-top: 10px;
+  overflow-y: auto; /* Allow scrolling if window is too short */
+}
+
+/* CONTAINER FOR MAP AND PREVIEW (CENTERED) */
+.map-and-preview-container {
+    display:grid;
+    /* Map (350px) | Preview (300px). Small gap. */
+    grid-template-columns: 350px 300px;
+    gap: 30px;
+    align-items:flex-start; /* Aligns map and preview top-to-top */
+    margin-bottom: 20px;
+}
+
+.grid-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+}
+.grid-title {
+    font-size: 18px;
+    color: var(--accent);
+    font-weight: 800;
+    margin-bottom: 5px;
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    text-transform: uppercase; /* ALL CAPS */
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+  width:100%;
+  max-width:300px;
+}
+.cell{
+  aspect-ratio:1/1;
+  background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.005));
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;cursor:pointer;position:relative;
+  transition:border .15s, box-shadow .15s, opacity .3s;
+  padding-top: 0;
+}
+/* TAPPED ELEMENTS SHOULD NEVER BE HIGHLIGHTED OR SELECTED */
+.cell:hover:not(.selected):not(.defeated){border:2px solid var(--accent);box-shadow:0 0 12px rgba(201,168,74,0.4)}
+.cell.selected{border:2px solid var(--accent);box-shadow:0 0 16px rgba(201,168,74,0.6)}
+
+/* NEW: Dissolve animation for completed encounters */
+@keyframes dissolve {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(0.8); opacity: 0; }
+}
+
+.cell.dissolve {
+    animation: dissolve 0.5s forwards;
+    pointer-events: none;
+}
+
+/* Defeated cell - new black and white style and increased transparency */
+.cell.defeated {
+    opacity: 0.25; /* Increased transparency for "won" encounters */
+    pointer-events: none;
+    background: #0d080f;
+    border: none;
+    filter: grayscale(100%);
+    box-shadow: none !important; /* NO HIGHLIGHT */
+    cursor: default; /* NO HIGHLIGHT */
+}
+.cell.defeated:hover{border: none !important; box-shadow: none !important;} /* NO HIGHLIGHT */
+.pawn{position:absolute;bottom:6px;right:6px;font-size:20px;pointer-events:none; filter: drop-shadow(0 0 2px #000);}
+
+/* Half Success Counter: Always visible, 1/2 style */
+.half-success-counter {
+    position: absolute;
+    top: -2px; /* Move up slightly */
+    right: -2px; /* Move right slightly */
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 4px; /* Use square/rounded edges */
+    background: #4682B4; /* Blue background for visibility */
+    color: white;
+    font-weight: bold;
+    line-height: 1;
+    z-index: 10;
+    border: 1px solid white;
+}
+
+/* Wrapper for Preview and Messages - Now second column in .main */
+.preview-and-message-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 300px;
+    position: relative;
+}
+/* Existing preview styles */
+.preview{
+  width:300px;height:300px;
+  border-radius:var(--radius);
+  border:1px solid rgba(255,255,255,0.04);
+  background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(255,255,255,0.005));
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding: 10px; /* Add some padding */
+}
+.preview-title {
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 8px; /* Spacing between emoji and title */
+}
+.preview .big{
+  font-size:60px;
+  /* FONT REVERTED: Using standard serif/monospace for stylized elements */
+  font-family: 'Courier New', monospace;
+  color:var(--accent);
+}
+
+/* NEW: Encounter Message Box Styling */
+.encounter-message-box {
+    width: 100%;
+    min-height: 80px;
+    /* ABSOLUTE POSITIONING to free up vertical space */
+    position: absolute;
+    bottom: -90px; /* Position below the preview box */
+    left: 0;
+
+    background: transparent;
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 20;
+}
+/* Hint Box for persistent hints - Updated for Second Hint line break */
+.hint-box {
+    width: 100%;
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.3;
+    padding: 5px 0;
+    margin-top: 12px; /* Spacing between title and hints */
+}
+.hint-box span {
+    display: block; /* Force the span (Second Hint) onto a new line */
+    margin-top: 5px;
+}
+
+/* The actual message item that appears and fades */
+.message-item {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 800;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    animation: fadeout 3s forwards;
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+    pointer-events: none;
+}
+.message-item.default {
+    background: rgba(139, 0, 0, 0.9);
+    border: 3px solid #FF4500;
+    color: #fff;
+    font-size: 18px;
+}
+.message-item.success {
+    background: rgba(0, 80, 0, 0.9);
+    border: 3px solid limegreen;
+    color: #9ff88b;
+    font-size: 20px;
+}
+.message-item.warning {
+    background: rgba(80, 80, 0, 0.9);
+    border: 3px solid yellow;
+    color: yellow;
+    font-size: 18px;
+}
+
+@keyframes fadeout {
+    0% { opacity: 1; }
+    /* FADE GRADUALLY FROM 0% */
+    100% { opacity: 0; }
+}
+/* END: Encounter Message Box Styling */
+
+/* CONTAINER FOR CARDS */
+.cards{
+  width: 650px; /* Match width of map/preview container */
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  align-items: flex-start; /* Align card rows to the left of the 650px container */
+  margin-top: 20px;
+}
+
+/* DYNAMIC CARD ROW */
+.row {
+    width: 100%; /* Use full width of .cards container (650px) */
+    display:grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 90px;
+    gap: 4px;
+    padding: 5px 0;
+    overflow-x: auto;
+    height: 130px; /* Reduced height */
+    justify-content: flex-start;
+}
+
+.card-slot{
+  height: 120px; /* Reduced height */
+  background:var(--card);
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.05);
+  display:flex;
+  flex-direction:column;
+  justify-content: flex-start;
+  align-items:center;
+  padding: 4px;
+  cursor:pointer;
+  position:relative;
+  transition:border .15s, box-shadow .15s, transform .2s, opacity .3s;
+}
+
+/* 1. DEFAULT HOVER (ONLY WHEN NOT SELECTED OR TAPPED) */
+.card-slot:hover:not(.selected-reagent):not(.tapped){
+    transform:translateY(-2px);
+    border:1px solid var(--accent);
+}
+
+/* 2. BASE SELECTED STATE (YELLOW GLOW/BORDER) - ONLY WHEN ONE IS SELECTED */
+.card-slot.selected-reagent{
+    box-shadow:0 0 12px rgba(255,255,255,0.4);
+    transform:translateY(-4px);
+    border:2px solid var(--accent);
+}
+/* 3. FUSION POSSIBLE (GREEN) - APPLIED WHEN 2 SELECTED */
+.card-slot.selected-reagent.fusable{
+    border:2px solid #4CAF50; /* Green border */
+    box-shadow:0 0 12px rgba(76, 175, 80, 0.6);
+}
+/* 4. FUSION IMPOSSIBLE (RED) - APPLIED WHEN 2 SELECTED */
+.card-slot.selected-reagent.unfusable{
+    border:2px solid #F44336; /* Red border */
+    box-shadow:0 0 12px rgba(244, 67, 54, 0.6);
+}
+
+/* 5. TAPPED STATE - NO HIGHLIGHTS & NO INTERACTION */
+.card-slot.tapped {
+    opacity: 0.3;
+    box-shadow: none !important; /* Ensure no glow */
+    border-color: #555 !important; /* Ensure gray border */
+    transform: none;
+    pointer-events: none; /* Make it unclickable when tapped */
+}
+/* Ensure tapped cards lose all selection/hover styles */
+.card-slot.tapped:hover {
+    border: 1px solid #555 !important;
+    box-shadow: none !important;
+}
+
+/* NEW: Shine animation for newly created products */
+@keyframes shine {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.card-slot.newly-created {
+    /* Subtle shine effect */
+    background: linear-gradient(90deg, var(--card) 0%, rgba(255,255,255,0.1) 50%, var(--card) 100%);
+    background-size: 200% 100%;
+    animation: shine 1.5s ease-out forwards;
+}
+
+
+/* Element Name Label Styling */
+.card-slot .label {
+  font-size: 0.7em;
+  font-weight: bold;
+  /* Dynamic color set by JS: var(--label-color) */
+  text-align: center;
+  line-height: 1.1;
+  margin-top: 1px;
+  /* Text outline effect (stroke) */
+  text-shadow:
+    -1px -1px 0 var(--element-color),
+    1px -1px 0 var(--element-color),
+    -1px 1px 0 var(--element-color),
+    1px 1px 0 var(--element-color);
+}
+/* Set default colors */
+.card-slot .label {
+    color: black;
+}
+.card-slot.dark-outline .label {
+    color: white;
+}
+
+.card-slot .emoji {
+    font-size: 1.6em; /* Reduced size */
+    margin-top: 1px;
+    margin-bottom: 2px;
+    flex-grow: 0;
+    display: flex;
+    align-items: center;
+}
+.card-slot .actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    padding: 3px 0;
+    border-top: 1px dashed rgba(255,255,255,0.1);
+    margin-top: auto;
+}
+.card-slot .action-btn {
+    font-size: 0.75em;
+    padding: 1px 3px;
+    width: 100%;
+    text-align: left;
+    background: #333;
+    border-radius: 4px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.1s;
+}
+.card-slot .action-btn:hover {
+    background: var(--accent);
+    color: var(--card);
+}
+.row-label{font-size:12px;color:var(--muted);margin-bottom:2px;margin-left:4px}
+
+/* NEW BUTTONS CONTAINER UNDER THE MAP/PREVIEW */
+.control-panel{
+    width: 650px; /* Match width of map/preview container */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    /* Ensure the control panel is visually separate from the cards */
+    margin-bottom: 10px;
+}
+.buttons{
+    display:flex;
+    gap:8px;
+    width: 100%;
+    justify-content: space-between; /* Space out the fuse button and the untap group */
+}
+/* Wrapper for Untap/Past Combinations */
+.right-buttons {
+    display: flex;
+    gap: 8px;
+    position: relative; /* Context for combination list */
+    align-items: center;
+}
+
+.btn{padding:6px 12px;border-radius:8px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.06);transition:all .2s}
+.btn.green{background:#2a5032;color:#9ff88b}
+.btn.green:hover{background:#356a42}
+.btn.silver{background:#444;color:#eee}
+.btn.silver:hover{background:#666}
+
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">RULES</div>
+  <h1>HOW TO PLAY</h1>
+  <p class="subtitle">    Welcome to Periodic Fable (name subject to change), a solo alchemy puzzle game. In this game you are trying to use elements to clear encounters, gain rewards, and fuse together elements to make new ones. In the same style of games such as Little Alchemy and Doodle God, you can combine two elements to make a new one, for example Fire + Earth would give you Rock. The goal of the first scenario is to create Gold. 
+</p>
+  <div class="instructions">
+    <strong>Encounters</strong>
+    <br>
+    <p>
+        The map is a grid of encounters, each with an element that is both the theme of the challenge and the element you get as a reward. For example, if you move to the “Fire” space of the map you face the Phoenix. Encounters that start with “The” are not combats and are more like physical puzzles.
+    </p>
+    <br>
+    <p>
+        To win the encounter, you must click on a verb on one of your elements that would defeat whatever puzzle or combat you are up against. For example, a way to defeat the Phoenix is to use the word “Flood” from the element “Water”.
+    </p>
+    <br>
+    <p>
+        If you choose a verb that wins the encounter, a “SUCCESS” message will appear, you receive that element as a permanent reward, and the encounter is removed from the map. You will receive a hint on the first and third failures. If you fail three times in a row, you must leave and try another encounter before you are allowed to try again. It is also possible to get a “half-success” for verbs that are partially effective. Two half-successes equal one success.
+    </p>
+    <br>
+    <strong>Fusing Elements</strong>
+    <br>
+    <p>
+        In order to create a new element, click on two elements in your reagents row and click the “Fuse” button. The first element you clicked on will be temporarily deactivated as a cost. Some combinations of elements are not possible and will be highlighted in red when you select them.
+    </p>
+    <br>
+    <p>
+        If you want your deactivated elements back, you can click “Untap All.” This reactivates all your elements but gets rid of all the new elements you have created in the products row. Some elements with a special symbol are final products and cannot be used to make any new fusions.
+    </p>
+    <br>
+    <strong>Improvements Roadmap</strong>
+    <ul>
+        <li>Add final room Z (The Alchemist's Endgame).</li>
+        <li>Add a game ending/victory screen.</li>
+        <li>Implement a hint system for the final room based on completing rows/columns.</li>
+        <li>Display a "final score" (Turn/move/failure timer) on the victory screen.</li>
+        <li>General UI Improvements and bug fixes.</li>
+        <li>Add basic art for each encounter.</li>
+        <li>Implement basic website elements (contact, privacy policy, etc.).</li>
+        <li>Add save and reset game functionality.</li>
+        <li>Improve these rules and add visuals.</li>
+        <li>Add a Lives/Roguelike mode.</li>
+        <li>Implement a Token System.</li>
+        <li>Add Set 2 and 3 of encounters.</li>
+        <li>Add more endgame room scenarios.</li>
+    </ul>
+</div>
+</div>
+
+<div class="main">
+  <div class="map-and-preview-container">
+    <div class="grid-wrap">
+      <div class="grid-title">Map</div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="preview-and-message-wrap">
+      <div class="preview">
+        <div class="big" id="preview">♙</div>
+        <div class="preview-title" id="previewTitle"></div>
+        <div class="hint-box" id="hintBox"></div>
+      </div>
+      <div class="encounter-message-box" id="encounterMessageBox"></div>
+    </div>
+  </div>
+
+  <div class="control-panel">
+    <div class="buttons">
+      <button class="btn green" id="fuseButton">Fuse!</button>
+      <div class="right-buttons">
+          <div class="combinations-wrap">
+              <span class="past-combinations-text" id="pastCombinationsText">Past Combinations (Hover)</span>
+              <div class="combinations-list" id="combinationsList">
+                  </div>
+          </div>
+          <button class="btn silver" id="clearButton">Untap All</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div>
+      <div class="row-label">Reagents</div>
+      <div class="row" id="row1"></div>
+    </div>
+    <div>
+      <div class="row-label">Products</div>
+      <div class="row" id="row2"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- START: DATA SETUP ---
+// Map element IDs to their appropriate CSS color variable name
+const elementColorMap = {
+    // Basic
+    '1': 'var(--color-air)', '2': 'var(--color-fire)', '3': 'var(--color-brown)', '4': 'var(--color-water)', '5': 'var(--color-energy)',
+    '6': 'var(--color-air)', '7': 'var(--color-dark)', '8': 'var(--color-green)', '9': 'var(--color-cyan)', '12': 'var(--color-energy)',
+    // Earthy / Natural
+    '10': 'var(--color-dust-rope)', '11': 'var(--color-dust-rope)', '15': 'var(--color-brown)', '16': 'var(--color-green)',
+    '17': 'var(--color-brown)', '52': 'var(--color-brown)', '56': 'var(--color-green)', '57': 'var(--color-brown)', '58': 'var(--color-green)',
+    '66': 'var(--color-brown)', '68': 'var(--color-brown)', '74': 'var(--color-brown)', '76': 'var(--color-green)',
+    // Cold
+    '18': 'var(--color-cyan)',
+    // Abstract / Arcane
+    '14': 'var(--color-default)', '29': 'var(--color-purple)', '33': 'var(--color-green)', '35': 'var(--color-time)',
+    '36': 'var(--color-pink)', '37': 'var(--color-pink)', '49': 'var(--color-default)', '50': 'var(--color-purple)',
+    // Dark / Negative
+    '31': 'var(--color-black)', '38': 'var(--color-black)', '45': 'var(--color-fire)', '47': 'var(--color-fire)', '53': 'var(--color-green)', '67': 'var(--color-black)',
+    // Man-made / Metal
+    '13': 'var(--color-silver)', '24': 'var(--color-silver)', '26': 'var(--color-cyan)', '28': 'var(--color-green)', '34': 'var(--color-silver)',
+    '40': 'var(--color-brown)', '41': 'var(--color-silver)', '43': 'var(--color-silver)', '44': 'var(--color-silver)', '48': 'var(--color-silver)',
+    '54': 'var(--color-cyan)', '60': 'var(--color-gold)', '62': 'var(--color-silver)', '69': 'var(--color-brown)', '70': 'var(--color-dark)',
+    '71': 'var(--color-silver)', '72': 'var(--color-silver)', '75': 'var(--color-black)', '77': 'var(--color-dark)', '79': 'var(--color-gold)', '80': 'var(--color-water)',
+    '81': 'var(--color-dust-rope)',
+    // Misc
+    '19': 'var(--color-default)', '20': 'var(--color-pink)', '21': 'var(--color-orange)', '22': 'var(--color-water)', '23': 'var(--color-pink)',
+    '39': 'var(--color-sky)', '42': 'var(--color-orange)', '46': 'var(--color-air)', '51': 'var(--color-energy)', '55': 'var(--color-fire)',
+    '61': 'var(--color-pink)', '63': 'var(--color-pink)', '64': 'var(--color-fire)', '65': 'var(--color-cyan)', '73': 'var(--color-air)', '78': 'var(--color-orange)', '82': 'var(--color-air)', '89': 'var(--color-fire)',
+};
+
+// Map color variables that are considered "dark" and need white text for contrast
+const darkColors = ['var(--color-time)', 'var(--color-water)', 'var(--color-dark)', 'var(--color-green)', 'var(--color-brown)', 'var(--color-orange)', 'var(--color-purple)', 'var(--color-black)'];
+
+const elementData = {
+    '1': { name: 'Air', emoji: '💨', verbs: ['Whirlwind'] },
+    '2': { name: 'Fire', emoji: '🔥', verbs: ['Burn'] },
+    '3': { name: 'Earth', emoji: '🌍', verbs: ['Quake'] },
+    '4': { name: 'Water', emoji: '💧', verbs: ['Flood'] },
+    '5': { name: 'Energy', emoji: '⚡', verbs: ['Zap'] },
+    '6': { name: 'Steam', emoji: '💨', verbs: ['Puff', 'Boil'] },
+    '7': { name: 'Rock', emoji: '🪨', verbs: ['Protect', 'Throw', 'Gift'] },
+    '8': { name: 'Plant', emoji: '🌿', verbs: ['Grow', 'Entangle'] },
+    '9': { name: 'Ice', emoji: '❄️', verbs: ['Cool', 'Freeze'] },
+    '10': { name: 'Dust', emoji: '✨', verbs: ['Dry', 'Blind'] },
+    '11': { name: 'Rope', emoji: '⛓️', verbs: ['Cross', 'Restrain', 'Whip'] },
+    '12': { name: 'Light', emoji: '💡', verbs: ['Shine', 'Blind'] },
+    '13': { name: 'Metal', emoji: '🔩', verbs: ['Block'] },
+    '14': { name: 'Sound', emoji: '🔊', verbs: ['Deafen', 'Yell'] },
+    '15': { name: 'Tobacco', emoji: '🚬', verbs: ['Smoke', 'Gift'] },
+    '16': { name: 'Kelp', emoji: '🌿', verbs: ['Gift'] },
+    '17': { name: 'Tree', emoji: '🌳', verbs: ['Grow', 'Gift'] },
+    '18': { name: 'Snow', emoji: '🌨️', verbs: ['Chill 4'] },
+    '19': { name: 'Soup', emoji: '🥣', verbs: ['Gift'] },
+    '20': { name: 'Icecream', emoji: '🍦', verbs: ['Gift'] },
+    '21': { name: 'Lava', emoji: '🌋', verbs: ['Smolder'] },
+    '22': { name: 'Aquarium', emoji: '🐠', verbs: ['Gift'] },
+    '23': { name: 'Sugar', emoji: '🍬', verbs: ['Gift'] },
+    '24': { name: 'Vacuum Cleaner', emoji: '🧹', verbs: ['Suck', 'Gift'] },
+    '25': { name: 'Time Machine', emoji: '⌚', verbs: ['Rewind'] },
+    '26': { name: 'Glass', emoji: '🔮', verbs: ['Wall', 'Shatter'] },
+    '27': { name: 'Pressure', emoji: '🤜', verbs: ['Compress'] },
+    '28': { name: 'Chemical', emoji: '🧪', verbs: ['Poison', 'Dissolve'] },
+    '29': { name: 'Gravity', emoji: '⬇️', verbs: ['Drop', 'Hover'] },
+    '30': { name: 'Oil', emoji: '🛢️', verbs: ['Fuel', 'Lubricate'] },
+    '31': { name: 'Darkness', emoji: '⬛', verbs: ['Conceal'] },
+    '32': { name: 'Man', emoji: '🧍', verbs: ['Communicate', 'Gift'] },
+    '33': { name: 'Life', emoji: '🧬', verbs: ['Heal', 'Gift'] },
+    '34': { name: 'Machine', emoji: '⚙️', verbs: ['Tamper'] },
+    '35': { name: 'Time', emoji: '⏱️', verbs: ['Wait', 'Rewind', 'Gift'] },
+    '36': { name: 'Intelligence', emoji: '🧠', verbs: ['Reason'] },
+    '37': { name: 'Love', emoji: '❤️', verbs: ['Romance'] },
+    '38': { name: 'Death', emoji: '💀', verbs: ['Kill'] },
+    '39': { name: 'Sky', emoji: '🌤️', verbs: ['Fly'] },
+    '40': { name: 'Bow', emoji: '🏹', verbs: ['Shoot'] },
+    '41': { name: 'Sword', emoji: '🗡️', verbs: ['Stab'] },
+    '42': { name: 'Explosion', emoji: '💥', verbs: ['Combust'] },
+    '43': { name: 'Gun', emoji: '🔫', verbs: ['Shoot'] },
+    '44': { name: 'Robot', emoji: '🤖', verbs: ['Gift'] },
+    '45': { name: 'Blood', emoji: '🩸', verbs: ['Throw', 'Gift'] },
+    '46': { name: 'Cloud', emoji: '☁️', verbs: ['Obscure', 'Cushion'] },
+    '47': { name: 'War', emoji: '⚔️', verbs: ['Battle'] },
+    '48': { name: 'Computer', emoji: '💻', verbs: ['Gift'] },
+    '49': { name: 'Art', emoji: '🖼️', verbs: ['Gift'] },
+    '50': { name: 'Space', emoji: '🌌', verbs: [] },
+    '51': { name: 'Sun', emoji: '☀️', verbs: ['Heat', 'Daze'] },
+    '52': { name: 'Animal', emoji: '🐾', verbs: ['Claw'] },
+    '53': { name: 'Disease', emoji: '🦠', verbs: ['Infect'] },
+    '54': { name: 'Mirror', emoji: '🪞', verbs: ['Reflect', 'Gift'] },
+    '55': { name: 'Pepper', emoji: '🌶️', verbs: ['Irritate', 'Gift'] },
+    '56': { name: 'Veggies', emoji: '🥕', verbs: ['Throw', 'Gift'] },
+    '57': { name: 'Barbecue', emoji: '🍖', verbs: ['Throw', 'Gift'] },
+    '58': { name: 'Mint', emoji: '🍃', verbs: ['Throw', 'Gift'] },
+    '59': { name: 'Flute', emoji: '🪈', verbs: ['Perform', 'Gift'] },
+    '60': { name: 'Bell', emoji: '🔔', verbs: ['Ring', 'Gift'] },
+    '61': { name: 'Doll', emoji: '🎎', verbs: ['Gift'] },
+    '62': { name: 'Car', emoji: '🚗', verbs: ['Transport'] },
+    '63': { name: 'Toy', emoji: '🧸', verbs: ['Throw', 'Gift'] },
+    '64': { name: 'Rose', emoji: '🌹', verbs: ['Gift'] },
+    '65': { name: 'Diamond', emoji: '💎', verbs: ['Throw', 'Protect', 'Gift'] },
+    '66': { name: 'Book', emoji: '📚', verbs: ['Gift'] },
+    '67': { name: 'Spider', emoji: '🕷️', verbs: ['Throw', 'Gift'] },
+    '68': { name: 'Dog', emoji: '🐕', verbs: ['Fetch', 'Gift'] },
+    '69': { name: 'Clock', emoji: '🕰️', verbs: ['Gift'] },
+    '70': { name: 'Bridge', emoji: '🌉', verbs: ['Cross'] },
+    '71': { name: 'Refrigerator', emoji: '🧊', verbs: ['Chill', 'Gift'] },
+    '72': { name: 'Can', emoji: '🥫', verbs: ['Protect', 'Gift'] },
+    '73': { name: 'Egg', emoji: '🥚', verbs: ['Throw', 'Gift'] },
+    '74': { name: 'Boat', emoji: '⛵', verbs: ['Sail', 'Gift'] },
+    '75': { name: 'Sunglasses', emoji: '🕶️', verbs: ['Wear', 'Gift'] },
+    '76': { name: 'Forest', emoji: '🌲', verbs: ['Grow'] },
+    '77': { name: 'Statue', emoji: '🗽', verbs: ['Gift'] },
+    '78': { name: 'Fireworks', emoji: '🎆', verbs: ['Ignite', 'Gift'] },
+    '79': { name: 'Gold', emoji: '🧈', verbs: ['Gift'] },
+    '80': { name: 'Police', emoji: '👮', verbs: ['Fight', 'Gift'] },
+    '81': { name: 'Map', emoji: '🗺️', verbs: ['Gift'] },
+    '82': { name: 'Mayonnaise', emoji: '🧴', verbs: ['Gift'] },
+    '89': { name: 'Spiderman', emoji: '🕸️', verbs: ['Gift'] }
+};
+
+const fuseList = [
+    '1 + 2 = 5', '1 + 3 = 10', '1 + 4 = 9', '1 + 5 = 27', '1 + 6 = 46', '1 + 7 = 10', '1 + 8 = 11', '1 + 9 = 18', '1 + 10 = 39', '1 + 26 = 59', '1 + 27 = 14', '1 + 28 = 53', '1 + 29 = 50', '1 + 31 = 50', '1 + 34 = 71', '1 + 38 = 53', '1 + 39 = 46', '1 + 46 = 39', '1 + 50 = 39', '1 + 62 = 26',
+    '2 + 3 = 7', '2 + 4 = 6', '2 + 5 = 12', '2 + 8 = 55', '2 + 9 = 4', '2 + 10 = 26', '2 + 11 = 10', '2 + 12 = 78', '2 + 13 = 12', '2 + 17 = 5', '2 + 26 = 65', '2 + 28 = 5', '2 + 29 = 51', '2 + 30 = 42', '2 + 31 = 12', '2 + 32 = 38', '2 + 33 = 37', '2 + 34 = 43', '2 + 35 = 10', '2 + 43 = 38', '2 + 47 = 42', '2 + 51 = 12', '2 + 52 = 57', '2 + 62 = 30', '2 + 66 = 10', '2 + 67 = 10', '2 + 74 = 10',
+    '3 + 4 = 8', '3 + 5 = 29', '3 + 7 = 29', '3 + 8 = 30', '3 + 9 = 18', '3 + 10 = 35', '3 + 11 = 70', '3 + 13 = 7', '3 + 26 = 65', '3 + 27 = 65', '3 + 28 = 33', '3 + 29 = 7', '3 + 30 = 7', '3 + 31 = 13', '3 + 33 = 32', '3 + 36 = 81', '3 + 50 = 29', '3 + 51 = 29', '3 + 66 = 81',
+    '4 + 5 = 27', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 38 = 45', '4 + 39 = 46', '4 + 50 = 3', '4 + 51 = 31', '4 + 52 = 22', '4 + 62 = 74',
+    '5 + 6 = 27', '5 + 8 = 23', '5 + 13 = 34', '5 + 17 = 2', '5 + 27 = 14', '5 + 28 = 42', '5 + 30 = 42', '5 + 32 = 36', '5 + 33 = 36', '5 + 35 = 33', '5 + 37 = 33', '5 + 38 = 43', '5 + 39 = 14', '5 + 47 = 42', '5 + 50 = 29', '5 + 51 = 12', '6 + 8 = 56', '6 + 13 = 5', '6 + 27 = 5', '6 + 29 = 5', '6 + 34 = 5', '6 + 39 = 46', '6 + 52 = 57', '6 + 62 = 5', '7 + 8 = 30', '7 + 9 = 26', '7 + 11 = 70', '7 + 26 = 65', '7 + 29 = 14', '7 + 32 = 77', '7 + 33 = 73', '7 + 35 = 10', '7 + 49 = 77', '7 + 50 = 29', '7 + 51 = 29', '8 + 9 = 58', '8 + 12 = 17', '8 + 13 = 41', '8 + 27 = 30', '8 + 28 = 15', '8 + 30 = 56', '8 + 31 = 15', '8 + 33 = 52', '8 + 37 = 64', '8 + 38 = 15', '8 + 51 = 17', '9 + 27 = 4', '9 + 29 = 4', '9 + 30 = 20', '9 + 34 = 71', '9 + 51 = 4', '10 + 12 = 31', '10 + 27 = 26', '10 + 28 = 53', '10 + 29 = 46', '10 + 31 = 50', '10 + 34 = 24', '10 + 35 = 7', '10 + 38 = 53', '10 + 39 = 46', '10 + 50 = 3', '10 + 52 = 53', '11 + 13 = 40', '11 + 17 = 70', '11 + 34 = 70', '11 + 35 = 10', '11 + 36 = 63', '11 + 52 = 67', '12 + 13 = 54', '12 + 17 = 76', '12 + 26 = 54', '12 + 31 = 37', '12 + 39 = 51', '12 + 46 = 39', '12 + 50 = 51', '12 + 51 = 5', '13 + 14 = 60', '13 + 26 = 54', '13 + 29 = 34', '13 + 30 = 72', '13 + 33 = 44', '13 + 36 = 34', '13 + 38 = 41', '14 + 26 = 59', '14 + 32 = 49', '14 + 36 = 49', '17 + 27 = 8', '17 + 31 = 38', '17 + 35 = 76', '17 + 36 = 66', '17 + 51 = 76', '26 + 27 = 65', '26 + 31 = 75', '26 + 32 = 36', '26 + 34 = 69', '26 + 49 = 77', '26 + 51 = 75', '26 + 62 = 26', '27 + 29 = 1', '27 + 30 = 65', '27 + 34 = 13', '27 + 35 = 65', '27 + 47 = 42', '27 + 51 = 12', '27 + 62 = 13', '28 + 30 = 2', '28 + 33 = 53', '28 + 35 = 33', '28 + 38 = 53', '28 + 47 = 42', '28 + 50 = 3', '28 + 52 = 38', '28 + 62 = 30', '29 + 31 = 50', '29 + 50 = 35', '29 + 52 = 38', '30 + 34 = 62', '30 + 47 = 42', '30 + 52 = 57', '30 + 62 = 5', '30 + 73 = 82', '31 + 32 = 47', '31 + 33 = 38', '31 + 39 = 50', '31 + 51 = 50', '31 + 52 = 67', '31 + 67 = 38', '32 + 33 = 45', '32 + 34 = 44', '32 + 35 = 36', '32 + 36 = 49', '32 + 37 = 33', '32 + 38 = 47', '32 + 43 = 80', '32 + 47 = 38', '32 + 53 = 38', '32 + 67 = 89', '33 + 34 = 44', '33 + 35 = 38', '33 + 36 = 52', '33 + 37 = 73', '33 + 50 = 3', '33 + 52 = 73', '34 + 35 = 69', '34 + 36 = 48', '34 + 38 = 43', '35 + 36 = 66', '35 + 38 = 10', '35 + 50 = 29', '35 + 51 = 31', '35 + 52 = 38', '35 + 62 = 13', '35 + 67 = 11', '35 + 73 = 52', '36 + 37 = 63', '36 + 52 = 68', '36 + 66 = 81', '36 + 74 = 81', '37 + 52 = 33', '37 + 63 = 61', '38 + 43 = 47', '38 + 47 = 42', '38 + 51 = 31', '38 + 52 = 67', '39 + 46 = 31', '39 + 62 = 26', '43 + 47 = 38', '43 + 52 = 38', '46 + 51 = 31', '47 + 52 = 38', '47 + 67 = 38', '50 + 51 = 29', '51 + 62 = 26', '52 + 53 = 38', '52 + 73 = 33', '53 + 67 = 38', '66 + 74 = 81',
+    '2 + 39 = 51'
+];
+
+// Encounter Data
+const encounterEffects = {
+    'A': { name: 'Fire- Phoenix', hint1: 'Physical damage seems to be ineffective against it, he is made not of solid material but flame itself.', hint2: 'You will need to put out his fire somehow.', effects: ['1A', '4A', '-9A', '-9B', '-35A', '-42A', '46B', '40A', '45A', '-28A', '-37A'] },
+    'B': { name: 'Earth- Desert Golem', hint1: 'A large tough humanoid creature made of tightly compacted sand.', hint2: 'No physical wounds seems to harm it, it must be separated.', effects: ['4A', '1A', '3B', '26B', '28B', '-28A', '35B', '-37A', '38A', '42A', '47A', '40A'] },
+    'C': { name: 'Water- Whispghost', hint1: 'No physical wounds seem to harm it.', hint2: 'It is made of mist and smoke that need to be torn apart somehow.', effects: ['1A', '28B', '6A', '6B', '10A', '51A', '-28A', '-35B', '38A', '-42A', '-47A', '40A'] },
+    'D': { name: 'Air- Sacmonster', hint1: 'A beast that looks like a pair of giant lungs.', hint2: 'You will need to stop its air flow somehow.', effects: ['42A', '2A'] },
+    'E': { name: 'Plant- Plantnnochio', hint1: 'The creature is a sturdy old toy.', hint2: 'Its distinctive nose is made of wood and looks vulnerable.', effects: ['2A', '5A', '28B', '34A', '-37A', '41A', '42A', '40A', '47A', '38A'] },
+    'F': { name: 'Ice- Wintergiant', hint1: "The creature's skin is hard and slightly transparent.", hint2: 'Its skin is slippery ice.', effects: ['2A', '3A', '-30B', '-28B', '-11A', '-51A', '40A', '47A', '78A', '38A'] },
+    'G': { name: 'Rope- Mummy', hint1: 'This creature seems to be wrapped in many strips.', hint2: 'The ropes and fabrics are its defences.', effects: ['2A', '-4A', '-1A', '-5A', '11A', '42A', '-30B', '-37A', '47A', '78A', '38A'] },
+    'H': { name: 'Light- Gorgon', hint1: 'The creature turns anyone it faces into stone.', hint2: 'The way it turns you to stone is by looking at you.', effects: ['-7A', '-29B', '-39A', '-40A', '-31A', '12B', '54A', '-37A', '38A', '10B', '51B'] },
+    'I': { name: 'Metal- Automaton', hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A'] },
+    'J': { name: 'Sound- Banshee', hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '-13A', '-26A', '14A', '-40A', '50A', '38A'] },
+    'K': { name: 'Glass- Illusionist', hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11C', '9B', '26B', '7B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A'] },
+    'L': { name: 'Pressure- The Press', hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B'] },
+    'M': { name: 'Chemical- The Valley', hint1: 'Something invisible is causing you to get sick.', hint2: 'You must deal with the cloud of chemicals.', effects: ['1A', '28B', '6A', '29B', '39A'] },
+    'N': { name: 'Gravity- The Abnormality', hint1: 'The gravitational abnormality is slamming you against the roof, unable to move.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '39A', '-11C', '-13A', '62A'] },
+    'O': { name: 'Oil- The Swamp', hint1: 'When you try to cross you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '7A', '-11C', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A'] },
+    'P': { name: 'Darkness- Alucard', hint1: 'It is a man in a cape and bat wings.', hint2: 'He is a vampire who has never left the darkness of the indoors.', effects: ['12A', '-37A', '38A', '41A', '40A', '54A'] },
+    'Q': { name: 'Man- The Child', hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['48A', '-52A', '-7C', '-59B', '-61A', '-49A', '-63B', '-66A', '-68B', '-69A', '-74B', '-78B', '89A'] },
+    'R': { name: 'Energy- Terror of the Tides', hint1: 'It takes the form of a deadly Eel.', hint2: 'It attacks using electricity.', effects: ['-4A', '-4B', '-10A', '-35A', '38A', '47A', '40A', '-37A'] },
+    'S': { name: 'Life- The Exchange', hint1: 'The being tells you that you will need to provide life in order to proceed.', hint2: 'You must give it life itself, or something similar.', effects: ['-8B', '-52A', '33B', '32B', '-68B', '-67B', '89A'] },
+    'T': { name: 'Machine- Geared Dragon', hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from the air.', effects: ['-28A', '35A', '35B', '5A', '40A', '-34A', '-39A', '-29B', '-11B', '65A'] },
+    'U': { name: 'Time- Ritualists', hint1: 'The magicians are about to complete their ritual, which will make it impossible to beat them.', hint2: 'They are putting together a large clock, you will need to disrupt them.', effects: ['-34A', '-31A', '35B', '12B', '14B', '38A'] },
+    'V': { name: 'Intelligence- Doppelganger', hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-12B', '-54A', '-39A', '-29B', '11C', '36A', '32A', '62A'] },
+    'W': { name: 'Love- The Gift', hint1: 'A lover tells you she feels heartbroken, she was expecting to receive something special from her valentine.', hint2: 'She wants to receive a heartfelt present.', effects: ['49A', '32B', '-37A', '64A', '79A', '65C', '54B'] },
+    'X': { name: 'Death- The Tribute', hint1: 'A solemn ceremony is taking place, one might wonder what would be appropriate to do here.', hint2: "An old man requests something to commemorate and honor his friend's memory.", effects: ['77A', '-59A', '-78A', '-17A', '-64A', '-65C', '-33A', '-32A', '49A'] }
+};
+
+
+// Generate fuseMap from the fuseList
+const fuseMap = {};
+fuseList.forEach(entry => {
+    const [combo, result] = entry.split(' = ');
+    const [id1, id2] = combo.split(' + ').map(s => s.trim());
+    const sortedKey = [id1, id2].sort((a, b) => a - b).join('+');
+    fuseMap[sortedKey] = result.trim();
+});
+
+// Global list to store successful combinations
+let successfulCombinations = [];
+
+// --- END: DATA SETUP ---
+
+const grid = document.getElementById("grid");
+const preview = document.getElementById("preview");
+const previewTitle = document.getElementById("previewTitle");
+const hintBox = document.getElementById("hintBox"); // Get the hint box
+const row1 = document.getElementById("row1");
+const row2 = document.getElementById("row2");
+const fuseButton = document.getElementById("fuseButton");
+const untapButton = document.getElementById("clearButton");
+const combinationsList = document.getElementById('combinationsList');
+const encounterMessageBox = document.getElementById('encounterMessageBox');
+
+let pawn;
+let selectedReagents = [];
+let currentEncounterCell = null;
+let halfSuccesses = {};
+let locationFailureCounter = {};
+let previousEncounterKey = null;
+
+// FIX: MOVED verbLetters to the global scope so handleEncounter can access it
+const verbLetters = ['A', 'B', 'C'];
+
+// Helper to display messages in the dedicated box
+function displayMessage(text, type = 'default') {
+    // Clear any previous message item to ensure only one is displayed/fading
+    encounterMessageBox.innerHTML = '';
+
+    const msgItem = document.createElement('div');
+    msgItem.className = `message-item ${type}`;
+    msgItem.textContent = text;
+
+    // Use a unique key to prevent re-adding identical messages instantly if they haven't faded
+    msgItem.dataset.messageId = Date.now();
+
+    encounterMessageBox.appendChild(msgItem);
+
+    // Remove the element after the animation duration (3000ms from CSS keyframe)
+    setTimeout(() => msgItem.remove(), 3000);
+}
+
+// Function to update the hint box
+function updateHintBox(encounterKey) {
+    hintBox.innerHTML = '';
+    if (!encounterKey) return;
+
+    const encounterData = encounterEffects[encounterKey];
+    const failureCount = locationFailureCounter[encounterKey] || 0;
+
+    // Use the new hint1 and hint2 properties
+    if (failureCount >= 1 && encounterData.hint1) {
+        hintBox.innerHTML = encounterData.hint1;
+    }
+    if (failureCount >= 3 && encounterData.hint2) {
+        // Append the second hint on a new line using a span
+        hintBox.innerHTML += `<span>${encounterData.hint2}</span>`;
+    }
+}
+
+// Function to update the Past Combinations list
+function updateCombinationsList() {
+    // Sort and make unique by recipe string
+    const uniqueRecipes = Array.from(new Set(successfulCombinations)).sort();
+
+    combinationsList.innerHTML = '';
+
+    if (uniqueRecipes.length === 0) {
+        combinationsList.textContent = 'No successful fusions yet.';
+        return;
+    }
+
+    uniqueRecipes.forEach(recipe => {
+        const recipeParts = recipe.split(' = ');
+        const [reagents, product] = recipeParts;
+        const [id1, id2] = reagents.split(' + ');
+
+        const r1Name = elementData[id1] ? elementData[id1].name : '???';
+        const r2Name = elementData[id2] ? elementData[id2].name : '???';
+        const productName = elementData[product] ? elementData[product].name : '???';
+
+        const li = document.createElement('div');
+        li.innerHTML = `${r1Name} + ${r2Name} = <strong>${productName}</strong>`;
+        combinationsList.appendChild(li);
+    });
+}
+
+// Function to check fusion validity
+function checkFusion(id1, id2) {
+    const sortedKey = [id1, id2].sort((a, b) => a - b).join('+');
+    return fuseMap[sortedKey];
+}
+
+// Function to update card highlighting based on selection
+function updateCardHighlights() {
+    // 1. Remove all fusion-related highlights from ALL cards
+    document.querySelectorAll('.card-slot').forEach(card => {
+        card.classList.remove('fusable', 'unfusable', 'newly-created');
+    });
+
+    if (selectedReagents.length === 2) {
+        const product = checkFusion(selectedReagents[0], selectedReagents[1]);
+        const highlightClass = product ? 'fusable' : 'unfusable';
+
+        // 2. Apply green/red highlight to both selected cards
+        document.querySelectorAll('.card-slot.selected-reagent').forEach(card => {
+            card.classList.add(highlightClass);
+            // Also explicitly remove the single-selection style which relies on the yellow border
+            card.style.border = '';
+        });
+    } else if (selectedReagents.length === 1) {
+        // Only one card selected: ensure the yellow highlight is applied
+        document.querySelector('.card-slot.selected-reagent').style.border = '2px solid var(--accent)';
+    }
+}
+
+function cleanVerb(verb) {
+    if (!verb || typeof verb !== 'string') {
+        return "";
+    }
+    // Remove the number/letter power from the end
+    let cleaned = verb.replace(/ \d+$/, '').replace(/[A-Z]$/, '').trim();
+    return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+// Check if an element ID already exists in either row and is not tapped
+function findCardById(elementId) {
+    return document.querySelector(`.card-slot[data-element-id="${elementId}"]`);
+}
+
+// Function to add a card, or untap if it exists
+function addCardToRow(elementId, rowElement, isNewCreation = false) {
+    const existingCard = findCardById(elementId);
+
+    if (existingCard) {
+        // Element exists, untap it and ensure it's in the Reagent row (or its current row)
+        existingCard.classList.remove('tapped', 'selected-reagent', 'fusable', 'unfusable');
+        return true;
+    }
+
+    // Create new card
+    const card = createCard(elementId);
+    if (!card) return false;
+
+    // Apply shine animation if it's a new product
+    if (isNewCreation) {
+        card.classList.add('newly-created');
+        // Remove the class after the animation so it doesn't apply to future cards in this slot
+        setTimeout(() => card.classList.remove('newly-created'), 1500);
+    }
+
+    // Append to the end of the row
+    rowElement.appendChild(card);
+    setupCardClickListener(card, elementId);
+    return true;
+}
+
+
+// Function to get the correct CSS color variable for an element
+function getElementColor(elementId) {
+    return elementColorMap[elementId] || 'var(--color-default)';
+}
+
+// Function to create a card element with verbs
+function createCard(elementId) {
+    const data = elementData[elementId];
+    if (!data) return null;
+
+    const card = document.createElement('div');
+    card.className = 'card-slot';
+    card.dataset.elementId = elementId;
+
+    const elementColor = getElementColor(elementId);
+
+    // Set the custom CSS variable for the label's outline color
+    card.style.setProperty('--element-color', elementColor);
+
+    // Check if the outline color is dark to determine text color (white vs black)
+    const isDarkOutline = darkColors.includes(elementColor);
+    if (isDarkOutline) {
+        card.classList.add('dark-outline');
+    }
+
+    // Create the actions list
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'actions';
+
+    data.verbs.forEach((verb, index) => {
+        // Limit to A, B, C verbs
+        if (index >= verbLetters.length) return;
+
+        const actionButton = document.createElement('div');
+        actionButton.className = 'action-btn';
+        const cleanedVerb = cleanVerb(verb);
+
+        // Only show the verb itself, no A:, B:, C:
+        actionButton.textContent = cleanedVerb;
+
+        // Store the verb key as element ID + verb letter (e.g., '1A')
+        actionButton.dataset.verbKey = `${elementId}${verbLetters[index]}`;
+
+        actionButton.onclick = (e) => {
+            e.stopPropagation();
+            if (card.classList.contains('tapped')) {
+                 displayMessage(`CARD IS TAPPED`, 'warning');
+                 return;
+            }
+            if (currentEncounterCell) {
+                // Check if the current encounter is locked out from too many failures
+                const encounterKey = currentEncounterCell.dataset.encounterKey;
+                if (locationFailureCounter[encounterKey] >= 3) {
+                    displayMessage('BLOCKED! Choose a different location first.', 'default');
+                    return; // Prevent handleEncounter from running
+                }
+                handleEncounter(card, actionButton.dataset.verbKey);
+            } else {
+                displayMessage(`SELECT ENCOUNTER`, 'warning');
+            }
+        };
+        actionsDiv.appendChild(actionButton);
+    });
+
+    card.innerHTML = `<div class="label">${data.name}</div><div class="emoji">${data.emoji}</div>`;
+    card.appendChild(actionsDiv);
+    return card;
+}
+
+// Function to set up card click listeners (for fusion)
+function setupCardClickListener(card, id) {
+    card.addEventListener('click', () => {
+        // Tapped elements should never be selected
+        if (card.classList.contains('tapped')) return;
+
+        const isSelected = card.classList.contains('selected-reagent');
+
+        // 1. Deselect if already selected
+        if (isSelected) {
+            card.classList.remove('selected-reagent', 'fusable', 'unfusable');
+            selectedReagents = selectedReagents.filter(el => el !== id);
+        } else {
+            // 2. Select if less than 2 are selected
+            if (selectedReagents.length < 2) {
+                card.classList.add('selected-reagent');
+                selectedReagents.push(id);
+            }
+        }
+
+        // 3. Clear all other highlights when deselecting
+        if (selectedReagents.length < 2) {
+             document.querySelectorAll('.card-slot:not(.tapped)').forEach(c => {
+                if (c !== card) {
+                    c.classList.remove('fusable', 'unfusable');
+                }
+            });
+        }
+
+        // 4. Recalculate all highlights after selection change
+        updateCardHighlights();
+    });
+
+    // Custom hover logic to manage border display with the selection logic
+    card.addEventListener('mouseenter', () => {
+        if (!card.classList.contains('selected-reagent') && !card.classList.contains('tapped')) {
+            card.style.border = '2px solid var(--accent)';
+            card.style.boxShadow = '0 0 12px rgba(201,168,74,0.4)';
+        }
+    });
+    card.addEventListener('mouseleave', () => {
+        if (!card.classList.contains('selected-reagent') && !card.classList.contains('tapped')) {
+            card.style.border = '1px solid rgba(255,255,255,0.05)';
+            card.style.boxShadow = 'none';
+        }
+    });
+}
+
+// --- ENCOUNTER LOGIC ---
+
+function handleEncounter(card, verbKey) {
+    const encounterCell = currentEncounterCell;
+    const encounterKey = encounterCell.dataset.encounterKey;
+    const encounterInfo = encounterEffects[encounterKey];
+    const rewardId = encounterCell.dataset.elementId;
+
+    // Check for success/half-success by seeing if the verbKey exists in the encounter's effects list
+    const isSuccess = encounterInfo.effects.includes(verbKey);
+    const isHalfSuccess = encounterInfo.effects.includes(`-${verbKey}`);
+
+    if (isSuccess || isHalfSuccess) {
+        // Reset failure counter on any success/half-success
+        locationFailureCounter[encounterKey] = 0;
+        updateHintBox(encounterKey);
+    }
+
+    if (isSuccess) {
+        // FULL SUCCESS
+        displayMessage('SUCCESS!', 'success');
+
+        // Start dissolve animation and mark as defeated after it's done
+        encounterCell.classList.add('dissolve');
+        setTimeout(() => {
+            encounterCell.classList.remove('dissolve');
+            encounterCell.classList.add('defeated');
+            encounterCell.innerHTML = encounterCell.dataset.icon;
+            // Add the rewarded element (will untap or add new)
+            addCardToRow(rewardId, row1);
+            // Reset encounter state (clears preview and selection)
+            resetEncounterState();
+        }, 500); // 500ms matches the CSS animation duration
+
+    } else if (isHalfSuccess) {
+        // HALF SUCCESS
+        const halfSuccessKey = `${encounterKey}-${verbKey}`;
+
+        if (!halfSuccesses[halfSuccessKey]) {
+            // New unique half success
+            halfSuccesses[halfSuccessKey] = true;
+            locationFailureCounter[encounterKey] = 0;
+
+            const currentEncounterHalfSuccesses = Object.keys(halfSuccesses).filter(key => key.startsWith(encounterKey));
+
+            if (currentEncounterHalfSuccesses.length >= 2) {
+                // TWO UNIQUE HALF SUCCESSES = FULL SUCCESS
+                displayMessage('TWO HALF SUCCESSES', 'success');
+
+                // Start dissolve animation and mark as defeated after it's done
+                encounterCell.classList.add('dissolve');
+                setTimeout(() => {
+                    encounterCell.classList.remove('dissolve');
+                    encounterCell.classList.add('defeated');
+                    encounterCell.innerHTML = encounterCell.dataset.icon;
+                    addCardToRow(rewardId, row1);
+                    resetEncounterState();
+                }, 500); // 500ms matches the CSS animation duration
+
+            } else {
+                // First half success
+                let counter = encounterCell.querySelector('.half-success-counter');
+                if (!counter) {
+                    counter = document.createElement('div');
+                    counter.className = 'half-success-counter';
+                    encounterCell.appendChild(counter);
+                }
+                counter.textContent = '1/2';
+                displayMessage('HALF SUCCESS', 'warning');
+            }
+        } else {
+             displayMessage('VERB ALREADY USED', 'warning');
+             // Already used verb is a failure for the 3-strike rule
+             handleFailure(encounterKey);
+        }
+
+    } else {
+        // FAILURE
+        handleFailure(encounterKey);
+    }
+}
+
+function handleFailure(encounterKey) {
+    locationFailureCounter[encounterKey] = (locationFailureCounter[encounterKey] || 0) + 1;
+    displayMessage('FAILURE', 'default');
+
+    // Update hint on 1st and 3rd failure
+    updateHintBox(encounterKey);
+
+    if (locationFailureCounter[encounterKey] >= 3) {
+        displayMessage('Third failure, must try another encounter', 'default');
+    }
+}
+
+function resetEncounterState() {
+    currentEncounterCell = null;
+    halfSuccesses = {};
+    preview.textContent = '♙';
+    previewTitle.textContent = '';
+    hintBox.textContent = ''; // Clear hint box
+    preview.style.fontSize = '60px'; // Set back to default size for the pawn
+    document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
+}
+
+
+// --- INITIALIZATION ---
+
+const gridIconsMap = [
+   { icon: '⏱️', id: '35', key: 'U' }, { icon: '🧪', id: '28', key: 'M' }, { icon: '🧠', id: '36', key: 'V' }, { icon: '⚙️', id: '34', key: 'T' }, { icon: '💀', id: '38', key: 'X' },
+   { icon: '🛢️', id: '30', key: 'O' }, { icon: '⚡', id: '5', key: 'R' },  { icon: '💨', id: '1', key: 'D' },  { icon: '❄️', id: '9', key: 'F' },  { icon: '🤜', id: '27', key: 'L' },
+   { icon: '⬛', id: '31', key: 'P' }, { icon: '🔥', id: '2', key: 'A' },  { icon: '', id: null, key: null },  { icon: '💧', id: '4', key: 'C' },  { icon: '🧍', id: '32', key: 'Q' },
+   { icon: '💡', id: '12', key: 'H' }, { icon: '🌿', id: '8', key: 'E' },  { icon: '🌍', id: '3', key: 'B' },  { icon: '⛓️', id: '11', key: 'G' }, { icon: '⬇️', id: '29', key: 'N' },
+   { icon: '🧬', id: '33', key: 'S' }, { icon: '🪈', id: '37', key: 'W' }, { icon: '🔩', id: '13', key: 'I' }, { icon: '🔊', id: '14', key: 'J' }, { icon: '🔮', id: '26', key: 'K' }
+];
+
+for(let r=0;r<5;r++){
+  for(let c=0;c<5;c++){
+    const cell=document.createElement("div");
+    cell.className="cell";
+    const index = r*5+c;
+    const data = gridIconsMap[index];
+
+    if (data.icon) {
+        const encounter = encounterEffects[data.key];
+
+        cell.dataset.encounterKey = data.key;
+        cell.dataset.icon = data.icon;
+        cell.dataset.elementId = data.id;
+        cell.dataset.encounterName = encounter.name;
+        cell.textContent = data.icon;
+
+        cell.addEventListener("click",()=>{
+            // TAPPED ELEMENTS SHOULD NEVER BE HIGHLIGHTED OR SELECTED
+            if (cell.classList.contains('defeated')) return;
+
+            // When selecting a new location, clear the failure block on the OLD location
+            if (previousEncounterKey && previousEncounterKey !== data.key) {
+                locationFailureCounter[previousEncounterKey] = 0;
+            }
+
+            // Failure Rule Check: If 3+ failures at this spot, force a different selection
+            if (locationFailureCounter[data.key] >= 3 && currentEncounterCell && currentEncounterCell.dataset.encounterKey === data.key) {
+                displayMessage('BLOCKED! Choose a different location first.', 'default');
+                return;
+            }
+
+            // Clear selection for all cells
+            document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
+            cell.classList.add("selected");
+
+            // Set the new encounter
+            currentEncounterCell = cell;
+            previousEncounterKey = data.key;
+
+            // Reset half successes for the NEW encounter
+            halfSuccesses = {};
+
+            // Update preview with encounter title and emoji
+            previewTitle.textContent = encounter.name;
+            preview.textContent = data.icon;
+            preview.style.fontSize = '60px';
+
+            // Update hint box immediately (will show hint based on existing failure count or none)
+            updateHintBox(data.key);
+
+            // Update pawn position
+            if (pawn) pawn.remove();
+            pawn=document.createElement("div");
+            pawn.className="pawn";
+            pawn.textContent="♙";
+            cell.appendChild(pawn);
+        });
+    } else {
+        cell.textContent = '';
+        cell.style.cursor = 'default';
+        cell.style.border = '1px solid transparent';
+        cell.style.background = 'transparent';
+        cell.style.boxShadow = 'none';
+
+        if(index === 12){
+            pawn=document.createElement("div");
+            pawn.className="pawn";
+            pawn.textContent="♙";
+            cell.appendChild(pawn);
+        }
+    }
+    grid.appendChild(cell);
+  }
+}
+
+// Display initial reagent cards (Earth and Air)
+const initialReagents = ['3', '1'];
+initialReagents.forEach(id => {
+    addCardToRow(id, row1);
+});
+
+// Initialize combinations list
+updateCombinationsList();
+
+
+// Event listeners for buttons
+fuseButton.addEventListener('click', () => {
+    // 1. Clear ALL selection/highlighting *before* processing if there aren't two cards.
+    if (selectedReagents.length !== 2) {
+        document.querySelectorAll('.card-slot.selected-reagent').forEach(c => {
+             c.classList.remove('selected-reagent', 'fusable', 'unfusable');
+             c.style.border = ''; // Clear custom border from single selection
+        });
+        selectedReagents = [];
+        return;
+    }
+
+    // Create a sorted copy for the key, preserving the original `selectedReagents` array order
+    const sortedKey = [...selectedReagents].sort((a, b) => a - b).join('+');
+    const product = fuseMap[sortedKey];
+
+    if (product) {
+        // SUCCESSFUL FUSION
+        const productAdded = addCardToRow(product, row2, true); // Add to row2
+        if (productAdded) {
+            // Tap the FIRST selected card. `selectedReagents` is still in its original click order.
+            const cardToTap = document.querySelector(`.card-slot[data-element-id="${selectedReagents[0]}"]:not(.tapped)`);
+            if (cardToTap) {
+                cardToTap.classList.add('tapped');
+            }
+
+            // Add the successful combination to the global list and update the sidebar
+            const recipeString = `${selectedReagents[0]} + ${selectedReagents[1]} = ${product}`;
+            successfulCombinations.push(recipeString);
+            updateCombinationsList();
+        }
+    } else {
+        // FAILED FUSION: NO REACTION - NO TAP
+    }
+
+    // 2. Clear selection and highlighting after attempt (success or failure)
+    document.querySelectorAll('.card-slot.selected-reagent').forEach(c => {
+        c.classList.remove('selected-reagent', 'fusable', 'unfusable');
+        c.style.border = ''; // Clear custom border
+    });
+
+    selectedReagents = [];
+});
+
+untapButton.addEventListener('click', () => {
+    // 1. Remove all elements from the products row
+    row2.innerHTML = '';
+
+    // 2. Untap all cards in the reagents row
+    row1.querySelectorAll('.card-slot').forEach(card => {
+        card.classList.remove('tapped', 'selected-reagent', 'fusable', 'unfusable');
+        card.style.border = ''; // Reset any highlight borders
+    });
+
+    // 3. Clear the selected reagents array
+    selectedReagents = [];
+
+    // 4. Clear all failure states
+    locationFailureCounter = {};
+});
+
+// Past Combinations hover logic
+const combinationsWrap = document.querySelector('.combinations-wrap');
+
+combinationsWrap.addEventListener('mouseenter', () => {
+    combinationsList.style.display = 'block';
+});
+
+combinationsWrap.addEventListener('mouseleave', () => {
+    combinationsList.style.display = 'none';
+});
+</script>
+</body>
+</html>
