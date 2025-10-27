@@ -21,13 +21,32 @@ Fusing elements
 In order to create a new element, click on two elements in your reagents row and click the “fuse” button. The first element you clicked on will be temporarily deactivated as a cost. If you want these back, you can click “Untap all”, which gives reactivated all your elements but gets rid of all the new elements you have created in the products row. Some combinations of elements are not possible and will be highlighted in red when you select them. Some elements with a special symbol are final products and cannot be used to make any new fusions. 
 
 
-Improvements roadmap: add final room Z (The Alchemist's Endgame: There is a shining, unbreakable door, in order to proceed you will need to provide the ultimate, most prized creation. They say it is a material that shines with the very essence of the sun. The sun is fire in the sky. The sky is clouds and air. Clouds are steam and air, steam is water and air, try to piece this all together into a metal that shines like the sun. You will need to give it gold which can be formed by combining sun and metal. ), add game ending (displays victory screen when you make gold and gift it to the final room), final room hints system (completing a full row or column gives you the next hint for the final room, each sentence is a new hint).  
-Turn/move/failure timer to be displayed on victory screen as a “final score”
+Improvements roadmap: 
+Change map so it goes easy to hard
+Air should be blow
+Clicking should unclick, you shouldn't need to unclick
+Rock protect with instead of do to, keep same tense
+Maybe warn player that they can't win that room with what they have, or unlock rooms when they are possible
+Unlock final room at halfway point
+Show first hint right away
+Blind should only be on one of dust or light
+Let players or testers contest logic
+Change block limit to at least 4
+Fusions could be more intuitive
+Improve rules and add visuals
+Reagents wrap
+Half successes bug
+Move encounter element to bottom
+If element already exists in reagents warn but don't tap
+If reward is in products it should move it to reagents or else it locks them out
+Last locations shouldn't block
+Row hints 
+New encounter set and solutions and scenario select
+final room hints system (completing a full row or column gives you the next hint for the final room, each sentence is a new hint).: (The Alchemist's Endgame: There is a shining, unbreakable door, in order to proceed you will need to provide the ultimate, most prized creation. They say it is a material that shines with the very essence of the sun. The sun is fire in the sky. The sky is clouds and air. Clouds are steam and air, steam is water and air, try to piece this all together into a metal that shines like the sun. You will need to give it gold which can be formed by combining sun and metal. )   
 UI Improvements and bug fixes
 Basic art for each encounter
 Basic website elements or security (contact, privacy, etc)
 Save and reset game
-Lives/Roguelike mode and rules
-Token System (Start with 3 tokens, Token Success uses one up if you choose to do so?)
+rules improvements and tutorial images
 Set 2 and 3 of encounters (to be provided later)
 Scenario 2,3,4,5 of endgame rooms (to be provided later)
