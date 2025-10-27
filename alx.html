@@ -384,6 +384,17 @@ p.subtitle{color:var(--muted);font-size:12px}
   transition:border .15s, box-shadow .15s, transform .2s, opacity .3s;
 }
 
+.terminal-dot {
+    position: absolute;
+    top: 5px;      /* Distance from the top edge */
+    right: 5px;    /* Distance from the right edge */
+    color: white; /* Uses your game's accent color */
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 0; /* Prevents the span from affecting card height */
+    pointer-events: none; /* Ensures dot doesn't block click events on the card */
+    text-shadow: 0 0 2px var(--bg); /* Optional: helps the dot stand out */
+}
 /* 1. DEFAULT HOVER (ONLY WHEN NOT SELECTED OR TAPPED) */
 .card-slot:hover:not(.selected-reagent):not(.tapped){
     transform:translateY(-2px);
@@ -515,6 +526,89 @@ p.subtitle{color:var(--muted);font-size:12px}
     gap: 8px;
     position: relative; /* Context for combination list */
     align-items: center;
+}
+/* ---------------- WIN MODAL STYLES ---------------- */
+
+/* The full-screen overlay (initially hidden) */
+.win-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    display: none; /* Starts hidden */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's on top of everything */
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+/* Make the modal visible */
+.win-modal-overlay.visible {
+    display: flex;
+    opacity: 1;
+}
+
+/* The box containing the 'YOU WIN!' message */
+.win-modal-content {
+    background-color: var(--panel);
+    border: 5px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 50px;
+    text-align: center;
+    box-shadow: 0 0 50px var(--accent);
+    transform: scale(0.9);
+    animation: pulse 1s infinite alternate;
+}
+
+/* Styling for the main message */
+.win-title {
+    color: var(--accent);
+    font-size: 4rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 15px var(--accent);
+}
+
+.win-message {
+    color: var(--muted);
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+}
+.win-moves {
+    font-size: 1.2rem;
+    color: white;
+    margin-bottom: 40px;
+}
+
+/* Button to exit the modal */
+.win-close-button {
+    background-color: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.win-close-button:hover {
+    background-color: #fce38a; /* Lighter gold/yellow */
+    transform: scale(1.05);
+}
+
+/* Animation for the celebratory effect */
+@keyframes pulse {
+    from {
+        box-shadow: 0 0 40px var(--accent), 0 0 10px var(--accent);
+        transform: scale(0.98);
+    }
+    to {
+        box-shadow: 0 0 70px var(--accent), 0 0 20px var(--accent);
+        transform: scale(1.02);
+    }
 }
 
 .btn{padding:6px 12px;border-radius:8px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.06);transition:all .2s}
@@ -652,126 +746,155 @@ const elementColorMap = {
 const darkColors = ['var(--color-time)', 'var(--color-water)', 'var(--color-dark)', 'var(--color-green)', 'var(--color-brown)', 'var(--color-orange)', 'var(--color-purple)', 'var(--color-black)'];
 
 const elementData = {
-    '1': { name: 'Air', emoji: '💨', verbs: ['Whirlwind'] },
-    '2': { name: 'Fire', emoji: '🔥', verbs: ['Burn'] },
-    '3': { name: 'Earth', emoji: '🌍', verbs: ['Quake'] },
-    '4': { name: 'Water', emoji: '💧', verbs: ['Flood'] },
-    '5': { name: 'Energy', emoji: '⚡', verbs: ['Zap'] },
-    '6': { name: 'Steam', emoji: '💨', verbs: ['Puff', 'Boil'] },
-    '7': { name: 'Rock', emoji: '🪨', verbs: ['Protect', 'Throw', 'Gift'] },
-    '8': { name: 'Plant', emoji: '🌿', verbs: ['Grow', 'Entangle'] },
-    '9': { name: 'Ice', emoji: '❄️', verbs: ['Cool', 'Freeze'] },
-    '10': { name: 'Dust', emoji: '✨', verbs: ['Dry', 'Blind'] },
-    '11': { name: 'Rope', emoji: '⛓️', verbs: ['Cross', 'Restrain', 'Whip'] },
-    '12': { name: 'Light', emoji: '💡', verbs: ['Shine', 'Blind'] },
-    '13': { name: 'Metal', emoji: '🔩', verbs: ['Block'] },
-    '14': { name: 'Sound', emoji: '🔊', verbs: ['Deafen', 'Yell'] },
-    '15': { name: 'Tobacco', emoji: '🚬', verbs: ['Smoke', 'Gift'] },
-    '16': { name: 'Kelp', emoji: '🌿', verbs: ['Gift'] },
-    '17': { name: 'Tree', emoji: '🌳', verbs: ['Grow', 'Gift'] },
-    '18': { name: 'Snow', emoji: '🌨️', verbs: ['Chill 4'] },
-    '19': { name: 'Soup', emoji: '🥣', verbs: ['Gift'] },
-    '20': { name: 'Icecream', emoji: '🍦', verbs: ['Gift'] },
-    '21': { name: 'Lava', emoji: '🌋', verbs: ['Smolder'] },
-    '22': { name: 'Aquarium', emoji: '🐠', verbs: ['Gift'] },
-    '23': { name: 'Sugar', emoji: '🍬', verbs: ['Gift'] },
-    '24': { name: 'Vacuum Cleaner', emoji: '🧹', verbs: ['Suck', 'Gift'] },
-    '25': { name: 'Time Machine', emoji: '⌚', verbs: ['Rewind'] },
-    '26': { name: 'Glass', emoji: '🔮', verbs: ['Wall', 'Shatter'] },
-    '27': { name: 'Pressure', emoji: '🤜', verbs: ['Compress'] },
-    '28': { name: 'Chemical', emoji: '🧪', verbs: ['Poison', 'Dissolve'] },
-    '29': { name: 'Gravity', emoji: '⬇️', verbs: ['Drop', 'Hover'] },
-    '30': { name: 'Oil', emoji: '🛢️', verbs: ['Fuel', 'Lubricate'] },
-    '31': { name: 'Darkness', emoji: '⬛', verbs: ['Conceal'] },
-    '32': { name: 'Man', emoji: '🧍', verbs: ['Communicate', 'Gift'] },
-    '33': { name: 'Life', emoji: '🧬', verbs: ['Heal', 'Gift'] },
-    '34': { name: 'Machine', emoji: '⚙️', verbs: ['Tamper'] },
-    '35': { name: 'Time', emoji: '⏱️', verbs: ['Wait', 'Rewind', 'Gift'] },
-    '36': { name: 'Intelligence', emoji: '🧠', verbs: ['Reason'] },
-    '37': { name: 'Love', emoji: '❤️', verbs: ['Romance'] },
-    '38': { name: 'Death', emoji: '💀', verbs: ['Kill'] },
-    '39': { name: 'Sky', emoji: '🌤️', verbs: ['Fly'] },
-    '40': { name: 'Bow', emoji: '🏹', verbs: ['Shoot'] },
-    '41': { name: 'Sword', emoji: '🗡️', verbs: ['Stab'] },
-    '42': { name: 'Explosion', emoji: '💥', verbs: ['Combust'] },
-    '43': { name: 'Gun', emoji: '🔫', verbs: ['Shoot'] },
-    '44': { name: 'Robot', emoji: '🤖', verbs: ['Gift'] },
-    '45': { name: 'Blood', emoji: '🩸', verbs: ['Throw', 'Gift'] },
-    '46': { name: 'Cloud', emoji: '☁️', verbs: ['Obscure', 'Cushion'] },
-    '47': { name: 'War', emoji: '⚔️', verbs: ['Battle'] },
-    '48': { name: 'Computer', emoji: '💻', verbs: ['Gift'] },
-    '49': { name: 'Art', emoji: '🖼️', verbs: ['Gift'] },
-    '50': { name: 'Space', emoji: '🌌', verbs: [] },
-    '51': { name: 'Sun', emoji: '☀️', verbs: ['Heat', 'Daze'] },
-    '52': { name: 'Animal', emoji: '🐾', verbs: ['Claw'] },
-    '53': { name: 'Disease', emoji: '🦠', verbs: ['Infect'] },
-    '54': { name: 'Mirror', emoji: '🪞', verbs: ['Reflect', 'Gift'] },
-    '55': { name: 'Pepper', emoji: '🌶️', verbs: ['Irritate', 'Gift'] },
-    '56': { name: 'Veggies', emoji: '🥕', verbs: ['Throw', 'Gift'] },
-    '57': { name: 'Barbecue', emoji: '🍖', verbs: ['Throw', 'Gift'] },
-    '58': { name: 'Mint', emoji: '🍃', verbs: ['Throw', 'Gift'] },
-    '59': { name: 'Flute', emoji: '🪈', verbs: ['Perform', 'Gift'] },
-    '60': { name: 'Bell', emoji: '🔔', verbs: ['Ring', 'Gift'] },
-    '61': { name: 'Doll', emoji: '🎎', verbs: ['Gift'] },
-    '62': { name: 'Car', emoji: '🚗', verbs: ['Transport'] },
-    '63': { name: 'Toy', emoji: '🧸', verbs: ['Throw', 'Gift'] },
-    '64': { name: 'Rose', emoji: '🌹', verbs: ['Gift'] },
-    '65': { name: 'Diamond', emoji: '💎', verbs: ['Throw', 'Protect', 'Gift'] },
-    '66': { name: 'Book', emoji: '📚', verbs: ['Gift'] },
-    '67': { name: 'Spider', emoji: '🕷️', verbs: ['Throw', 'Gift'] },
-    '68': { name: 'Dog', emoji: '🐕', verbs: ['Fetch', 'Gift'] },
-    '69': { name: 'Clock', emoji: '🕰️', verbs: ['Gift'] },
-    '70': { name: 'Bridge', emoji: '🌉', verbs: ['Cross'] },
-    '71': { name: 'Refrigerator', emoji: '🧊', verbs: ['Chill', 'Gift'] },
-    '72': { name: 'Can', emoji: '🥫', verbs: ['Protect', 'Gift'] },
-    '73': { name: 'Egg', emoji: '🥚', verbs: ['Throw', 'Gift'] },
-    '74': { name: 'Boat', emoji: '⛵', verbs: ['Sail', 'Gift'] },
-    '75': { name: 'Sunglasses', emoji: '🕶️', verbs: ['Wear', 'Gift'] },
-    '76': { name: 'Forest', emoji: '🌲', verbs: ['Grow'] },
-    '77': { name: 'Statue', emoji: '🗽', verbs: ['Gift'] },
-    '78': { name: 'Fireworks', emoji: '🎆', verbs: ['Ignite', 'Gift'] },
-    '79': { name: 'Gold', emoji: '🧈', verbs: ['Gift'] },
-    '80': { name: 'Police', emoji: '👮', verbs: ['Fight', 'Gift'] },
-    '81': { name: 'Map', emoji: '🗺️', verbs: ['Gift'] },
-    '82': { name: 'Mayonnaise', emoji: '🧴', verbs: ['Gift'] },
-    '89': { name: 'Spiderman', emoji: '🕸️', verbs: ['Gift'] }
+    '1': { name: 'Air', emoji: '💨', verbs: ['Whirlwind'], terminal: false },
+    '2': { name: 'Fire', emoji: '🔥', verbs: ['Burn'], terminal: false },
+    '3': { name: 'Earth', emoji: '🌍', verbs: ['Quake'], terminal: false },
+    '4': { name: 'Water', emoji: '💧', verbs: ['Flood'], terminal: false },
+    '5': { name: 'Energy', emoji: '⚡', verbs: ['Zap'], terminal: false },
+    '6': { name: 'Steam', emoji: '💨', verbs: ['Puff', 'Boil'], terminal: false },
+    '7': { name: 'Rock', emoji: '🪨', verbs: ['Protect', 'Throw', 'Gift'], terminal: false },
+    '8': { name: 'Plant', emoji: '🌿', verbs: ['Grow', 'Entangle'], terminal: false },
+    '9': { name: 'Ice', emoji: '❄️', verbs: ['Cool', 'Freeze'], terminal: false },
+    '10': { name: 'Dust', emoji: '✨', verbs: ['Dry', 'Blind'], terminal: false },
+    '11': { name: 'Rope', emoji: '⛓️', verbs: ['Cross', 'Restrain'], terminal: false },
+    '12': { name: 'Light', emoji: '💡', verbs: ['Shine', 'Blind'], terminal: false },
+    '13': { name: 'Metal', emoji: '🔩', verbs: ['Block'], terminal: false },
+    '14': { name: 'Sound', emoji: '🔊', verbs: ['Deafen', 'Yell'], terminal: false },
+    '15': { name: 'Tobacco', emoji: '🚬', verbs: ['Smoke', 'Gift'], terminal: true },
+    '16': { name: 'Kelp', emoji: '🌿', verbs: ['Gift'], terminal: true },
+    '17': { name: 'Tree', emoji: '🌳', verbs: ['Grow', 'Gift'], terminal: false },
+    '18': { name: 'Snow', emoji: '🌨️', verbs: ['Chill 4'], terminal: true },
+    '19': { name: 'Soup', emoji: '🥣', verbs: ['Gift'], terminal: true },
+    '20': { name: 'Icecream', emoji: '🍦', verbs: ['Gift'], terminal: true },
+    '21': { name: 'Lava', emoji: '🌋', verbs: ['Smolder'], terminal: true },
+    '22': { name: 'Aquarium', emoji: '🐠', verbs: ['Gift'], terminal: true },
+    '23': { name: 'Sugar', emoji: '🍬', verbs: ['Gift'], terminal: true },
+    '24': { name: 'Vacuum Cleaner', emoji: '🧹', verbs: ['Suck', 'Gift'], terminal: true },
+    '25': { name: 'Time Machine', emoji: '⌚', verbs: ['Rewind'], terminal: true },
+    '26': { name: 'Glass', emoji: '🔮', verbs: ['Wall', 'Shatter'], terminal: false },
+    '27': { name: 'Pressure', emoji: '🤜', verbs: ['Compress'], terminal: false },
+    '28': { name: 'Chemical', emoji: '🧪', verbs: ['Poison', 'Dissolve'], terminal: false },
+    '29': { name: 'Gravity', emoji: '⬇️', verbs: ['Drop', 'Hover'], terminal: false },
+    '30': { name: 'Oil', emoji: '🛢️', verbs: ['Fuel', 'Lubricate'], terminal: false },
+    '31': { name: 'Darkness', emoji: '⬛', verbs: ['Conceal'], terminal: false },
+    '32': { name: 'Man', emoji: '🧍', verbs: ['Communicate', 'Gift'], terminal: false },
+    '33': { name: 'Life', emoji: '🧬', verbs: ['Heal', 'Gift'], terminal: false },
+    '34': { name: 'Machine', emoji: '⚙️', verbs: ['Tamper'], terminal: false },
+    '35': { name: 'Time', emoji: '⏱️', verbs: ['Wait', 'Rewind', 'Gift'], terminal: false },
+    '36': { name: 'Intelligence', emoji: '🧠', verbs: ['Reason'], terminal: false },
+    '37': { name: 'Love', emoji: '❤️', verbs: ['Romance'], terminal: false },
+    '38': { name: 'Death', emoji: '💀', verbs: ['Kill'], terminal: false },
+    '39': { name: 'Sky', emoji: '🌤️', verbs: ['Fly'], terminal: false },
+    '40': { name: 'Bow', emoji: '🏹', verbs: ['Shoot'], terminal: true },
+    '41': { name: 'Sword', emoji: '🗡️', verbs: ['Stab'], terminal: true },
+    '42': { name: 'Explosion', emoji: '💥', verbs: ['Combust'], terminal: true },
+    '43': { name: 'Gun', emoji: '🔫', verbs: ['Shoot'], terminal: false },
+    '44': { name: 'Robot', emoji: '🤖', verbs: ['Gift'], terminal: true },
+    '45': { name: 'Blood', emoji: '🩸', verbs: ['Throw', 'Gift'], terminal: true },
+    '46': { name: 'Cloud', emoji: '☁️', verbs: ['Obscure', 'Cushion'], terminal: false },
+    '47': { name: 'War', emoji: '⚔️', verbs: ['Battle'], terminal: false },
+    '48': { name: 'Computer', emoji: '💻', verbs: ['Gift'], terminal: true },
+    '49': { name: 'Art', emoji: '🖼️', verbs: ['Gift'], terminal: false },
+    '50': { name: 'Space', emoji: '🌌', verbs: [], terminal: false },
+    '51': { name: 'Sun', emoji: '☀️', verbs: ['Heat', 'Daze'], terminal: false },
+    '52': { name: 'Animal', emoji: '🐾', verbs: ['Claw'], terminal: false },
+    '53': { name: 'Disease', emoji: '🦠', verbs: ['Infect'], terminal: false },
+    '54': { name: 'Mirror', emoji: '🪞', verbs: ['Reflect', 'Gift'], terminal: true },
+    '55': { name: 'Pepper', emoji: '🌶️', verbs: ['Irritate', 'Gift'], terminal: true },
+    '56': { name: 'Veggies', emoji: '🥕', verbs: ['Throw', 'Gift'], terminal: true },
+    '57': { name: 'Barbecue', emoji: '🍖', verbs: ['Throw', 'Gift'], terminal: true },
+    '58': { name: 'Mint', emoji: '🍃', verbs: ['Throw', 'Gift'], terminal: true },
+    '59': { name: 'Flute', emoji: '🪈', verbs: ['Perform', 'Gift'], terminal: true },
+    '60': { name: 'Bell', emoji: '🔔', verbs: ['Ring', 'Gift'], terminal: true },
+    '61': { name: 'Doll', emoji: '🎎', verbs: ['Gift'], terminal: true },
+    '62': { name: 'Car', emoji: '🚗', verbs: ['Transport'], terminal: true },
+    '63': { name: 'Toy', emoji: '🧸', verbs: ['Throw', 'Gift'], terminal: false },
+    '64': { name: 'Rose', emoji: '🌹', verbs: ['Gift'], terminal: true },
+    '65': { name: 'Diamond', emoji: '💎', verbs: ['Throw', 'Protect', 'Gift'], terminal: true },
+    '66': { name: 'Book', emoji: '📚', verbs: ['Gift'], terminal: false },
+    '67': { name: 'Spider', emoji: '🕷️', verbs: ['Throw', 'Gift'], terminal: false },
+    '68': { name: 'Dog', emoji: '🐕', verbs: ['Fetch', 'Gift'], terminal: true },
+    '69': { name: 'Clock', emoji: '🕰️', verbs: ['Gift'], terminal: true },
+    '70': { name: 'Bridge', emoji: '🌉', verbs: ['Cross'], terminal: true },
+    '71': { name: 'Refrigerator', emoji: '🧊', verbs: ['Chill', 'Gift'], terminal: true },
+    '72': { name: 'Can', emoji: '🥫', verbs: ['Protect', 'Gift'], terminal: true },
+    '73': { name: 'Egg', emoji: '🥚', verbs: ['Throw', 'Gift'], terminal: false },
+    '74': { name: 'Ship', emoji: '⛵', verbs: ['Sail', 'Gift'], terminal: false },
+    '75': { name: 'Sunglasses', emoji: '🕶️', verbs: ['Wear', 'Gift'], terminal: true },
+    '76': { name: 'Forest', emoji: '🌲', verbs: ['Grow'], terminal: true },
+    '77': { name: 'Statue', emoji: '🗽', verbs: ['Gift'], terminal: true },
+    '78': { name: 'Fireworks', emoji: '🎆', verbs: ['Ignite', 'Gift'], terminal: true },
+    '79': { name: 'Gold', emoji: '🏅', verbs: ['Gift'], terminal: true },
+    '80': { name: 'Police', emoji: '👮', verbs: ['Fight', 'Gift'], terminal: true },
+    '81': { name: 'Map', emoji: '🗺️', verbs: ['Gift'], terminal: true },
+    '82': { name: 'Mayonnaise', emoji: '🧴', verbs: ['Gift'], terminal: true },
+    '89': { name: 'Spiderman', emoji: '🦸🏻‍♂️', verbs: ['Gift'], terminal: true },
+    '90': { name: 'Vacuum Cleaner', emoji: '👩🏻‍🦯', verbs: ['Suck', 'Gift'], terminal: true },
+    '91': { name: 'Motorcycle', emoji: '🏍️', verbs: ['Ride'], terminal: true },
+    '92': { name: 'Elevator', emoji: '🛗', verbs: ['Ascend'], terminal: true },
+    '93': { name: 'Squirrel', emoji: '🐿️', verbs: ['Gift'], terminal: true },
+    '94': { name: 'Airplane', emoji: '✈️', verbs: ['Soar'], terminal: true },
+    '95': { name: 'Audiobook', emoji: '🎧', verbs: ['Gift'], terminal: true },
+    '96': { name: 'Treehouse', emoji: '🏡', verbs: ['Gift'], terminal: true },
+    '97': { name: 'Sauna', emoji: '🧖‍♀️', verbs: ['Heat'], terminal: true },
+    '98': { name: 'Sunscreen', emoji: '🧴', verbs: ['Spread'], terminal: true },
+    '99': { name: 'Sweat', emoji: '💦', verbs: ['Perspire'], terminal: true },
+    '100': { name: 'Maraca', emoji: '🪇', verbs: ['Shake', 'Gift'], terminal: true },
+    '101': { name: 'Omelette', emoji: '🍳', verbs: ['Gift'], terminal: true },
+    '102': { name: 'Humpty Dumpty', emoji: '🐣', verbs: ['Fall', 'Gift'], terminal: true },
+    '103': { name: 'Bat', emoji: '🦇', verbs: ['Gift'], terminal: false },
+    '104': { name: 'Batman', emoji: '🦹🏻‍♂️', verbs: ['Ambush', 'Gift'], terminal: true },
+    '105': { name: 'Bulb', emoji: '🪫', verbs: ['Illuminate'], terminal: true },
+    '106': { name: 'Fireman', emoji: '🧑‍🚒', verbs: ['Hose'], terminal: true },
+    '107': { name: 'Newton', emoji: '👨‍🔬', verbs: ['Gift'], terminal: true },
+    '108': { name: 'Spaceship', emoji: '🚀', verbs: ['Gift'], terminal: true },
+    '109': { name: 'Termite', emoji: '🐜', verbs: ['Gift'], terminal: true },
+    '110': { name: 'Lizard', emoji: '🦎', verbs: ['Gift'], terminal: true },
+    '111': { name: 'Eagle', emoji: '🦅', verbs: ['View', 'Peck', 'Gift'], terminal: true },
+    '112': { name: 'Turtle', emoji: '🐢', verbs: ['Dig', 'Shield', 'Gift'], terminal: true },
+    '113': { name: 'Fish', emoji: '🐟', verbs: ['Throw', 'Gift'], terminal: true },
+    '114': { name: 'Penguin', emoji: '🐧', verbs: ['Gift'], terminal: true },
+    '115': { name: 'Mountain', emoji: '🏔️', verbs: ['Climb'], terminal: false },
+    '116': { name: 'Rushmore', emoji: '🏞️', verbs: ['Gift'], terminal: true }
 };
 
 const fuseList = [
-    '1 + 2 = 5', '1 + 3 = 10', '1 + 4 = 9', '1 + 5 = 27', '1 + 6 = 46', '1 + 7 = 10', '1 + 8 = 11', '1 + 9 = 18', '1 + 10 = 39', '1 + 26 = 59', '1 + 27 = 14', '1 + 28 = 53', '1 + 29 = 50', '1 + 31 = 50', '1 + 34 = 71', '1 + 38 = 53', '1 + 39 = 46', '1 + 46 = 39', '1 + 50 = 39', '1 + 62 = 26',
+    '1 + 2 = 5', '1 + 3 = 10', '1 + 4 = 9', '1 + 5 = 27', '1 + 6 = 46', '1 + 7 = 10', '1 + 8 = 11', '1 + 9 = 18', '1 + 10 = 39', '1 + 26 = 59', '1 + 27 = 14', '1 + 28 = 53', '1 + 29 = 50', '1 + 31 = 50', '1 + 34 = 71', '1 + 38 = 53', '1 + 39 = 46', '1 + 46 = 39', '1 + 50 = 39', '1 + 62 = 94',
     '2 + 3 = 7', '2 + 4 = 6', '2 + 5 = 12', '2 + 8 = 55', '2 + 9 = 4', '2 + 10 = 26', '2 + 11 = 10', '2 + 12 = 78', '2 + 13 = 12', '2 + 17 = 5', '2 + 26 = 65', '2 + 28 = 5', '2 + 29 = 51', '2 + 30 = 42', '2 + 31 = 12', '2 + 32 = 38', '2 + 33 = 37', '2 + 34 = 43', '2 + 35 = 10', '2 + 43 = 38', '2 + 47 = 42', '2 + 51 = 12', '2 + 52 = 57', '2 + 62 = 30', '2 + 66 = 10', '2 + 67 = 10', '2 + 74 = 10',
-    '3 + 4 = 8', '3 + 5 = 29', '3 + 7 = 29', '3 + 8 = 30', '3 + 9 = 18', '3 + 10 = 35', '3 + 11 = 70', '3 + 13 = 7', '3 + 26 = 65', '3 + 27 = 65', '3 + 28 = 33', '3 + 29 = 7', '3 + 30 = 7', '3 + 31 = 13', '3 + 33 = 32', '3 + 36 = 81', '3 + 50 = 29', '3 + 51 = 29', '3 + 66 = 81',
-    '4 + 5 = 27', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 38 = 45', '4 + 39 = 46', '4 + 50 = 3', '4 + 51 = 31', '4 + 52 = 22', '4 + 62 = 74',
-    '5 + 6 = 27', '5 + 8 = 23', '5 + 13 = 34', '5 + 17 = 2', '5 + 27 = 14', '5 + 28 = 42', '5 + 30 = 42', '5 + 32 = 36', '5 + 33 = 36', '5 + 35 = 33', '5 + 37 = 33', '5 + 38 = 43', '5 + 39 = 14', '5 + 47 = 42', '5 + 50 = 29', '5 + 51 = 12', '6 + 8 = 56', '6 + 13 = 5', '6 + 27 = 5', '6 + 29 = 5', '6 + 34 = 5', '6 + 39 = 46', '6 + 52 = 57', '6 + 62 = 5', '7 + 8 = 30', '7 + 9 = 26', '7 + 11 = 70', '7 + 26 = 65', '7 + 29 = 14', '7 + 32 = 77', '7 + 33 = 73', '7 + 35 = 10', '7 + 49 = 77', '7 + 50 = 29', '7 + 51 = 29', '8 + 9 = 58', '8 + 12 = 17', '8 + 13 = 41', '8 + 27 = 30', '8 + 28 = 15', '8 + 30 = 56', '8 + 31 = 15', '8 + 33 = 52', '8 + 37 = 64', '8 + 38 = 15', '8 + 51 = 17', '9 + 27 = 4', '9 + 29 = 4', '9 + 30 = 20', '9 + 34 = 71', '9 + 51 = 4', '10 + 12 = 31', '10 + 27 = 26', '10 + 28 = 53', '10 + 29 = 46', '10 + 31 = 50', '10 + 34 = 24', '10 + 35 = 7', '10 + 38 = 53', '10 + 39 = 46', '10 + 50 = 3', '10 + 52 = 53', '11 + 13 = 40', '11 + 17 = 70', '11 + 34 = 70', '11 + 35 = 10', '11 + 36 = 63', '11 + 52 = 67', '12 + 13 = 54', '12 + 17 = 76', '12 + 26 = 54', '12 + 31 = 37', '12 + 39 = 51', '12 + 46 = 39', '12 + 50 = 51', '12 + 51 = 5', '13 + 14 = 60', '13 + 26 = 54', '13 + 29 = 34', '13 + 30 = 72', '13 + 33 = 44', '13 + 36 = 34', '13 + 38 = 41', '14 + 26 = 59', '14 + 32 = 49', '14 + 36 = 49', '17 + 27 = 8', '17 + 31 = 38', '17 + 35 = 76', '17 + 36 = 66', '17 + 51 = 76', '26 + 27 = 65', '26 + 31 = 75', '26 + 32 = 36', '26 + 34 = 69', '26 + 49 = 77', '26 + 51 = 75', '26 + 62 = 26', '27 + 29 = 1', '27 + 30 = 65', '27 + 34 = 13', '27 + 35 = 65', '27 + 47 = 42', '27 + 51 = 12', '27 + 62 = 13', '28 + 30 = 2', '28 + 33 = 53', '28 + 35 = 33', '28 + 38 = 53', '28 + 47 = 42', '28 + 50 = 3', '28 + 52 = 38', '28 + 62 = 30', '29 + 31 = 50', '29 + 50 = 35', '29 + 52 = 38', '30 + 34 = 62', '30 + 47 = 42', '30 + 52 = 57', '30 + 62 = 5', '30 + 73 = 82', '31 + 32 = 47', '31 + 33 = 38', '31 + 39 = 50', '31 + 51 = 50', '31 + 52 = 67', '31 + 67 = 38', '32 + 33 = 45', '32 + 34 = 44', '32 + 35 = 36', '32 + 36 = 49', '32 + 37 = 33', '32 + 38 = 47', '32 + 43 = 80', '32 + 47 = 38', '32 + 53 = 38', '32 + 67 = 89', '33 + 34 = 44', '33 + 35 = 38', '33 + 36 = 52', '33 + 37 = 73', '33 + 50 = 3', '33 + 52 = 73', '34 + 35 = 69', '34 + 36 = 48', '34 + 38 = 43', '35 + 36 = 66', '35 + 38 = 10', '35 + 50 = 29', '35 + 51 = 31', '35 + 52 = 38', '35 + 62 = 13', '35 + 67 = 11', '35 + 73 = 52', '36 + 37 = 63', '36 + 52 = 68', '36 + 66 = 81', '36 + 74 = 81', '37 + 52 = 33', '37 + 63 = 61', '38 + 43 = 47', '38 + 47 = 42', '38 + 51 = 31', '38 + 52 = 67', '39 + 46 = 31', '39 + 62 = 26', '43 + 47 = 38', '43 + 52 = 38', '46 + 51 = 31', '47 + 52 = 38', '47 + 67 = 38', '50 + 51 = 29', '51 + 62 = 26', '52 + 53 = 38', '52 + 73 = 33', '53 + 67 = 38', '66 + 74 = 81',
-    '2 + 39 = 51'
+    '3 + 4 = 8', '3 + 5 = 29', '3 + 7 = 29', '3 + 8 = 30', '3 + 9 = 18', '3 + 10 = 35', '3 + 11 = 70', '3 + 13 = 7', '3 + 26 = 65', '3 + 27 = 65', '3 + 28 = 33', '3 + 29 = 7', '3 + 30 = 7', '3 + 31 = 13', '3 + 33 = 32', '3 + 36 = 81', '3 + 50 = 29', '3 + 51 = 29', '3 + 66 = 81', '4 + 10 = 46',
+    '4 + 5 = 27', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 8 = 17', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 38 = 45', '4 + 39 = 46', '4 + 50 = 3', '4 + 51 = 31', '4 + 52 = 22', '4 + 62 = 74',
+    '5 + 6 = 27', '5 + 8 = 23', '5 + 13 = 34', '5 + 17 = 2', '5 + 27 = 14', '5 + 28 = 42', '5 + 30 = 42', '5 + 32 = 36', '5 + 33 = 36', '5 + 35 = 33', '5 + 37 = 33', '5 + 38 = 43', '5 + 39 = 14', '5 + 47 = 42', '5 + 50 = 29', '5 + 51 = 12', '6 + 8 = 56', '6 + 13 = 5', '6 + 27 = 5', '6 + 29 = 5', '6 + 34 = 5', '6 + 39 = 46', '6 + 52 = 57', '6 + 62 = 5', '7 + 8 = 30', '7 + 9 = 26', '7 + 11 = 70', '7 + 26 = 65', '7 + 29 = 14', '7 + 32 = 77', '7 + 33 = 73', '7 + 35 = 10', '7 + 49 = 77', '7 + 50 = 29', '7 + 51 = 29', '8 + 9 = 58', '8 + 12 = 17', '8 + 13 = 41', '8 + 27 = 30', '8 + 28 = 15', '8 + 30 = 56', '8 + 31 = 15', '8 + 33 = 52', '8 + 37 = 64', '8 + 38 = 15', '8 + 51 = 17', '9 + 27 = 4', '9 + 29 = 4', '9 + 30 = 20', '9 + 34 = 71', '9 + 51 = 4', '10 + 12 = 31', '10 + 27 = 26', '10 + 28 = 53', '10 + 29 = 46', '10 + 31 = 50', '10 + 34 = 24', '10 + 35 = 7', '10 + 38 = 53', '10 + 39 = 46', '10 + 50 = 3', '10 + 52 = 53', '11 + 13 = 40', '11 + 17 = 70', '11 + 34 = 70', '11 + 35 = 10', '11 + 36 = 63', '11 + 52 = 67', '12 + 13 = 54', '12 + 17 = 76', '12 + 26 = 54', '12 + 31 = 37', '12 + 39 = 51', '12 + 46 = 39', '12 + 50 = 51', '12 + 51 = 5', '13 + 14 = 60', '13 + 26 = 54', '13 + 29 = 92', '13 + 30 = 72', '13 + 33 = 44', '13 + 36 = 34', '13 + 38 = 41', '14 + 26 = 59', '14 + 32 = 49', '14 + 36 = 49', '17 + 27 = 8', '17 + 31 = 38', '17 + 35 = 76', '17 + 36 = 66', '17 + 51 = 76', '26 + 27 = 65', '26 + 31 = 75', '26 + 32 = 36', '26 + 34 = 69', '26 + 49 = 77', '26 + 51 = 75', '26 + 62 = 26', '27 + 29 = 1', '27 + 30 = 65', '27 + 34 = 13', '27 + 35 = 65', '27 + 47 = 42', '27 + 51 = 12', '27 + 62 = 13', '28 + 30 = 2', '28 + 33 = 53', '28 + 35 = 33', '28 + 38 = 53', '28 + 47 = 42', '28 + 50 = 3', '28 + 52 = 38', '28 + 62 = 30', '29 + 31 = 50', '29 + 50 = 35', '29 + 52 = 38', '30 + 34 = 62', '30 + 47 = 42', '30 + 52 = 57', '30 + 62 = 5', '30 + 73 = 82', '31 + 32 = 47', '31 + 33 = 38', '31 + 39 = 50', '31 + 51 = 50', '31 + 52 = 67', '31 + 67 = 38', '32 + 33 = 45', '32 + 34 = 44', '32 + 35 = 36', '32 + 36 = 66', '32 + 37 = 33', '32 + 38 = 47', '32 + 43 = 80', '32 + 47 = 38', '32 + 53 = 38', '32 + 67 = 89', '33 + 34 = 44', '33 + 35 = 38', '33 + 36 = 52', '33 + 37 = 73', '33 + 50 = 3', '33 + 52 = 73', '34 + 35 = 69', '34 + 36 = 48', '34 + 38 = 43', '35 + 36 = 66', '35 + 38 = 10', '35 + 50 = 29', '35 + 51 = 31', '35 + 52 = 38', '35 + 62 = 13', '35 + 67 = 11', '35 + 73 = 52', '36 + 37 = 63', '36 + 52 = 68', '36 + 66 = 81', '36 + 74 = 81', '37 + 52 = 33', '37 + 63 = 61', '38 + 43 = 47', '38 + 47 = 42', '38 + 51 = 31', '38 + 52 = 67', '39 + 46 = 31', '39 + 62 = 26', '43 + 47 = 38', '43 + 52 = 38', '46 + 51 = 31', '47 + 52 = 38', '47 + 67 = 38', '50 + 51 = 29', '51 + 62 = 26', '52 + 53 = 38', '52 + 73 = 33', '53 + 67 = 38', '66 + 74 = 81',
+    '2 + 39 = 51', '4 + 8 = 17', '13 + 51 = 79', '1 + 62 = 94','1 + 74 = 94','1 + 73 = 102','2 + 32 = 106','2 + 73 = 101','3 + 7 = 115','3 + 27 = 115','3 + 35 = 115','4 + 32 = 99','4 + 52 = 113','5 + 52 = 93','6 + 7 = 97','6 + 32 = 97','6 + 34 = 97','6 + 35 = 97','6 + 73 = 101','7 + 27 = 65','7 + 37 = 65','8 + 52 = 93','9 + 52 = 114','10 + 13 = 24','10 + 34 = 24','11 + 17 = 96','12 + 13 = 105','12 + 34 = 105','12 + 36 = 105','14 + 52 = 103','14 + 66 = 95','14 + 73 = 100','17 + 32 = 96','17 + 34 = 96','17 + 52 = 93','26 + 37 = 65','26 + 73 = 100','27 + 73 = 101','29 + 32 = 107','29 + 34 = 92','29 + 36 = 107','29 + 73 = 102','30 + 51 = 98','31 + 52 = 103','32 + 34 = 91','32 + 39 = 99','32 + 51 = 99','32 + 66 = 95','32 + 67 = 89','32 + 103 = 104','34 + 62 = 91','34 + 66 = 95','34 + 73 = 100','35 + 52 = 73','39 + 52 = 111','46 + 52 = 111','50 + 74 = 108','51 + 52 = 110','51 + 73 = 102','52 + 3 = 112','52 + 7 = 112','52 + 8 = 112','52 + 9 = 114','52 + 17 = 109','52 + 27 = 112','62 + 66 = 95','77 + 115 = 116'
 ];
 
 // Encounter Data
 const encounterEffects = {
-    'A': { name: 'Fire- Phoenix', hint1: 'Physical damage seems to be ineffective against it, he is made not of solid material but flame itself.', hint2: 'You will need to put out his fire somehow.', effects: ['1A', '4A', '-9A', '-9B', '-35A', '-42A', '46B', '40A', '45A', '-28A', '-37A'] },
-    'B': { name: 'Earth- Desert Golem', hint1: 'A large tough humanoid creature made of tightly compacted sand.', hint2: 'No physical wounds seems to harm it, it must be separated.', effects: ['4A', '1A', '3B', '26B', '28B', '-28A', '35B', '-37A', '38A', '42A', '47A', '40A'] },
-    'C': { name: 'Water- Whispghost', hint1: 'No physical wounds seem to harm it.', hint2: 'It is made of mist and smoke that need to be torn apart somehow.', effects: ['1A', '28B', '6A', '6B', '10A', '51A', '-28A', '-35B', '38A', '-42A', '-47A', '40A'] },
-    'D': { name: 'Air- Sacmonster', hint1: 'A beast that looks like a pair of giant lungs.', hint2: 'You will need to stop its air flow somehow.', effects: ['42A', '2A'] },
-    'E': { name: 'Plant- Plantnnochio', hint1: 'The creature is a sturdy old toy.', hint2: 'Its distinctive nose is made of wood and looks vulnerable.', effects: ['2A', '5A', '28B', '34A', '-37A', '41A', '42A', '40A', '47A', '38A'] },
-    'F': { name: 'Ice- Wintergiant', hint1: "The creature's skin is hard and slightly transparent.", hint2: 'Its skin is slippery ice.', effects: ['2A', '3A', '-30B', '-28B', '-11A', '-51A', '40A', '47A', '78A', '38A'] },
-    'G': { name: 'Rope- Mummy', hint1: 'This creature seems to be wrapped in many strips.', hint2: 'The ropes and fabrics are its defences.', effects: ['2A', '-4A', '-1A', '-5A', '11A', '42A', '-30B', '-37A', '47A', '78A', '38A'] },
-    'H': { name: 'Light- Gorgon', hint1: 'The creature turns anyone it faces into stone.', hint2: 'The way it turns you to stone is by looking at you.', effects: ['-7A', '-29B', '-39A', '-40A', '-31A', '12B', '54A', '-37A', '38A', '10B', '51B'] },
-    'I': { name: 'Metal- Automaton', hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A'] },
-    'J': { name: 'Sound- Banshee', hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '-13A', '-26A', '14A', '-40A', '50A', '38A'] },
-    'K': { name: 'Glass- Illusionist', hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11C', '9B', '26B', '7B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A'] },
-    'L': { name: 'Pressure- The Press', hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B'] },
-    'M': { name: 'Chemical- The Valley', hint1: 'Something invisible is causing you to get sick.', hint2: 'You must deal with the cloud of chemicals.', effects: ['1A', '28B', '6A', '29B', '39A'] },
-    'N': { name: 'Gravity- The Abnormality', hint1: 'The gravitational abnormality is slamming you against the roof, unable to move.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '39A', '-11C', '-13A', '62A'] },
-    'O': { name: 'Oil- The Swamp', hint1: 'When you try to cross you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '7A', '-11C', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A'] },
-    'P': { name: 'Darkness- Alucard', hint1: 'It is a man in a cape and bat wings.', hint2: 'He is a vampire who has never left the darkness of the indoors.', effects: ['12A', '-37A', '38A', '41A', '40A', '54A'] },
-    'Q': { name: 'Man- The Child', hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['48A', '-52A', '-7C', '-59B', '-61A', '-49A', '-63B', '-66A', '-68B', '-69A', '-74B', '-78B', '89A'] },
-    'R': { name: 'Energy- Terror of the Tides', hint1: 'It takes the form of a deadly Eel.', hint2: 'It attacks using electricity.', effects: ['-4A', '-4B', '-10A', '-35A', '38A', '47A', '40A', '-37A'] },
-    'S': { name: 'Life- The Exchange', hint1: 'The being tells you that you will need to provide life in order to proceed.', hint2: 'You must give it life itself, or something similar.', effects: ['-8B', '-52A', '33B', '32B', '-68B', '-67B', '89A'] },
-    'T': { name: 'Machine- Geared Dragon', hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from the air.', effects: ['-28A', '35A', '35B', '5A', '40A', '-34A', '-39A', '-29B', '-11B', '65A'] },
-    'U': { name: 'Time- Ritualists', hint1: 'The magicians are about to complete their ritual, which will make it impossible to beat them.', hint2: 'They are putting together a large clock, you will need to disrupt them.', effects: ['-34A', '-31A', '35B', '12B', '14B', '38A'] },
-    'V': { name: 'Intelligence- Doppelganger', hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-12B', '-54A', '-39A', '-29B', '11C', '36A', '32A', '62A'] },
-    'W': { name: 'Love- The Gift', hint1: 'A lover tells you she feels heartbroken, she was expecting to receive something special from her valentine.', hint2: 'She wants to receive a heartfelt present.', effects: ['49A', '32B', '-37A', '64A', '79A', '65C', '54B'] },
-    'X': { name: 'Death- The Tribute', hint1: 'A solemn ceremony is taking place, one might wonder what would be appropriate to do here.', hint2: "An old man requests something to commemorate and honor his friend's memory.", effects: ['77A', '-59A', '-78A', '-17A', '-64A', '-65C', '-33A', '-32A', '49A'] }
+    'A': { name: 'Fire- Phoenix', hint1: 'Physical damage seems to be ineffective against it, he is made not of solid material but flame itself.', hint2: 'You will need to put out his fire somehow.', effects: ['1A', '4A', '-9A', '-9B', '-35A', '-42A', '46B', '40A', '45A', '-28A', '-37A', '98A', '106A'] },
+    'B': { name: 'Earth- Desert Golem', hint1: 'A large tough humanoid creature made of tightly compacted sand.', hint2: 'No physical wounds seems to harm it, it must be separated.', effects: ['4A', '1A', '3B', '26B', '28B', '-28A', '35B', '-37A', '38A', '42A', '47A', '40A', '90A', '106A'] },
+    'C': { name: 'Water- Whispghost', hint1: 'No physical wounds seem to harm it.', hint2: 'It is made of mist and smoke that need to be torn apart somehow.', effects: ['1A', '28B', '6A', '6B', '10A', '51A', '-28A', '-35B', '38A', '-42A', '-47A', '40A', '90A'] },
+    'D': { name: 'Air- Sacmonster', hint1: 'A beast that looks like a pair of giant lungs.', hint2: 'You will need to stop its air flow somehow.', effects: ['42A', '2A', '8B', '10A', '7B', '11B', '15A', '27A', '28A', '38A', '40A', '41A', '42A', '43A', '47A', '52A', '53A', '55A', '65A', '111A'] },
+    'E': { name: 'Plant- Plantnnochio', hint1: 'The creature is a sturdy old toy.', hint2: 'Its distinctive nose is made of wood and looks vulnerable.', effects: ['2A', '5A', '28B', '34A', '-37A', '41A', '42A', '40A', '47A', '38A', '104A', '109A'] },
+    'F': { name: 'Ice- Wintergiant', hint1: "The creature's skin is hard and slightly transparent.", hint2: 'Its skin is slippery ice.', effects: ['2A', '3A', '-30B', '-28B', '-11A', '-51A', '40A', '47A', '78A', '38A', '104A', '97A'] },
+    'G': { name: 'Rope- Mummy', hint1: 'This creature seems to be wrapped in many strips.', hint2: 'The ropes and fabrics are its defences.', effects: ['2A', '-4A', '-1A', '-5A', '11A', '42A', '-30B', '-37A', '47A', '78A', '38A', '104A', '90A', '106A'] },
+    'H': { name: 'Light- Gorgon', hint1: 'The creature turns anyone it faces into stone.', hint2: 'The way it turns you to stone is by looking at you.', effects: ['-7A', '-29B', '-39A', '-40A', '-31A', '12B', '54A', '-37A', '38A', '10B', '51B', '-111A', '111B'] },
+    'I': { name: 'Metal- Automaton', hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A', '102A'] },
+    'J': { name: 'Sound- Banshee', hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '-13A', '-26A', '14A', '-40A', '50A', '38A', '92A', '94A', '115A', '104A'] },
+    'K': { name: 'Glass- Illusionist', hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11C', '9B', '26B', '7B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A', '104A', ''] },
+    'L': { name: 'Pressure- The Press', hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B', '112B'] },
+    'M': { name: 'Chemical- The Valley', hint1: 'Something invisible is causing you to get sick.', hint2: 'You must deal with the cloud of chemicals.', effects: ['1A', '28B', '6A', '29B', '39A', '90A', '94A', '115A'] },
+    'N': { name: 'Gravity- The Abnormality', hint1: 'The gravitational abnormality is slamming you against the roof, unable to move.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '29A', '39A', '-11A', '-13A', '62A', '102A'] },
+    'O': { name: 'Oil- The Swamp', hint1: 'When you try to cross you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '7A', '11A', '-11C', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A', '94A', '92A'] },
+    'P': { name: 'Darkness- Alucard', hint1: 'It is a man in a cape and bat wings.', hint2: 'He is a vampire who has never left the darkness of the indoors.', effects: ['12A', '-37A', '38A', '41A', '40A', '54A', '104A', '111B'] },
+    'Q': { name: 'Man- The Child', hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['20A', '22A', '48A', '-52A', '-7C', '-59B', '-61A', '-49A', '-63B', '-66A', '-68B', '-69A', '-74B', '-78B', '89A', '-91A', '96A', '100B', '104B', '108A', '114A'] },
+    'R': { name: 'Energy- Terror of the Tides', hint1: 'It takes the form of a deadly Eel.', hint2: 'It attacks using electricity.', effects: ['-4A', '-4B', '-10A', '-35A', '38A', '47A', '40A', '-37A', '104A', '106A', '111B', '114A'] },
+    'S': { name: 'Life- The Exchange', hint1: 'The being tells you that you will need to provide life in order to proceed.', hint2: 'You must give it life itself, or something similar.', effects: ['-8B', '-52A', '33B', '32B', '-68B', '-67B', '89A', '93A', '102B', '103A', '104B', '109A', '110A', '111A', '112A', '113A', '114A'] },
+    'T': { name: 'Machine- Geared Dragon', hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from the air.', effects: ['-28A', '35A', '35B', '5A', '40A', '-34A', '-39A', '-29B', '-11B', '65A', '90A', '92A', '94A', '111B', '115A'] },
+    'U': { name: 'Time- Ritualists', hint1: 'The magicians are about to complete their ritual, which will make it impossible to beat them.', hint2: 'They are putting together a large clock, you will need to disrupt them.', effects: ['-34A', '-31A', '35B', '12B', '14B', '38A', '-104A', '111B', '113A', '97A'] },
+    'V': { name: 'Intelligence- Doppelganger', hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-12B', '-54A', '-39A', '-29B', '11C', '36A', '32A', '62A', '37A', '70A', '91A'] },
+    'W': { name: 'Love- The Gift', hint1: 'A lover tells you she feels heartbroken, she was expecting to receive something special from her valentine.', hint2: 'She wants to receive a heartfelt present.', effects: ['49A', '32B', '-37A', '64A', '79A', '65C', '54B', '95A', '101A', '114A', '116A'] },
+    'X': { name: 'Death- The Tribute', hint1: 'A solemn ceremony is taking place, one might wonder what would be appropriate to do here.', hint2: "An old man requests something to commemorate and honor his friend's memory.", effects: ['77A', '-59A', '-78A', '-17A', '-64A', '-65C', '-33A', '-32A', '49A'] },
+    'Z': { name: 'FINAL ROOM: The Alchemists Endgame', hint1: 'To win the game, enter this room and provide the alchemists most prized creation', hint2: "They say it is a metal that shines with the power of the sun", effects: ['79A'] }
+
 };
 
 
@@ -806,9 +929,25 @@ let currentEncounterCell = null;
 let halfSuccesses = {};
 let locationFailureCounter = {};
 let previousEncounterKey = null;
+let persistentHints = {};
+let moveCounter = 0;
 
 // FIX: MOVED verbLetters to the global scope so handleEncounter can access it
 const verbLetters = ['A', 'B', 'C'];
+
+function countIncompleteEncounters() {
+    // Assuming all encounter cells have the class 'cell' and completed ones get 'defeated'
+    const allCells = document.querySelectorAll(".cell");
+    let incompleteCount = 0;
+
+    allCells.forEach(cell => {
+        if (!cell.classList.contains('defeated')) {
+            incompleteCount++;
+        }
+    });
+
+    return incompleteCount;
+}
 
 // Helper to display messages in the dedicated box
 function displayMessage(text, type = 'default') {
@@ -828,23 +967,7 @@ function displayMessage(text, type = 'default') {
     setTimeout(() => msgItem.remove(), 3000);
 }
 
-// Function to update the hint box
-function updateHintBox(encounterKey) {
-    hintBox.innerHTML = '';
-    if (!encounterKey) return;
 
-    const encounterData = encounterEffects[encounterKey];
-    const failureCount = locationFailureCounter[encounterKey] || 0;
-
-    // Use the new hint1 and hint2 properties
-    if (failureCount >= 1 && encounterData.hint1) {
-        hintBox.innerHTML = encounterData.hint1;
-    }
-    if (failureCount >= 3 && encounterData.hint2) {
-        // Append the second hint on a new line using a span
-        hintBox.innerHTML += `<span>${encounterData.hint2}</span>`;
-    }
-}
 
 // Function to update the Past Combinations list
 function updateCombinationsList() {
@@ -996,7 +1119,7 @@ function createCard(elementId) {
             if (currentEncounterCell) {
                 // Check if the current encounter is locked out from too many failures
                 const encounterKey = currentEncounterCell.dataset.encounterKey;
-                if (locationFailureCounter[encounterKey] >= 3) {
+                if (locationFailureCounter[encounterKey] >= 3 & countIncompleteEncounters() > 2) {
                     displayMessage('BLOCKED! Choose a different location first.', 'default');
                     return; // Prevent handleEncounter from running
                 }
@@ -1009,6 +1132,12 @@ function createCard(elementId) {
     });
 
     card.innerHTML = `<div class="label">${data.name}</div><div class="emoji">${data.emoji}</div>`;
+    if (data.terminal) {
+        const dot = document.createElement("span");
+        dot.className = "terminal-dot"; 
+        dot.textContent = "•"; // Using a solid dot character
+        card.appendChild(dot);
+    }
     card.appendChild(actionsDiv);
     return card;
 }
@@ -1063,6 +1192,25 @@ function setupCardClickListener(card, id) {
 
 // --- ENCOUNTER LOGIC ---
 
+function handleFailure(encounterKey) {
+    locationFailureCounter[encounterKey] = (locationFailureCounter[encounterKey] || 0) + 1;
+    displayMessage('FAILURE', 'default');
+
+    // Permanently record the highest hint level unlocked
+    const currentHintLevel = persistentHints[encounterKey] || 0;
+    if (locationFailureCounter[encounterKey] >= 3) {
+        persistentHints[encounterKey] = 2; // Unlock level 2
+        displayMessage('Third failure, must try another encounter', 'default');
+    } else if (locationFailureCounter[encounterKey] >= 1 && currentHintLevel < 1) {
+        persistentHints[encounterKey] = 1; // Unlock level 1
+    }
+
+    // Update hint box display
+    updateHintBox(encounterKey);
+}
+
+
+
 function handleEncounter(card, verbKey) {
     const encounterCell = currentEncounterCell;
     const encounterKey = encounterCell.dataset.encounterKey;
@@ -1073,8 +1221,13 @@ function handleEncounter(card, verbKey) {
     const isSuccess = encounterInfo.effects.includes(verbKey);
     const isHalfSuccess = encounterInfo.effects.includes(`-${verbKey}`);
 
+    
+
     if (isSuccess || isHalfSuccess) {
         // Reset failure counter on any success/half-success
+        if (encounterKey === 'Z') {
+        displayWinScreen();
+    }
         locationFailureCounter[encounterKey] = 0;
         updateHintBox(encounterKey);
     }
@@ -1143,15 +1296,19 @@ function handleEncounter(card, verbKey) {
     }
 }
 
-function handleFailure(encounterKey) {
-    locationFailureCounter[encounterKey] = (locationFailureCounter[encounterKey] || 0) + 1;
-    displayMessage('FAILURE', 'default');
+function updateHintBox(encounterKey) {
+    hintBox.innerHTML = '';
+    if (!encounterKey) return;
 
-    // Update hint on 1st and 3rd failure
-    updateHintBox(encounterKey);
+    const encounterData = encounterEffects[encounterKey];
+    const hintLevel = persistentHints[encounterKey] || 0; // Get the unlocked hint level
 
-    if (locationFailureCounter[encounterKey] >= 3) {
-        displayMessage('Third failure, must try another encounter', 'default');
+    // Display hints based on the permanent hint level
+    if (hintLevel >= 1 && encounterData.hint1) {
+        hintBox.innerHTML = encounterData.hint1;
+    }
+    if (hintLevel >= 2 && encounterData.hint2) {
+        hintBox.innerHTML += `<span>${encounterData.hint2}</span>`;
     }
 }
 
@@ -1165,15 +1322,33 @@ function resetEncounterState() {
     document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
 }
 
+// Function to display the win screen
+function displayWinScreen() {
+    const modal = document.getElementById('win-modal');
+    const movesDisplay = document.getElementById('win-moves-display'); // <-- ADD THIS
+    movesDisplay.textContent = `You won in ${moveCounter} moves.`; // <-- ADD THIS
+    modal.classList.add('visible');
+}
+
+// Function to hide the win screen
+function hideWinScreen() {
+    const modal = document.getElementById('win-modal');
+    modal.classList.remove('visible');
+    
+    // Optional: You could reload the page or reset the game state here
+}
+
+
+
 
 // --- INITIALIZATION ---
 
 const gridIconsMap = [
    { icon: '⏱️', id: '35', key: 'U' }, { icon: '🧪', id: '28', key: 'M' }, { icon: '🧠', id: '36', key: 'V' }, { icon: '⚙️', id: '34', key: 'T' }, { icon: '💀', id: '38', key: 'X' },
    { icon: '🛢️', id: '30', key: 'O' }, { icon: '⚡', id: '5', key: 'R' },  { icon: '💨', id: '1', key: 'D' },  { icon: '❄️', id: '9', key: 'F' },  { icon: '🤜', id: '27', key: 'L' },
-   { icon: '⬛', id: '31', key: 'P' }, { icon: '🔥', id: '2', key: 'A' },  { icon: '', id: null, key: null },  { icon: '💧', id: '4', key: 'C' },  { icon: '🧍', id: '32', key: 'Q' },
-   { icon: '💡', id: '12', key: 'H' }, { icon: '🌿', id: '8', key: 'E' },  { icon: '🌍', id: '3', key: 'B' },  { icon: '⛓️', id: '11', key: 'G' }, { icon: '⬇️', id: '29', key: 'N' },
-   { icon: '🧬', id: '33', key: 'S' }, { icon: '🪈', id: '37', key: 'W' }, { icon: '🔩', id: '13', key: 'I' }, { icon: '🔊', id: '14', key: 'J' }, { icon: '🔮', id: '26', key: 'K' }
+   { icon: '⬛', id: '31', key: 'P' }, { icon: '🔥', id: '2', key: 'A' },  { icon: '🔚', id: null, key: 'Z' },  { icon: '💧', id: '4', key: 'C' },  { icon: '🧍', id: '32', key: 'Q' },
+   { icon: '🔮', id: '26', key: 'H' }, { icon: '🌿', id: '8', key: 'E' },  { icon: '🌍', id: '3', key: 'B' },  { icon: '⛓️', id: '11', key: 'G' }, { icon: '⬇️', id: '29', key: 'N' },
+   { icon: '🧬', id: '33', key: 'S' }, { icon: '❤️', id: '37', key: 'W' }, { icon: '🔩', id: '13', key: 'I' }, { icon: '🔊', id: '14', key: 'J' }, { icon: '💡', id: '12', key: 'K' }
 ];
 
 for(let r=0;r<5;r++){
@@ -1196,21 +1371,32 @@ for(let r=0;r<5;r++){
             // TAPPED ELEMENTS SHOULD NEVER BE HIGHLIGHTED OR SELECTED
             if (cell.classList.contains('defeated')) return;
 
+            if (currentEncounterCell !== cell) {
+                moveCounter++;
+            }
+
+            const remainingEncounters = countIncompleteEncounters();
+            const isBlockingActive = remainingEncounters > 2;
+
+            if (isBlockingActive) {
+                // 2. If the block is active, perform the 3x failure check
+                if (locationFailureCounter[data.key] >= 3 && currentEncounterCell && currentEncounterCell.dataset.encounterKey === data.key) {
+                    displayMessage('BLOCKED! Choose a different location first.', 'default');
+                    return;
+                }
+            }
+
             // When selecting a new location, clear the failure block on the OLD location
             if (previousEncounterKey && previousEncounterKey !== data.key) {
                 locationFailureCounter[previousEncounterKey] = 0;
             }
 
-            // Failure Rule Check: If 3+ failures at this spot, force a different selection
-            if (locationFailureCounter[data.key] >= 3 && currentEncounterCell && currentEncounterCell.dataset.encounterKey === data.key) {
-                displayMessage('BLOCKED! Choose a different location first.', 'default');
-                return;
-            }
 
             // Clear selection for all cells
             document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
             cell.classList.add("selected");
-
+document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
+            cell.classList.add("selected");
             // Set the new encounter
             currentEncounterCell = cell;
             previousEncounterKey = data.key;
@@ -1318,8 +1504,6 @@ untapButton.addEventListener('click', () => {
     // 3. Clear the selected reagents array
     selectedReagents = [];
 
-    // 4. Clear all failure states
-    locationFailureCounter = {};
 });
 
 // Past Combinations hover logic
@@ -1332,6 +1516,26 @@ combinationsWrap.addEventListener('mouseenter', () => {
 combinationsWrap.addEventListener('mouseleave', () => {
     combinationsList.style.display = 'none';
 });
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    // Now it is safe to look for the button element
+    const closeButton = document.getElementById('win-close-button');
+    
+    if (closeButton) {
+        // Attach the listener now that the button exists
+        closeButton.addEventListener('click', hideWinScreen);
+    }
+});
+
 </script>
+
+<div id="win-modal" class="win-modal-overlay">
+    <div class="win-modal-content">
+        <h1 class="win-title">🎉 YOU WIN! 🎉</h1>
+        <p class="win-message">Congratulations!</p>
+        <p id="win-moves-display" class="win-moves"></p>
+        <button id="win-close-button" class="win-close-button">Continue</button>
+    </div>
+</div>
 </body>
 </html>
