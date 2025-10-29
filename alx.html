@@ -52,7 +52,7 @@ body{
 }
 /* SIDEBAR (Instructions Column) MOVED TO COLUMN 3 - It will now show up on the right */
 .sidebar{
-  grid-column:3/4; /* Fixed position */
+  grid-column:3/ -1; /* Fixed position */
   grid-row:1/2;
   background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);
   border-radius:var(--radius);
@@ -144,7 +144,7 @@ p.subtitle{color:var(--muted);font-size:12px}
   grid-row: 1/2;
   display:flex;
   flex-direction:column;
-  align-items:center; /* Center all contents horizontally */
+  align-items:left; /* Center all contents horizontally */
   gap:10px;
   padding-top: 10px;
   overflow-y: auto; /* Allow scrolling if window is too short */
@@ -257,10 +257,10 @@ p.subtitle{color:var(--muted);font-size:12px}
   padding: 10px; /* Add some padding */
 }
 .preview-title {
-    font-size: 14px;
-    color: var(--muted);
+    font-size: 1.5rem; 
+    color: var(--accent);
     text-align: center;
-    margin-top: 8px; /* Spacing between emoji and title */
+    margin-bottom: 15px;
 }
 .preview .big{
   font-size:60px;
@@ -299,6 +299,7 @@ p.subtitle{color:var(--muted);font-size:12px}
     line-height: 1.3;
     padding: 5px 0;
     margin-top: 12px; /* Spacing between title and hints */
+    margin-bottom: 20px;
 }
 .hint-box span {
     display: block; /* Force the span (Second Hint) onto a new line */
@@ -339,6 +340,20 @@ p.subtitle{color:var(--muted);font-size:12px}
     font-size: 18px;
 }
 
+.element-name-subtitle {
+    font-size: 1rem;
+    color: var(--muted);
+    font-style: italic;
+    
+    /* --- CHANGES HERE --- */
+    font-family: Georgia, 'Times New Roman', serif; /* Changed to a classic serif font */
+    margin-top: 3px; /* Added 5px margin to push it down from the emoji (was -10px) */
+    opacity: 0.5; 
+    
+    margin-bottom: 5px;
+    text-align: center;
+}
+
 @keyframes fadeout {
     0% { opacity: 1; }
     /* FADE GRADUALLY FROM 0% */
@@ -353,7 +368,7 @@ p.subtitle{color:var(--muted);font-size:12px}
   flex-direction:column;
   gap:6px;
   align-items: flex-start; /* Align card rows to the left of the 650px container */
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 /* DYNAMIC CARD ROW */
@@ -512,7 +527,8 @@ p.subtitle{color:var(--muted);font-size:12px}
     align-items: center;
     gap: 10px;
     /* Ensure the control panel is visually separate from the cards */
-    margin-bottom: 10px;
+    margin-bottom: 0px;
+    margin-top: -10px;
 }
 .buttons{
     display:flex;
@@ -611,7 +627,7 @@ p.subtitle{color:var(--muted);font-size:12px}
     }
 }
 
-.btn{padding:6px 12px;border-radius:8px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.06);transition:all .2s}
+.btn{padding:4px 12px;border-radius:8px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.06);transition:all .2s}
 .btn.green{background:#2a5032;color:#9ff88b}
 .btn.green:hover{background:#356a42}
 .btn.silver{background:#444;color:#eee}
@@ -621,15 +637,16 @@ p.subtitle{color:var(--muted);font-size:12px}
 </head>
 <body>
 <div class="sidebar">
-  <div class="logo">RULES</div>
   <h1>HOW TO PLAY</h1>
-  <p class="subtitle">    Welcome to Periodic Fable (name subject to change), a solo alchemy puzzle game. In this game you are trying to use elements to clear encounters, gain rewards, and fuse together elements to make new ones. In the same style of games such as Little Alchemy and Doodle God, you can combine two elements to make a new one, for example Fire + Earth would give you Rock. The goal of the first scenario is to create Gold. 
-</p>
-  <div class="instructions">
+  <p class="subtitle">    
+  <div class="instructions">  Welcome to Periodic Fable (name subject to change), a solo alchemy puzzle game. In this game you are trying to use elements to clear encounters, gain rewards, and fuse together elements to make new ones. In the same style of games such as Little Alchemy and Doodle God, you can combine two elements to make a new one, for example Fire + Earth would give you Rock. The goal of the first scenario is to create Gold in the final room. 
+    <br>
+    <br>
     <strong>Encounters</strong>
     <br>
+    <br>
     <p>
-        The map is a grid of encounters, each with an element that is both the theme of the challenge and the element you get as a reward. For example, if you move to the “Fire” space of the map you face the Phoenix. Encounters that start with “The” are not combats and are more like physical puzzles.
+        The map is a grid of encounters, each with an element that is both the theme of the challenge and the element you get as a reward. For example, if you move to the “Fire” space of the map you face the Phoenix. Encounters that start with “The” are not combats and are more like physical puzzles. Encounters in the first rows are easier, while those in later rows are more difficult.
     </p>
     <br>
     <p>
@@ -637,51 +654,39 @@ p.subtitle{color:var(--muted);font-size:12px}
     </p>
     <br>
     <p>
-        If you choose a verb that wins the encounter, a “SUCCESS” message will appear, you receive that element as a permanent reward, and the encounter is removed from the map. You will receive a hint on the first and third failures. If you fail three times in a row, you must leave and try another encounter before you are allowed to try again. It is also possible to get a “half-success” for verbs that are partially effective. Two half-successes equal one success.
+        If you choose a verb that wins the encounter, a “SUCCESS” message will appear, you receive that element as a permanent reward, and the encounter is removed from the map. You will receive a hint on the first and third failures. If you fail four times in a row, you must leave and try another encounter before you are allowed to try again. It is also possible to get a “half-success” for verbs that are partially effective. Two half-successes equal one success.
     </p>
     <br>
     <strong>Fusing Elements</strong>
     <br>
+    <br>
+
     <p>
         In order to create a new element, click on two elements in your reagents row and click the “Fuse” button. The first element you clicked on will be temporarily deactivated as a cost. Some combinations of elements are not possible and will be highlighted in red when you select them.
     </p>
     <br>
     <p>
-        If you want your deactivated elements back, you can click “Untap All.” This reactivates all your elements but gets rid of all the new elements you have created in the products row. Some elements with a special symbol are final products and cannot be used to make any new fusions.
+        If you want your deactivated elements back, you can click “Untap All.” This reactivates all your elements but gets rid of all the new elements you have created in the products row. Some elements with a dot symbol in the top right are final products and cannot be used to make any new fusions.
     </p>
     <br>
-    <strong>Improvements Roadmap</strong>
-    <ul>
-        <li>Add final room Z (The Alchemist's Endgame).</li>
-        <li>Add a game ending/victory screen.</li>
-        <li>Implement a hint system for the final room based on completing rows/columns.</li>
-        <li>Display a "final score" (Turn/move/failure timer) on the victory screen.</li>
-        <li>General UI Improvements and bug fixes.</li>
-        <li>Add basic art for each encounter.</li>
-        <li>Implement basic website elements (contact, privacy policy, etc.).</li>
-        <li>Add save and reset game functionality.</li>
-        <li>Improve these rules and add visuals.</li>
-        <li>Add a Lives/Roguelike mode.</li>
-        <li>Implement a Token System.</li>
-        <li>Add Set 2 and 3 of encounters.</li>
-        <li>Add more endgame room scenarios.</li>
-    </ul>
+    <img src="fuse_example.gif" alt="Example of two cards fusing" class="rules-gif">
+    <br>
 </div>
 </div>
 
 <div class="main">
   <div class="map-and-preview-container">
     <div class="grid-wrap">
-      <div class="grid-title">Map</div>
       <div class="grid" id="grid"></div>
     </div>
 
     <div class="preview-and-message-wrap">
-      <div class="preview">
-        <div class="big" id="preview">♙</div>
-        <div class="preview-title" id="previewTitle"></div>
-        <div class="hint-box" id="hintBox"></div>
-      </div>
+        <div class="preview">
+            <div class="preview-title" id="previewTitle"></div>
+            <div class="hint-box" id="hintBox"></div>
+            <div class="big" id="preview">♙</div>
+            <div class="element-name-subtitle" id="elementNameSubtitle"></div> 
+        </div>
       <div class="encounter-message-box" id="encounterMessageBox"></div>
     </div>
   </div>
@@ -746,24 +751,24 @@ const elementColorMap = {
 const darkColors = ['var(--color-time)', 'var(--color-water)', 'var(--color-dark)', 'var(--color-green)', 'var(--color-brown)', 'var(--color-orange)', 'var(--color-purple)', 'var(--color-black)'];
 
 const elementData = {
-    '1': { name: 'Air', emoji: '💨', verbs: ['Whirlwind'], terminal: false },
+    '1': { name: 'Air', emoji: '💨', verbs: ['Blow'], terminal: false },
     '2': { name: 'Fire', emoji: '🔥', verbs: ['Burn'], terminal: false },
     '3': { name: 'Earth', emoji: '🌍', verbs: ['Quake'], terminal: false },
     '4': { name: 'Water', emoji: '💧', verbs: ['Flood'], terminal: false },
     '5': { name: 'Energy', emoji: '⚡', verbs: ['Zap'], terminal: false },
     '6': { name: 'Steam', emoji: '💨', verbs: ['Puff', 'Boil'], terminal: false },
-    '7': { name: 'Rock', emoji: '🪨', verbs: ['Protect', 'Throw', 'Gift'], terminal: false },
-    '8': { name: 'Plant', emoji: '🌿', verbs: ['Grow', 'Entangle'], terminal: false },
+    '7': { name: 'Rock', emoji: '🪨', verbs: ['Block', 'Gift'], terminal: false },
+    '8': { name: 'Plant', emoji: '🌿', verbs: ['Entangle'], terminal: false },
     '9': { name: 'Ice', emoji: '❄️', verbs: ['Cool', 'Freeze'], terminal: false },
     '10': { name: 'Dust', emoji: '✨', verbs: ['Dry', 'Blind'], terminal: false },
     '11': { name: 'Rope', emoji: '⛓️', verbs: ['Cross', 'Restrain'], terminal: false },
-    '12': { name: 'Light', emoji: '💡', verbs: ['Shine', 'Blind'], terminal: false },
-    '13': { name: 'Metal', emoji: '🔩', verbs: ['Block'], terminal: false },
+    '12': { name: 'Light', emoji: '💡', verbs: ['Shine', 'Daze'], terminal: false },
+    '13': { name: 'Metal', emoji: '🔩', verbs: ['Protect'], terminal: false },
     '14': { name: 'Sound', emoji: '🔊', verbs: ['Deafen', 'Yell'], terminal: false },
     '15': { name: 'Tobacco', emoji: '🚬', verbs: ['Smoke', 'Gift'], terminal: true },
     '16': { name: 'Kelp', emoji: '🌿', verbs: ['Gift'], terminal: true },
     '17': { name: 'Tree', emoji: '🌳', verbs: ['Grow', 'Gift'], terminal: false },
-    '18': { name: 'Snow', emoji: '🌨️', verbs: ['Chill 4'], terminal: true },
+    '18': { name: 'Snow', emoji: '🌨️', verbs: ['Chill'], terminal: true },
     '19': { name: 'Soup', emoji: '🥣', verbs: ['Gift'], terminal: true },
     '20': { name: 'Icecream', emoji: '🍦', verbs: ['Gift'], terminal: true },
     '21': { name: 'Lava', emoji: '🌋', verbs: ['Smolder'], terminal: true },
@@ -780,7 +785,7 @@ const elementData = {
     '32': { name: 'Man', emoji: '🧍', verbs: ['Communicate', 'Gift'], terminal: false },
     '33': { name: 'Life', emoji: '🧬', verbs: ['Heal', 'Gift'], terminal: false },
     '34': { name: 'Machine', emoji: '⚙️', verbs: ['Tamper'], terminal: false },
-    '35': { name: 'Time', emoji: '⏱️', verbs: ['Wait', 'Rewind', 'Gift'], terminal: false },
+    '35': { name: 'Time', emoji: '⏱️', verbs: ['Wait', 'Rewind'], terminal: false },
     '36': { name: 'Intelligence', emoji: '🧠', verbs: ['Reason'], terminal: false },
     '37': { name: 'Love', emoji: '❤️', verbs: ['Romance'], terminal: false },
     '38': { name: 'Death', emoji: '💀', verbs: ['Kill'], terminal: false },
@@ -810,14 +815,14 @@ const elementData = {
     '62': { name: 'Car', emoji: '🚗', verbs: ['Transport'], terminal: true },
     '63': { name: 'Toy', emoji: '🧸', verbs: ['Throw', 'Gift'], terminal: false },
     '64': { name: 'Rose', emoji: '🌹', verbs: ['Gift'], terminal: true },
-    '65': { name: 'Diamond', emoji: '💎', verbs: ['Throw', 'Protect', 'Gift'], terminal: true },
+    '65': { name: 'Diamond', emoji: '💎', verbs: ['Throw', 'Wall', 'Gift'], terminal: true },
     '66': { name: 'Book', emoji: '📚', verbs: ['Gift'], terminal: false },
     '67': { name: 'Spider', emoji: '🕷️', verbs: ['Throw', 'Gift'], terminal: false },
     '68': { name: 'Dog', emoji: '🐕', verbs: ['Fetch', 'Gift'], terminal: true },
     '69': { name: 'Clock', emoji: '🕰️', verbs: ['Gift'], terminal: true },
     '70': { name: 'Bridge', emoji: '🌉', verbs: ['Cross'], terminal: true },
-    '71': { name: 'Refrigerator', emoji: '🧊', verbs: ['Chill', 'Gift'], terminal: true },
-    '72': { name: 'Can', emoji: '🥫', verbs: ['Protect', 'Gift'], terminal: true },
+    '71': { name: 'Refrigerator', emoji: '🧊', verbs: ['Refrigerate', 'Gift'], terminal: true },
+    '72': { name: 'Can', emoji: '🥫', verbs: ['Encase', 'Gift'], terminal: true },
     '73': { name: 'Egg', emoji: '🥚', verbs: ['Throw', 'Gift'], terminal: false },
     '74': { name: 'Ship', emoji: '⛵', verbs: ['Sail', 'Gift'], terminal: false },
     '75': { name: 'Sunglasses', emoji: '🕶️', verbs: ['Wear', 'Gift'], terminal: true },
@@ -872,28 +877,28 @@ const encounterEffects = {
     'A': { name: 'Fire- Phoenix', hint1: 'Physical damage seems to be ineffective against it, he is made not of solid material but flame itself.', hint2: 'You will need to put out his fire somehow.', effects: ['1A', '4A', '-9A', '-9B', '-35A', '-42A', '46B', '40A', '45A', '-28A', '-37A', '98A', '106A'] },
     'B': { name: 'Earth- Desert Golem', hint1: 'A large tough humanoid creature made of tightly compacted sand.', hint2: 'No physical wounds seems to harm it, it must be separated.', effects: ['4A', '1A', '3B', '26B', '28B', '-28A', '35B', '-37A', '38A', '42A', '47A', '40A', '90A', '106A'] },
     'C': { name: 'Water- Whispghost', hint1: 'No physical wounds seem to harm it.', hint2: 'It is made of mist and smoke that need to be torn apart somehow.', effects: ['1A', '28B', '6A', '6B', '10A', '51A', '-28A', '-35B', '38A', '-42A', '-47A', '40A', '90A'] },
-    'D': { name: 'Air- Sacmonster', hint1: 'A beast that looks like a pair of giant lungs.', hint2: 'You will need to stop its air flow somehow.', effects: ['42A', '2A', '8B', '10A', '7B', '11B', '15A', '27A', '28A', '38A', '40A', '41A', '42A', '43A', '47A', '52A', '53A', '55A', '65A', '111A'] },
+    'D': { name: 'Air- Sacmonster', hint1: 'A beast that looks like a pair of giant lungs.', hint2: 'You will need to stop its air flow somehow.', effects: ['42A', '2A', '8A', '10A', '11B', '15A', '27A', '28A', '38A', '40A', '41A', '42A', '43A', '47A', '52A', '53A', '55A', '65A', '111A'] },
     'E': { name: 'Plant- Plantnnochio', hint1: 'The creature is a sturdy old toy.', hint2: 'Its distinctive nose is made of wood and looks vulnerable.', effects: ['2A', '5A', '28B', '34A', '-37A', '41A', '42A', '40A', '47A', '38A', '104A', '109A'] },
-    'F': { name: 'Ice- Wintergiant', hint1: "The creature's skin is hard and slightly transparent.", hint2: 'Its skin is slippery ice.', effects: ['2A', '3A', '-30B', '-28B', '-11A', '-51A', '40A', '47A', '78A', '38A', '104A', '97A'] },
+    'F': { name: 'Ice- Frozen Tower', hint1: "This narrow siege tower is made of slippery ice", hint2: 'It seems easy to knock over', effects: ['-1A', '3A', '26B', '-28B', '-30B', '-51A', '40A', '47A','-34A', '78A', '42A', '-43A', '104A', '97A'] },
     'G': { name: 'Rope- Mummy', hint1: 'This creature seems to be wrapped in many strips.', hint2: 'The ropes and fabrics are its defences.', effects: ['2A', '-4A', '-1A', '-5A', '11A', '42A', '-30B', '-37A', '47A', '78A', '38A', '104A', '90A', '106A'] },
     'H': { name: 'Light- Gorgon', hint1: 'The creature turns anyone it faces into stone.', hint2: 'The way it turns you to stone is by looking at you.', effects: ['-7A', '-29B', '-39A', '-40A', '-31A', '12B', '54A', '-37A', '38A', '10B', '51B', '-111A', '111B'] },
     'I': { name: 'Metal- Automaton', hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A', '102A'] },
     'J': { name: 'Sound- Banshee', hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '-13A', '-26A', '14A', '-40A', '50A', '38A', '92A', '94A', '115A', '104A'] },
-    'K': { name: 'Glass- Illusionist', hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11C', '9B', '26B', '7B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A', '104A', ''] },
+    'K': { name: 'Glass- Illusionist', hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11C', '9B', '26B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A', '104A'] },
     'L': { name: 'Pressure- The Press', hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B', '112B'] },
     'M': { name: 'Chemical- The Valley', hint1: 'Something invisible is causing you to get sick.', hint2: 'You must deal with the cloud of chemicals.', effects: ['1A', '28B', '6A', '29B', '39A', '90A', '94A', '115A'] },
     'N': { name: 'Gravity- The Abnormality', hint1: 'The gravitational abnormality is slamming you against the roof, unable to move.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '29A', '39A', '-11A', '-13A', '62A', '102A'] },
-    'O': { name: 'Oil- The Swamp', hint1: 'When you try to cross you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '7A', '11A', '-11C', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A', '94A', '92A'] },
+    'O': { name: 'Oil- The Swamp', hint1: 'When you try to cross you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '11A', '-11C', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A', '94A', '92A'] },
     'P': { name: 'Darkness- Alucard', hint1: 'It is a man in a cape and bat wings.', hint2: 'He is a vampire who has never left the darkness of the indoors.', effects: ['12A', '-37A', '38A', '41A', '40A', '54A', '104A', '111B'] },
-    'Q': { name: 'Man- The Child', hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['20A', '22A', '48A', '-52A', '-7C', '-59B', '-61A', '-49A', '-63B', '-66A', '-68B', '-69A', '-74B', '-78B', '89A', '-91A', '96A', '100B', '104B', '108A', '114A'] },
+    'Q': { name: 'Man- The Child', hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['20A', '22A', '48A', '-52A', '-7B', '-59B', '-61A', '-49A', '-63B', '-66A', '-68B', '-69A', '-74B', '-78B', '89A', '-91A', '96A', '100B', '104B', '108A', '114A'] },
     'R': { name: 'Energy- Terror of the Tides', hint1: 'It takes the form of a deadly Eel.', hint2: 'It attacks using electricity.', effects: ['-4A', '-4B', '-10A', '-35A', '38A', '47A', '40A', '-37A', '104A', '106A', '111B', '114A'] },
-    'S': { name: 'Life- The Exchange', hint1: 'The being tells you that you will need to provide life in order to proceed.', hint2: 'You must give it life itself, or something similar.', effects: ['-8B', '-52A', '33B', '32B', '-68B', '-67B', '89A', '93A', '102B', '103A', '104B', '109A', '110A', '111A', '112A', '113A', '114A'] },
+    'S': { name: 'Life- The Exchange', hint1: 'The being tells you that you will need to provide life in order to proceed.', hint2: 'You must give it life itself, or something similar.', effects: ['-52A', '33B', '32B', '-68B', '-67B', '89A', '93A', '102B', '103A', '104B', '109A', '110A', '111A', '112A', '113A', '114A'] },
     'T': { name: 'Machine- Geared Dragon', hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from the air.', effects: ['-28A', '35A', '35B', '5A', '40A', '-34A', '-39A', '-29B', '-11B', '65A', '90A', '92A', '94A', '111B', '115A'] },
     'U': { name: 'Time- Ritualists', hint1: 'The magicians are about to complete their ritual, which will make it impossible to beat them.', hint2: 'They are putting together a large clock, you will need to disrupt them.', effects: ['-34A', '-31A', '35B', '12B', '14B', '38A', '-104A', '111B', '113A', '97A'] },
     'V': { name: 'Intelligence- Doppelganger', hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-12B', '-54A', '-39A', '-29B', '11C', '36A', '32A', '62A', '37A', '70A', '91A'] },
     'W': { name: 'Love- The Gift', hint1: 'A lover tells you she feels heartbroken, she was expecting to receive something special from her valentine.', hint2: 'She wants to receive a heartfelt present.', effects: ['49A', '32B', '-37A', '64A', '79A', '65C', '54B', '95A', '101A', '114A', '116A'] },
     'X': { name: 'Death- The Tribute', hint1: 'A solemn ceremony is taking place, one might wonder what would be appropriate to do here.', hint2: "An old man requests something to commemorate and honor his friend's memory.", effects: ['77A', '-59A', '-78A', '-17A', '-64A', '-65C', '-33A', '-32A', '49A'] },
-    'Z': { name: 'FINAL ROOM: The Alchemists Endgame', hint1: 'To win the game, enter this room and provide the alchemists most prized creation', hint2: "They say it is a metal that shines with the power of the sun", effects: ['79A'] }
+    'Z': { name: 'FINAL ROOM: The Alchemists Endgame', hint1: 'To win the game, enter this room and provide the alchemists most prized creation. Each completed encounter in the final row will reveal another hint.', hint2: "They say it is a metal that shines with the power of the sun", hint3: "The sun itself is fire in the sky", hint4: "The sky is clouds and air", hint5: "Clouds are steam and air, steam is water and air, try to piece this all together into a metal that shines like the sun", hint6: "You will need to give it gold which can be formed by combining sun and metal",  unlocksHints: ['U', 'W', 'K', 'X'], effects: ['79A'] }
 
 };
 
@@ -922,15 +927,25 @@ const fuseButton = document.getElementById("fuseButton");
 const untapButton = document.getElementById("clearButton");
 const combinationsList = document.getElementById('combinationsList');
 const encounterMessageBox = document.getElementById('encounterMessageBox');
+const elementNameSubtitle = document.getElementById('elementNameSubtitle');
 
 let pawn;
 let selectedReagents = [];
 let currentEncounterCell = null;
+let persistentHalfSuccesses = {}; // Stores half-successes for ALL encounters
 let halfSuccesses = {};
 let locationFailureCounter = {};
 let previousEncounterKey = null;
 let persistentHints = {};
 let moveCounter = 0;
+const defeatedEncounters = new Set();
+let startingElements = [];
+while (startingElements.length < 2) {
+    const randomId = String(Math.floor(Math.random() * 4) + 1);
+    if (!startingElements.includes(randomId)) {
+        startingElements.push(randomId);
+    }
+}
 
 // FIX: MOVED verbLetters to the global scope so handleEncounter can access it
 const verbLetters = ['A', 'B', 'C'];
@@ -949,6 +964,11 @@ function countIncompleteEncounters() {
     return incompleteCount;
 }
 
+// Helper function to check if a card exists anywhere on the board
+function findCardById(id) {
+    // Searches for any .card-slot with the matching data-element-id attribute
+    return document.querySelector(`.card-slot[data-element-id="${id}"]`);
+}
 // Helper to display messages in the dedicated box
 function displayMessage(text, type = 'default') {
     // Clear any previous message item to ensure only one is displayed/fading
@@ -1150,25 +1170,33 @@ function setupCardClickListener(card, id) {
 
         const isSelected = card.classList.contains('selected-reagent');
 
-        // 1. Deselect if already selected
         if (isSelected) {
+            // If the clicked card is already selected, deselect it.
             card.classList.remove('selected-reagent', 'fusable', 'unfusable');
             selectedReagents = selectedReagents.filter(el => el !== id);
         } else {
-            // 2. Select if less than 2 are selected
-            if (selectedReagents.length < 2) {
-                card.classList.add('selected-reagent');
-                selectedReagents.push(id);
-            }
-        }
-
-        // 3. Clear all other highlights when deselecting
-        if (selectedReagents.length < 2) {
-             document.querySelectorAll('.card-slot:not(.tapped)').forEach(c => {
-                if (c !== card) {
-                    c.classList.remove('fusable', 'unfusable');
+            // If the clicked card is NOT selected:
+            if (selectedReagents.length === 2) {
+                // --- THIS IS THE NEW LOGIC ---
+                // 1. Get the ID of the first card that was selected.
+                const idToDeselect = selectedReagents[0];
+                
+                // 2. Find that card's element on the page.
+                const cardToDeselect = document.querySelector(`.card-slot[data-element-id="${idToDeselect}"]`);
+                
+                // 3. Visually deselect it.
+                if (cardToDeselect) {
+                    cardToDeselect.classList.remove('selected-reagent', 'fusable', 'unfusable');
                 }
-            });
+                
+                // 4. Remove it from the beginning of the selection array.
+                selectedReagents.shift(); 
+            }
+            
+            // Whether there were 0, 1, or 2 cards selected before,
+            // now add the newly clicked card to the selection.
+            card.classList.add('selected-reagent');
+            selectedReagents.push(id);
         }
 
         // 4. Recalculate all highlights after selection change
@@ -1200,7 +1228,6 @@ function handleFailure(encounterKey) {
     const currentHintLevel = persistentHints[encounterKey] || 0;
     if (locationFailureCounter[encounterKey] >= 3) {
         persistentHints[encounterKey] = 2; // Unlock level 2
-        displayMessage('Third failure, must try another encounter', 'default');
     } else if (locationFailureCounter[encounterKey] >= 1 && currentHintLevel < 1) {
         persistentHints[encounterKey] = 1; // Unlock level 1
     }
@@ -1209,7 +1236,62 @@ function handleFailure(encounterKey) {
     updateHintBox(encounterKey);
 }
 
+function updatePreview(encounterKey) {
+    if (!encounterKey) {
+        preview.textContent = '♙';
+        previewTitle.textContent = '';
+        elementNameSubtitle.textContent = ''; 
+        preview.style.fontSize = '60px';
+        updateHintBox(null);
+        return;
+    }
 
+    const encounterData = encounterEffects[encounterKey]; 
+    let fullEncounterName = encounterData.name; // e.g., "Earth- Desert Golem"
+    let mainTitle = fullEncounterName;
+    let elementSubtitle = '';
+
+    // Check if the full name contains a dash
+    if (fullEncounterName.includes('-')) {
+        const parts = fullEncounterName.split('-');
+        elementSubtitle = parts[0].trim(); // "Earth"
+        mainTitle = parts.slice(1).join('-').trim(); // "Desert Golem" (handles multiple dashes if present)
+    }
+
+    // 1. Set the main title (e.g., "Desert Golem")
+    previewTitle.textContent = mainTitle; 
+
+    // 2. Set the emoji/icon (logic remains the same)
+    const elementId = currentEncounterCell.dataset.elementId;
+    if (elementId && elementData[elementId]) {
+        preview.textContent = elementData[elementId].emoji;
+    } else {
+        preview.textContent = currentEncounterCell.dataset.icon;
+    }
+    preview.style.fontSize = '60px';
+
+    // 3. Set the element name subtitle (e.g., "Earth")
+    elementNameSubtitle.textContent = elementSubtitle; 
+    
+    // 4. Update the hints
+    updateHintBox(encounterKey);
+}
+
+function initializeDefeatedEncounters() {
+    // Clear the Set, just in case
+    defeatedEncounters.clear(); 
+    
+    // Find all cells that have the 'defeated' class
+    const defeatedCells = document.querySelectorAll('.cell.defeated');
+    
+    // Add the encounter key of each defeated cell to the Set
+    defeatedCells.forEach(cell => {
+        const key = cell.dataset.encounterKey;
+        if (key) {
+            defeatedEncounters.add(key);
+        }
+    });
+}
 
 function handleEncounter(card, verbKey) {
     const encounterCell = currentEncounterCell;
@@ -1241,40 +1323,57 @@ function handleEncounter(card, verbKey) {
         setTimeout(() => {
             encounterCell.classList.remove('dissolve');
             encounterCell.classList.add('defeated');
+            const existingCard = findCardById(rewardId);
+            // Check if the card exists and is in the products row
+            if (existingCard && existingCard.parentElement === row2) {
+                row1.appendChild(existingCard); // Moves the card to the reagents row
+            }
             encounterCell.innerHTML = encounterCell.dataset.icon;
             // Add the rewarded element (will untap or add new)
             addCardToRow(rewardId, row1);
+            defeatedEncounters.add(encounterKey);
+            
+            if (previousEncounterKey === 'Z') { 
+                 updateHintBox('Z');
+            }
             // Reset encounter state (clears preview and selection)
             resetEncounterState();
         }, 500); // 500ms matches the CSS animation duration
 
     } else if (isHalfSuccess) {
-        // HALF SUCCESS
-        const halfSuccessKey = `${encounterKey}-${verbKey}`;
+        // HALF SUCCESS (using the new persistent tracker)
+        const halfSuccessKey = `-${verbKey}`; // e.g., "-4A"
 
-        if (!halfSuccesses[halfSuccessKey]) {
-            // New unique half success
-            halfSuccesses[halfSuccessKey] = true;
-            locationFailureCounter[encounterKey] = 0;
+        // Ensure a Set exists for this specific encounter to store its unique half-successes
+        if (!persistentHalfSuccesses[encounterKey]) {
+            persistentHalfSuccesses[encounterKey] = new Set();
+        }
 
-            const currentEncounterHalfSuccesses = Object.keys(halfSuccesses).filter(key => key.startsWith(encounterKey));
+        // Check if this specific half-success verb has already been used FOR THIS ENCOUNTER
+        if (!persistentHalfSuccesses[encounterKey].has(halfSuccessKey)) {
+            // This is a NEW, unique half-success
+            persistentHalfSuccesses[encounterKey].add(halfSuccessKey);
+            locationFailureCounter[encounterKey] = 0; // Reset failure count
 
-            if (currentEncounterHalfSuccesses.length >= 2) {
+            // Check if this new success makes the total count 2 or more
+            if (persistentHalfSuccesses[encounterKey].size >= 2) {
                 // TWO UNIQUE HALF SUCCESSES = FULL SUCCESS
                 displayMessage('TWO HALF SUCCESSES', 'success');
 
-                // Start dissolve animation and mark as defeated after it's done
                 encounterCell.classList.add('dissolve');
                 setTimeout(() => {
                     encounterCell.classList.remove('dissolve');
                     encounterCell.classList.add('defeated');
                     encounterCell.innerHTML = encounterCell.dataset.icon;
+                    defeatedEncounters.add(encounterKey);
                     addCardToRow(rewardId, row1);
+                    refreshZHintsIfSelected();
                     resetEncounterState();
-                }, 500); // 500ms matches the CSS animation duration
+                }, 500);
 
             } else {
-                // First half success
+                // This is the FIRST unique half-success.
+                // Your original display logic works perfectly here.
                 let counter = encounterCell.querySelector('.half-success-counter');
                 if (!counter) {
                     counter = document.createElement('div');
@@ -1285,11 +1384,10 @@ function handleEncounter(card, verbKey) {
                 displayMessage('HALF SUCCESS', 'warning');
             }
         } else {
+             // This verb has already been used for this encounter
              displayMessage('VERB ALREADY USED', 'warning');
-             // Already used verb is a failure for the 3-strike rule
              handleFailure(encounterKey);
         }
-
     } else {
         // FAILURE
         handleFailure(encounterKey);
@@ -1301,24 +1399,66 @@ function updateHintBox(encounterKey) {
     if (!encounterKey) return;
 
     const encounterData = encounterEffects[encounterKey];
-    const hintLevel = persistentHints[encounterKey] || 0; // Get the unlocked hint level
+    
+    // --- SPECIAL LOGIC FOR ENCOUNTER 'Z' ---
+    if (encounterKey === 'Z') {
+        let hintsToShow = [];
+        let unlockCount = 0;
 
-    // Display hints based on the permanent hint level
-    if (hintLevel >= 1 && encounterData.hint1) {
-        hintBox.innerHTML = encounterData.hint1;
+        // 1. Define the specific unlocker keys for the final row
+        const unlockers = ['U', 'W', 'K', 'X']; 
+
+        // 2. Count how many of those unlockers are 'defeated' 
+        //    by checking the global defeatedEncounters Set.
+        unlockers.forEach(key => {
+            if (defeatedEncounters.has(key)) {
+                unlockCount++;
+            }
+        });
+        console.log(unlockers, unlockCount);
+        
+        // 3. Determine the maximum number of hints to show.
+
+        const maxHints = unlockCount + 1;
+
+        // 4. Iterate sequentially from Hint 1 up to maxHints
+        for (let i = 1; i <= maxHints; i++) {
+            const hintKey = `hint${i}`;
+            const hintText = encounterData[hintKey];
+            
+            if (hintText) {
+                // Removed numbering
+                hintsToShow.push(`<span>${hintText}</span>`);
+            } else {
+                break;
+            }
+        }
+        
+        // Display all accumulated hints
+        hintsToShow.forEach(hintHTML => {
+            hintBox.innerHTML += hintHTML;
+        });
+        
+        return; 
     }
+    // --- END SPECIAL LOGIC FOR ENCOUNTER 'Z' ---
+
+    // --- DEFAULT LOGIC FOR ALL OTHER ENCOUNTERS ---
+    
+    const hintLevel = persistentHints[encounterKey] || 0; 
+
+    // Hint 1:
+    if (hintLevel >= 0 && encounterData.hint1) {
+        hintBox.innerHTML = `<span>${encounterData.hint1}</span>`;
+    }
+    // Hint 2:
     if (hintLevel >= 2 && encounterData.hint2) {
         hintBox.innerHTML += `<span>${encounterData.hint2}</span>`;
     }
 }
-
 function resetEncounterState() {
     currentEncounterCell = null;
-    halfSuccesses = {};
-    preview.textContent = '♙';
-    previewTitle.textContent = '';
-    hintBox.textContent = ''; // Clear hint box
-    preview.style.fontSize = '60px'; // Set back to default size for the pawn
+    updatePreview(null); // This clears all preview elements back to the pawn
     document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
 }
 
@@ -1344,11 +1484,13 @@ function hideWinScreen() {
 // --- INITIALIZATION ---
 
 const gridIconsMap = [
-   { icon: '⏱️', id: '35', key: 'U' }, { icon: '🧪', id: '28', key: 'M' }, { icon: '🧠', id: '36', key: 'V' }, { icon: '⚙️', id: '34', key: 'T' }, { icon: '💀', id: '38', key: 'X' },
-   { icon: '🛢️', id: '30', key: 'O' }, { icon: '⚡', id: '5', key: 'R' },  { icon: '💨', id: '1', key: 'D' },  { icon: '❄️', id: '9', key: 'F' },  { icon: '🤜', id: '27', key: 'L' },
-   { icon: '⬛', id: '31', key: 'P' }, { icon: '🔥', id: '2', key: 'A' },  { icon: '🔚', id: null, key: 'Z' },  { icon: '💧', id: '4', key: 'C' },  { icon: '🧍', id: '32', key: 'Q' },
-   { icon: '🔮', id: '26', key: 'H' }, { icon: '🌿', id: '8', key: 'E' },  { icon: '🌍', id: '3', key: 'B' },  { icon: '⛓️', id: '11', key: 'G' }, { icon: '⬇️', id: '29', key: 'N' },
-   { icon: '🧬', id: '33', key: 'S' }, { icon: '❤️', id: '37', key: 'W' }, { icon: '🔩', id: '13', key: 'I' }, { icon: '🔊', id: '14', key: 'J' }, { icon: '💡', id: '12', key: 'K' }
+   { icon: '🔥', id: '2', key: 'A' },  { icon: '💧', id: '4', key: 'C' }, { icon: '🌍', id: '3', key: 'B' }, { icon: '💨', id: '1', key: 'D' },
+   { icon: '❄️', id: '9', key: 'F' }, { icon: '⚙️', id: '34', key: 'T' }, { icon: '🌿', id: '8', key: 'E' }, { icon: '⛓️', id: '11', key: 'G' },
+   { icon: '🛢️', id: '30', key: 'O' },  { icon: '🧪', id: '28', key: 'M' }, { icon: '🧠', id: '36', key: 'V' }, { icon: '⚡', id: '5', key: 'R' }, { icon: '🔩', id: '13', key: 'I' },
+   { icon: '⬛', id: '31', key: 'P' }, { icon: '🧍', id: '32', key: 'Q' }, { icon: '🧬', id: '33', key: 'S' },  { icon: '🤜', id: '27', key: 'L' },
+   { icon: '💡', id: '12', key: 'H' }, { icon: '⬇️', id: '29', key: 'N' }, { icon: '🔊', id: '14', key: 'J' }, { icon: '⏱️', id: '35', key: 'U' }, 
+   { icon: '❤️', id: '37', key: 'W' }, { icon: '🔮', id: '26', key: 'K' }, { icon: '💀', id: '38', key: 'X' }, 
+   { icon: '🔚', id: null, key: 'Z' }
 ];
 
 for(let r=0;r<5;r++){
@@ -1380,8 +1522,8 @@ for(let r=0;r<5;r++){
 
             if (isBlockingActive) {
                 // 2. If the block is active, perform the 3x failure check
-                if (locationFailureCounter[data.key] >= 3 && currentEncounterCell && currentEncounterCell.dataset.encounterKey === data.key) {
-                    displayMessage('BLOCKED! Choose a different location first.', 'default');
+                if (locationFailureCounter[data.key] >= 4 && currentEncounterCell && currentEncounterCell.dataset.encounterKey === data.key) {
+                    displayMessage('Fourth failure in a row, must try another encounter!', 'default');
                     return;
                 }
             }
@@ -1395,8 +1537,6 @@ for(let r=0;r<5;r++){
             // Clear selection for all cells
             document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
             cell.classList.add("selected");
-document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
-            cell.classList.add("selected");
             // Set the new encounter
             currentEncounterCell = cell;
             previousEncounterKey = data.key;
@@ -1404,13 +1544,9 @@ document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
             // Reset half successes for the NEW encounter
             halfSuccesses = {};
 
-            // Update preview with encounter title and emoji
-            previewTitle.textContent = encounter.name;
-            preview.textContent = data.icon;
-            preview.style.fontSize = '60px';
-
-            // Update hint box immediately (will show hint based on existing failure count or none)
-            updateHintBox(data.key);
+            // <--- THE CRITICAL FIX: CALL THE NEW FUNCTION --->
+            updatePreview(data.key); 
+            // <--- THE CRITICAL FIX: END --->
 
             // Update pawn position
             if (pawn) pawn.remove();
@@ -1418,6 +1554,7 @@ document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
             pawn.className="pawn";
             pawn.textContent="♙";
             cell.appendChild(pawn);
+
         });
     } else {
         cell.textContent = '';
@@ -1438,14 +1575,14 @@ document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
 }
 
 // Display initial reagent cards (Earth and Air)
-const initialReagents = ['3', '1'];
-initialReagents.forEach(id => {
+startingElements.forEach(id => {
     addCardToRow(id, row1);
 });
 
 // Initialize combinations list
 updateCombinationsList();
 
+initializeDefeatedEncounters();
 
 // Event listeners for buttons
 fuseButton.addEventListener('click', () => {
@@ -1462,8 +1599,9 @@ fuseButton.addEventListener('click', () => {
     // Create a sorted copy for the key, preserving the original `selectedReagents` array order
     const sortedKey = [...selectedReagents].sort((a, b) => a - b).join('+');
     const product = fuseMap[sortedKey];
-
-    if (product) {
+    const elementAlreadyExists = findCardById(product);
+    
+    if (product && !elementAlreadyExists) {
         // SUCCESSFUL FUSION
         const productAdded = addCardToRow(product, row2, true); // Add to row2
         if (productAdded) {
@@ -1480,6 +1618,8 @@ fuseButton.addEventListener('click', () => {
         }
     } else {
         // FAILED FUSION: NO REACTION - NO TAP
+        const elementName = elementData[product].name;
+        displayMessage(`Element "${elementName}" already obtained`, 'warning');
     }
 
     // 2. Clear selection and highlighting after attempt (success or failure)
