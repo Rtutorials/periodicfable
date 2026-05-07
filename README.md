@@ -27,6 +27,5 @@ Reagents wrap to better make use of space
 Save and reset game
 Maybe warn player that they can't win that room with what they have, or unlock rooms when they are possible
 UI Improvements and bug fixes
-Basic art for each encounter
 Basic website elements or security (contact, privacy, etc)
 Set 2 and 3 of encounters (to be provided later), Scenario 2,3,4,5 of endgame rooms (to be provided later), randomized start.
