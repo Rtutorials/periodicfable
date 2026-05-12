@@ -33,27 +33,34 @@
   --color-orange: #FFA500; /* Orange */
   --color-purple: #800080; /* Purple */
   --color-cyan: #00FFFF;   /* Cyan */
+  --map-w: clamp(280px, 30vw, 350px);
+  --preview-w: clamp(300px, 30vw, 360px);
+  --sidebar-w: clamp(280px, 26vw, 360px);
+  /* Second grid column: rules panel width, or 0 when hidden (keeps column 1 width math stable) */
+  --rules-track: minmax(260px, var(--sidebar-w));
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   /* FONT REVERTED: Simple sans-serif font */
-  font-family: Arial, sans-serif;
+  font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
   background:linear-gradient(180deg,#050306 0%,var(--bg) 60%);
   color:#efe9f2;
-  /* Corrected Grid Layout: Main content | Sidebar (right) */
-  /* Main area is now centered and flexible, Sidebar is fixed */
-  grid-template-columns: 1fr minmax(650px, 900px) 260px 1fr;
+  /* Main column shares remaining space; rules track collapses to 0 when closed */
+  grid-template-columns: minmax(0, 1fr) var(--rules-track);
   grid-template-rows:1fr; /* Single row spanning the height */
-  height:100vh;
-  gap:10px;
-  padding:10px;
+  min-height:100vh;
+  min-height:100dvh;
+  gap:14px;
+  padding:16px 0 16px 32px;
   display: grid;
-  justify-content: center; /* Center the whole grid system */
+  justify-content: start; /* Use left space more efficiently */
 }
 /* SIDEBAR (Instructions Column) MOVED TO COLUMN 3 - It will now show up on the right */
 .sidebar{
-  grid-column:3/ -1; /* Fixed position */
+  grid-column:2/3; /* Rules panel column */
   grid-row:1/2;
+  position: relative;
+  z-index: 2100;
   background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);
   border-radius:var(--radius);
   padding:15px;
@@ -63,6 +70,8 @@ body{
   flex-direction:column;
   gap:15px;
   overflow-y:auto;
+  justify-self:end;
+  width:min(100vw, var(--sidebar-w));
 }
 .logo{
   width:50px;height:50px;
@@ -70,7 +79,7 @@ body{
   background:conic-gradient(from 200deg at 50% 50%, rgba(201,168,74,0.2),rgba(255,255,255,0.03));
   display:flex;align-items:center;justify-content:center;
   /* FONT REVERTED: Using standard serif/monospace for stylized elements */
-  font-weight:800;font-family: 'Courier New', monospace;
+  font-weight:800;font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
   font-size:18px;color:var(--accent);
   box-shadow:var(--glow);
 }
@@ -83,6 +92,21 @@ p.subtitle{color:var(--muted);font-size:12px}
     color:var(--muted);
     line-height:1.3;
     overflow-y: auto;
+    overflow-x: hidden;
+}
+.rules-gif-frame {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
+    border-radius: 8px;
+}
+.rules-gif {
+    display: block;
+    height: auto;
+    max-height: none;
+    max-width: none;
+    margin-left: 50%;
+    transform: translateX(-50%);
 }
 
 /* --- Past Combinations Hover Text (Moved under buttons) --- */
@@ -140,24 +164,204 @@ p.subtitle{color:var(--muted);font-size:12px}
 
 /* MAIN AREA FOR MAP/PREVIEW/CARDS (Column 2) */
 .main{
-  grid-column:2/3; /* Center column */
+  grid-column:1/2; /* Main game column */
   grid-row: 1/2;
   display:flex;
   flex-direction:column;
-  align-items:left; /* Center all contents horizontally */
+  align-items:flex-start; /* stretch children via align-self below */
+  width: 100%;
+  min-width: 0; /* Safari/grid: allow shrinking so inner flex rows stay horizontal */
   gap:10px;
   padding-top: 10px;
-  overflow-y: auto; /* Allow scrolling if window is too short */
+  overflow-y: auto; /* Allow vertical scrolling if needed */
+  overflow-x: hidden; /* Avoid ugly horizontal scroll bar */
+}
+
+/* Full-width main sections — without this, flex-start + intrinsic sizing makes .cards
+   shrink to ~one card wide in Safari so reagents stack vertically */
+.main > .map-and-preview-container,
+.main > .cards {
+  align-self: stretch;
+  width: 100%;
+  min-width: 0;
+}
+
+/* --- Rules column toggle (close/open) --- */
+.rules-header{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap:10px;
+}
+.rules-close-btn{
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+.rules-close-btn:hover{
+  border-color: rgba(201,168,74,0.35);
+  color: #fce38a;
+}
+
+.rules-open-btn{
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 2000;
+  background: var(--panel);
+  border: 1px solid rgba(201,168,74,0.35);
+  color: var(--accent);
+  border-radius: 12px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 15px;
+  min-height: 44px;
+  display: none;
+  box-shadow: var(--glow);
+}
+.rules-open-btn:hover{
+  background: rgba(255,255,255,0.03);
+}
+.floating-controls{
+  position: fixed;
+  top: auto;
+  bottom: 14px;
+  right: 14px;
+  z-index: 2000;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.floating-controls .rules-open-btn{
+  position: static;
+}
+.floating-reset-btn{
+  background:rgba(120, 20, 28, 0.88);
+  color:#ffd9dd;
+  border:1px solid rgba(255, 90, 105, 0.35);
+  border-radius:12px;
+  padding:12px 14px;
+  cursor:pointer;
+  font-weight:800;
+  font-size:15px;
+  min-height:44px;
+  box-shadow:var(--glow);
+}
+.floating-reset-btn:hover{
+  background:rgba(150, 28, 38, 0.96);
+  border-color:rgba(255, 120, 135, 0.6);
+}
+
+body.rules-closed .sidebar{
+  display:none;
+}
+body:not(.rules-closed) .floating-controls{
+  top: auto;
+  bottom: 14px;
+  right: 14px;
+}
+body:not(.rules-closed) .floating-reset-btn{
+  display:none;
+}
+body.rules-closed .rules-open-btn{
+  display:block;
+}
+body.rules-closed{
+  --rules-track: 0px;
+}
+body.rules-closed .main{
+  grid-column: 1 / 2;
+}
+
+/* On smaller windows, keep the floating Rules button
+   away from the encounter panel area. */
+@media (max-width: 1100px) {
+  .floating-controls{
+    top: auto;
+    bottom: 14px;
+    right: 14px;
+  }
+}
+
+/* Responsive: avoid horizontal scroll by stacking on narrow widths */
+@media (max-width: 1200px) {
+  body{
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    justify-content: stretch;
+    padding: 12px 12px 12px 14px;
+  }
+  .main{
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .sidebar{
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    max-height: 40vh;
+  }
+  .map-and-preview-container{
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+  .grid{
+    max-width: min(360px, 100%);
+  }
+  .preview-and-message-wrap{
+    width: 100%;
+    max-width: 420px;
+  }
+  .preview{
+    width: 100%;
+    min-height: 320px;
+  }
+  .cards,
+  .control-panel{
+    max-width: 100%;
+  }
+  .control-panel{
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    padding: 8px 0 6px;
+    background: linear-gradient(180deg, rgba(8,5,9,0), rgba(8,5,9,0.92) 40%);
+  }
+  .btn{
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+  .card-slot .action-btn{
+    padding: 4px 5px;
+    font-size: 0.8em;
+  }
+  .buttons{
+    width: 100%;
+    gap: 10px;
+  }
 }
 
 /* CONTAINER FOR MAP AND PREVIEW (CENTERED) */
 .map-and-preview-container {
     display:grid;
     /* Map (350px) | Preview (300px). Small gap. */
-    grid-template-columns: 350px 300px;
+    grid-template-columns: var(--map-w) var(--preview-w);
     gap: 30px;
     align-items:flex-start; /* Aligns map and preview top-to-top */
-    margin-bottom: 20px;
+    margin-bottom: 6px;
 }
 
 .grid-wrap{
@@ -181,7 +385,7 @@ p.subtitle{color:var(--muted);font-size:12px}
   grid-template-columns:repeat(5,1fr);
   gap:6px;
   width:100%;
-  max-width:300px;
+  max-width:var(--map-w);
 }
 .cell{
   aspect-ratio:1/1;
@@ -245,43 +449,94 @@ p.subtitle{color:var(--muted);font-size:12px}
     gap: 10px;
     width: 300px;
     position: relative;
+    overflow: visible;
 }
 /* Existing preview styles */
 .preview{
-  width:300px;height:300px;
+  width:var(--preview-w);
+  min-height: 350px;
+  height: auto;
   border-radius:var(--radius);
   border:1px solid rgba(255,255,255,0.04);
   background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(255,255,255,0.005));
   display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
+  align-items:center;
+  justify-content:flex-start;
+  gap: 4px;
   padding: 10px; /* Add some padding */
+  overflow: hidden; /* Keep every child visually contained */
 }
 .preview-title {
-    font-size: 1.5rem; 
+    font-size: 1.2rem; 
     color: var(--accent);
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 0;
+    line-height: 1.2;
+    font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+.selected-encounter-hint{
+    font-size: 8px;
+    color: rgba(239,233,242,0.3);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+.preview-art {
+    width: 100%;
+    max-width: 100%;
+    height: 185px;
+    object-fit: contain;
+    object-position: center;
+    flex: 0 0 auto;
+    border-radius: 0;
+    border: none;
+    margin-bottom: 8px;
+    background: transparent;
+    display: none;
 }
 .preview .big{
-  font-size:60px;
+  font-size:10px;
   /* FONT REVERTED: Using standard serif/monospace for stylized elements */
-  font-family: 'Courier New', monospace;
+  font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
   color:var(--accent);
+  flex: 0 0 auto;
+  margin-top: 0;
+  margin-bottom: -6px;
+  line-height: 1;
+  transform: scale(0.72);
+  transform-origin: center top;
 }
 
-/* NEW: Encounter Message Box Styling */
+@keyframes successPulse {
+    0% { box-shadow: 0 0 0 rgba(76,175,80,0); }
+    30% { box-shadow: 0 0 18px rgba(76,175,80,0.55); }
+    100% { box-shadow: 0 0 0 rgba(76,175,80,0); }
+}
+@keyframes failureShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-3px); }
+    40% { transform: translateX(3px); }
+    60% { transform: translateX(-2px); }
+    80% { transform: translateX(2px); }
+}
+.feedback-success { animation: successPulse 420ms ease-out; }
+.feedback-failure { animation: failureShake 320ms ease-out; }
+
+/* NEW: Encounter Message Box Styling - in normal flow so messages are never clipped (Safari/Main overflow) */
 .encounter-message-box {
     width: 100%;
-    min-height: 80px;
-    /* ABSOLUTE POSITIONING to free up vertical space */
-    position: absolute;
-    bottom: -90px; /* Position below the preview box */
-    left: 0;
+    min-height: 0;
+    position: relative;
+    left: auto;
+    bottom: auto;
+    flex-shrink: 0;
 
     background: transparent;
     border: none;
     border-radius: var(--radius);
-    padding: 10px;
+    padding: 0 4px;
     box-shadow: none;
     display: flex;
     flex-direction: column;
@@ -293,13 +548,15 @@ p.subtitle{color:var(--muted);font-size:12px}
 /* Hint Box for persistent hints - Updated for Second Hint line break */
 .hint-box {
     width: 100%;
-    font-size: 14px;
+    font-size: 12px;
     color: var(--muted);
     text-align: center;
     line-height: 1.3;
     padding: 5px 0;
-    margin-top: 12px; /* Spacing between title and hints */
-    margin-bottom: 20px;
+    margin-top: 4px;
+    margin-bottom: 0;
+    max-height: 180px;
+    overflow-y: auto;
 }
 .hint-box span {
     display: block; /* Force the span (Second Hint) onto a new line */
@@ -341,17 +598,18 @@ p.subtitle{color:var(--muted);font-size:12px}
 }
 
 .element-name-subtitle {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--muted);
     font-style: italic;
     
     /* --- CHANGES HERE --- */
-    font-family: Georgia, 'Times New Roman', serif; /* Changed to a classic serif font */
-    margin-top: 3px; /* Added 5px margin to push it down from the emoji (was -10px) */
+    font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+    margin-top: -12px;
     opacity: 0.5; 
     
-    margin-bottom: 5px;
+    margin-bottom: 0;
     text-align: center;
+    line-height: 1;
 }
 
 @keyframes fadeout {
@@ -363,29 +621,38 @@ p.subtitle{color:var(--muted);font-size:12px}
 
 /* CONTAINER FOR CARDS */
 .cards{
-  width: 650px; /* Match width of map/preview container */
+  width: 100%;
+  max-width: 100%; /* Let wrapping rows use full main width */
   display:flex;
   flex-direction:column;
   gap:6px;
-  align-items: flex-start; /* Align card rows to the left of the 650px container */
+  align-items: flex-start;
   margin-top: 10px;
 }
+.cards > div {
+  width: 100%;
+  min-width: 0;
+}
 
-/* DYNAMIC CARD ROW */
+/* DYNAMIC CARD ROW — wrap to extra rows; never clip cards */
 .row {
-    width: 100%; /* Use full width of .cards container (650px) */
-    display:grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 90px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 4px;
     padding: 5px 0;
-    overflow-x: auto;
-    height: 130px; /* Reduced height */
+    overflow: visible;
+    min-height: 130px;
     justify-content: flex-start;
+    align-items: flex-start;
 }
 
 .card-slot{
+  flex: 0 0 90px;
   height: 120px; /* Reduced height */
+  min-height: 120px;
+  max-height: 120px;
   background:var(--card);
   border-radius:8px;
   border:1px solid rgba(255,255,255,0.05);
@@ -397,6 +664,7 @@ p.subtitle{color:var(--muted);font-size:12px}
   cursor:pointer;
   position:relative;
   transition:border .15s, box-shadow .15s, transform .2s, opacity .3s;
+  overflow: hidden; /* Safari: prevent per-card scrollbars on product cards */
 }
 
 .terminal-dot {
@@ -409,6 +677,30 @@ p.subtitle{color:var(--muted);font-size:12px}
     line-height: 0; /* Prevents the span from affecting card height */
     pointer-events: none; /* Ensures dot doesn't block click events on the card */
     text-shadow: 0 0 2px var(--bg); /* Optional: helps the dot stand out */
+    z-index: 1;
+}
+.fusion-count-badge {
+    position: absolute;
+    top: 5px;
+    right: 6px;
+    min-width: 14px;
+    text-align: right;
+    color: rgba(190, 145, 215, 0.36);
+    font-size: 10px;
+    font-style: italic;
+    font-weight: 600;
+    line-height: 1;
+    opacity: 0;
+    pointer-events: none;
+    text-shadow: 0 0 5px rgba(8, 5, 9, 0.75);
+    transition: opacity .15s ease;
+    z-index: 2;
+}
+.card-slot:hover .fusion-count-badge {
+    opacity: 1;
+}
+.card-slot:hover .terminal-dot {
+    opacity: 0;
 }
 /* 1. DEFAULT HOVER (ONLY WHEN NOT SELECTED OR TAPPED) */
 .card-slot:hover:not(.selected-reagent):not(.tapped){
@@ -463,7 +755,7 @@ p.subtitle{color:var(--muted);font-size:12px}
 
 /* Element Name Label Styling */
 .card-slot .label {
-  font-size: 0.7em;
+  font-size: 0.78em;
   font-weight: bold;
   /* Dynamic color set by JS: var(--label-color) */
   text-align: center;
@@ -485,8 +777,8 @@ p.subtitle{color:var(--muted);font-size:12px}
 }
 
 .card-slot .emoji {
-    font-size: 1.6em; /* Reduced size */
-    margin-top: 1px;
+    font-size: 1.75em;
+    margin-top: 4px;
     margin-bottom: 2px;
     flex-grow: 0;
     display: flex;
@@ -501,6 +793,7 @@ p.subtitle{color:var(--muted);font-size:12px}
     padding: 3px 0;
     border-top: 1px dashed rgba(255,255,255,0.1);
     margin-top: auto;
+    overflow: hidden; /* Keep verb list clipped inside the card */
 }
 .card-slot .action-btn {
     font-size: 0.75em;
@@ -521,14 +814,16 @@ p.subtitle{color:var(--muted);font-size:12px}
 
 /* NEW BUTTONS CONTAINER UNDER THE MAP/PREVIEW */
 .control-panel{
-    width: 650px; /* Match width of map/preview container */
+    align-self: flex-start;
+    width: calc(var(--map-w) + var(--preview-w) + 30px);
+    max-width: 100%; /* Align with the fixed map + encounter area, not the expanded rules-free space */
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
     /* Ensure the control panel is visually separate from the cards */
     margin-bottom: 0px;
-    margin-top: -10px;
+    margin-top: -14px;
 }
 .buttons{
     display:flex;
@@ -633,11 +928,41 @@ p.subtitle{color:var(--muted);font-size:12px}
 .btn.silver{background:#444;color:#eee}
 .btn.silver:hover{background:#666}
 
+/* Keep game layout inline and stable at all widths. */
+@media (max-width: 900px) {
+  :root {
+    --sidebar-w: 220px;
+  }
+  body {
+    padding: 6px;
+    gap: 8px;
+  }
+  .map-and-preview-container,
+  .cards,
+  .control-panel {
+    min-width: 580px; /* Preserve composition and avoid hidden/cut content */
+  }
+  .preview-art {
+    height: 160px;
+  }
+  .preview {
+    min-height: 350px;
+    height: auto;
+  }
+}
+
 </style>
 </head>
 <body>
+<div class="floating-controls">
+  <button id="resetGameBtn" class="floating-reset-btn" type="button">Reset Game</button>
+  <button id="rulesOpenBtn" class="rules-open-btn" type="button" aria-label="Open rules">Rules</button>
+</div>
 <div class="sidebar">
-  <h1>HOW TO PLAY</h1>
+  <div class="rules-header">
+    <h1>HOW TO PLAY</h1>
+    <button class="rules-close-btn" id="rulesCloseBtn" type="button" aria-label="Close rules">×</button>
+  </div>
   <p class="subtitle">    
   <div class="instructions">  Welcome to Periodic Fable (name subject to change), a solo alchemy puzzle game. In this game you are trying to use elements to clear encounters, gain rewards, and fuse together elements to make new ones. In the same style of games such as Little Alchemy and Doodle God, you can combine two elements to make a new one, for example Fire + Earth would give you Rock. The goal of the first scenario is to create Gold in the final room. 
     <br>
@@ -654,7 +979,7 @@ p.subtitle{color:var(--muted);font-size:12px}
     </p>
     <br>
     <p>
-        If you choose a verb that wins the encounter, a “SUCCESS” message will appear, you receive that element as a permanent reward, and the encounter is removed from the map. You will receive a hint on the first and third failures. If you fail four times in a row, you must leave and try another encounter before you are allowed to try again. It is also possible to get a “half-success” for verbs that are partially effective. Two half-successes equal one success.
+        If you choose a verb that wins the encounter, a “SUCCESS” message will appear, you receive that element as a permanent reward, and the encounter is removed from the map. You will receive a hint on the third failure. If you fail four times in a row, you must leave and try another encounter before you are allowed to try again. It is also possible to get a “half-success” for verbs that are partially effective. Two half-successes equal one success.
     </p>
     <br>
     <strong>Fusing Elements</strong>
@@ -669,7 +994,9 @@ p.subtitle{color:var(--muted);font-size:12px}
         If you want your deactivated elements back, you can click “Untap All.” This reactivates all your elements but gets rid of all the new elements you have created in the products row. Some elements with a dot symbol in the top right are final products and cannot be used to make any new fusions.
     </p>
     <br>
-    <img src="fuse_example.gif" alt="Example of two cards fusing" class="rules-gif">
+    <div class="rules-gif-frame">
+        <img src="fuse_example.gif" alt="Example of two cards fusing" class="rules-gif">
+    </div>
     <br>
 </div>
 </div>
@@ -682,10 +1009,12 @@ p.subtitle{color:var(--muted);font-size:12px}
 
     <div class="preview-and-message-wrap">
         <div class="preview">
+            <div class="selected-encounter-hint" id="selectedEncounterHint"></div>
             <div class="preview-title" id="previewTitle"></div>
-            <div class="hint-box" id="hintBox"></div>
+            <img class="preview-art" id="previewArt" alt="">
             <div class="big" id="preview">♙</div>
             <div class="element-name-subtitle" id="elementNameSubtitle"></div> 
+            <div class="hint-box" id="hintBox"></div>
         </div>
       <div class="encounter-message-box" id="encounterMessageBox"></div>
     </div>
@@ -803,7 +1132,7 @@ const elementData = {
     '50': { name: 'Space', emoji: '🌌', verbs: [], terminal: false },
     '51': { name: 'Sun', emoji: '☀️', verbs: ['Heat', 'Daze'], terminal: false },
     '52': { name: 'Animal', emoji: '🐾', verbs: ['Claw'], terminal: false },
-    '53': { name: 'Disease', emoji: '🦠', verbs: ['Infect'], terminal: false },
+    '53': { name: 'Disease', emoji: '🦠', verbs: ['Infect'], terminal: true },
     '54': { name: 'Mirror', emoji: '🪞', verbs: ['Reflect', 'Gift'], terminal: true },
     '55': { name: 'Pepper', emoji: '🌶️', verbs: ['Irritate', 'Gift'], terminal: true },
     '56': { name: 'Veggies', emoji: '🥕', verbs: ['Throw', 'Gift'], terminal: true },
@@ -812,7 +1141,7 @@ const elementData = {
     '59': { name: 'Flute', emoji: '🪈', verbs: ['Perform', 'Gift'], terminal: true },
     '60': { name: 'Bell', emoji: '🔔', verbs: ['Ring', 'Gift'], terminal: true },
     '61': { name: 'Doll', emoji: '🎎', verbs: ['Gift'], terminal: true },
-    '62': { name: 'Car', emoji: '🚗', verbs: ['Transport'], terminal: true },
+    '62': { name: 'Car', emoji: '🚗', verbs: ['Transport'], terminal: false },
     '63': { name: 'Toy', emoji: '🧸', verbs: ['Throw', 'Gift'], terminal: false },
     '64': { name: 'Rose', emoji: '🌹', verbs: ['Gift'], terminal: true },
     '65': { name: 'Diamond', emoji: '💎', verbs: ['Throw', 'Wall', 'Gift'], terminal: true },
@@ -820,14 +1149,14 @@ const elementData = {
     '67': { name: 'Spider', emoji: '🕷️', verbs: ['Throw', 'Gift'], terminal: false },
     '68': { name: 'Dog', emoji: '🐕', verbs: ['Fetch', 'Gift'], terminal: true },
     '69': { name: 'Clock', emoji: '🕰️', verbs: ['Gift'], terminal: true },
-    '70': { name: 'Bridge', emoji: '🌉', verbs: ['Cross'], terminal: true },
+    '70': { name: 'Bridge', emoji: '🌉', verbs: ['Traverse'], terminal: true },
     '71': { name: 'Refrigerator', emoji: '🧊', verbs: ['Refrigerate', 'Gift'], terminal: true },
     '72': { name: 'Can', emoji: '🥫', verbs: ['Encase', 'Gift'], terminal: true },
     '73': { name: 'Egg', emoji: '🥚', verbs: ['Throw', 'Gift'], terminal: false },
     '74': { name: 'Ship', emoji: '⛵', verbs: ['Sail', 'Gift'], terminal: false },
     '75': { name: 'Sunglasses', emoji: '🕶️', verbs: ['Wear', 'Gift'], terminal: true },
     '76': { name: 'Forest', emoji: '🌲', verbs: ['Grow'], terminal: true },
-    '77': { name: 'Statue', emoji: '🗽', verbs: ['Gift'], terminal: true },
+    '77': { name: 'Statue', emoji: '🗽', verbs: ['Gift'], terminal: false },
     '78': { name: 'Fireworks', emoji: '🎆', verbs: ['Ignite', 'Gift'], terminal: true },
     '79': { name: 'Gold', emoji: '🏅', verbs: ['Gift'], terminal: true },
     '80': { name: 'Police', emoji: '👮', verbs: ['Fight', 'Gift'], terminal: true },
@@ -864,40 +1193,40 @@ const elementData = {
 };
 
 const fuseList = [
-    '1 + 2 = 5', '1 + 3 = 10', '1 + 4 = 9', '1 + 5 = 27', '1 + 6 = 46', '1 + 7 = 10', '1 + 8 = 11', '1 + 9 = 18', '1 + 10 = 39', '1 + 26 = 59', '1 + 27 = 14', '1 + 28 = 53', '1 + 29 = 50', '1 + 31 = 50', '1 + 34 = 71', '1 + 38 = 53', '1 + 39 = 46', '1 + 46 = 39', '1 + 50 = 39', '1 + 62 = 94',
+    '1 + 2 = 5', '1 + 3 = 10', '1 + 4 = 9', '1 + 5 = 27', '1 + 6 = 46', '1 + 7 = 10', '1 + 8 = 11', '1 + 9 = 18', '1 + 10 = 46', '1 + 11 = 70', '1 + 26 = 59', '1 + 27 = 14', '1 + 28 = 53', '1 + 29 = 50', '1 + 31 = 50', '1 + 34 = 71', '1 + 38 = 53', '1 + 39 = 46', '1 + 46 = 39', '1 + 50 = 39', '1 + 62 = 94',
     '2 + 3 = 7', '2 + 4 = 6', '2 + 5 = 12', '2 + 8 = 55', '2 + 9 = 4', '2 + 10 = 26', '2 + 11 = 10', '2 + 12 = 78', '2 + 13 = 12', '2 + 17 = 5', '2 + 26 = 65', '2 + 28 = 5', '2 + 29 = 51', '2 + 30 = 42', '2 + 31 = 12', '2 + 32 = 38', '2 + 33 = 37', '2 + 34 = 43', '2 + 35 = 10', '2 + 43 = 38', '2 + 47 = 42', '2 + 51 = 12', '2 + 52 = 57', '2 + 62 = 30', '2 + 66 = 10', '2 + 67 = 10', '2 + 74 = 10',
     '3 + 4 = 8', '3 + 5 = 29', '3 + 7 = 29', '3 + 8 = 30', '3 + 9 = 18', '3 + 10 = 35', '3 + 11 = 70', '3 + 13 = 7', '3 + 26 = 65', '3 + 27 = 65', '3 + 28 = 33', '3 + 29 = 7', '3 + 30 = 7', '3 + 31 = 13', '3 + 33 = 32', '3 + 36 = 81', '3 + 50 = 29', '3 + 51 = 29', '3 + 66 = 81', '4 + 10 = 46',
-    '4 + 5 = 27', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 8 = 17', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 38 = 45', '4 + 39 = 46', '4 + 50 = 3', '4 + 51 = 31', '4 + 52 = 22', '4 + 62 = 74',
-    '5 + 6 = 27', '5 + 8 = 23', '5 + 13 = 34', '5 + 17 = 2', '5 + 27 = 14', '5 + 28 = 42', '5 + 30 = 42', '5 + 32 = 36', '5 + 33 = 36', '5 + 35 = 33', '5 + 37 = 33', '5 + 38 = 43', '5 + 39 = 14', '5 + 47 = 42', '5 + 50 = 29', '5 + 51 = 12', '6 + 8 = 56', '6 + 13 = 5', '6 + 27 = 5', '6 + 29 = 5', '6 + 34 = 5', '6 + 39 = 46', '6 + 52 = 57', '6 + 62 = 5', '7 + 8 = 30', '7 + 9 = 26', '7 + 11 = 70', '7 + 26 = 65', '7 + 29 = 14', '7 + 32 = 77', '7 + 33 = 73', '7 + 35 = 10', '7 + 49 = 77', '7 + 50 = 29', '7 + 51 = 29', '8 + 9 = 58', '8 + 12 = 17', '8 + 13 = 41', '8 + 27 = 30', '8 + 28 = 15', '8 + 30 = 56', '8 + 31 = 15', '8 + 33 = 52', '8 + 37 = 64', '8 + 38 = 15', '8 + 51 = 17', '9 + 27 = 4', '9 + 29 = 4', '9 + 30 = 20', '9 + 34 = 71', '9 + 51 = 4', '10 + 12 = 31', '10 + 27 = 26', '10 + 28 = 53', '10 + 29 = 46', '10 + 31 = 50', '10 + 34 = 24', '10 + 35 = 7', '10 + 38 = 53', '10 + 39 = 46', '10 + 50 = 3', '10 + 52 = 53', '11 + 13 = 40', '11 + 17 = 70', '11 + 34 = 70', '11 + 35 = 10', '11 + 36 = 63', '11 + 52 = 67', '12 + 13 = 54', '12 + 17 = 76', '12 + 26 = 54', '12 + 31 = 37', '12 + 39 = 51', '12 + 46 = 39', '12 + 50 = 51', '12 + 51 = 5', '13 + 14 = 60', '13 + 26 = 54', '13 + 29 = 92', '13 + 30 = 72', '13 + 33 = 44', '13 + 36 = 34', '13 + 38 = 41', '14 + 26 = 59', '14 + 32 = 49', '14 + 36 = 49', '17 + 27 = 8', '17 + 31 = 38', '17 + 35 = 76', '17 + 36 = 66', '17 + 51 = 76', '26 + 27 = 65', '26 + 31 = 75', '26 + 32 = 36', '26 + 34 = 69', '26 + 49 = 77', '26 + 51 = 75', '26 + 62 = 26', '27 + 29 = 1', '27 + 30 = 65', '27 + 34 = 13', '27 + 35 = 65', '27 + 47 = 42', '27 + 51 = 12', '27 + 62 = 13', '28 + 30 = 2', '28 + 33 = 53', '28 + 35 = 33', '28 + 38 = 53', '28 + 47 = 42', '28 + 50 = 3', '28 + 52 = 38', '28 + 62 = 30', '29 + 31 = 50', '29 + 50 = 35', '29 + 52 = 38', '30 + 34 = 62', '30 + 47 = 42', '30 + 52 = 57', '30 + 62 = 5', '30 + 73 = 82', '31 + 32 = 47', '31 + 33 = 38', '31 + 39 = 50', '31 + 51 = 50', '31 + 52 = 67', '31 + 67 = 38', '32 + 33 = 45', '32 + 34 = 44', '32 + 35 = 36', '32 + 36 = 66', '32 + 37 = 33', '32 + 38 = 47', '32 + 43 = 80', '32 + 47 = 38', '32 + 53 = 38', '32 + 67 = 89', '33 + 34 = 44', '33 + 35 = 38', '33 + 36 = 52', '33 + 37 = 73', '33 + 50 = 3', '33 + 52 = 73', '34 + 35 = 69', '34 + 36 = 48', '34 + 38 = 43', '35 + 36 = 66', '35 + 38 = 10', '35 + 50 = 29', '35 + 51 = 31', '35 + 52 = 38', '35 + 62 = 13', '35 + 67 = 11', '35 + 73 = 52', '36 + 37 = 63', '36 + 52 = 68', '36 + 66 = 81', '36 + 74 = 81', '37 + 52 = 33', '37 + 63 = 61', '38 + 43 = 47', '38 + 47 = 42', '38 + 51 = 31', '38 + 52 = 67', '39 + 46 = 31', '39 + 62 = 26', '43 + 47 = 38', '43 + 52 = 38', '46 + 51 = 31', '47 + 52 = 38', '47 + 67 = 38', '50 + 51 = 29', '51 + 62 = 26', '52 + 53 = 38', '52 + 73 = 33', '53 + 67 = 38', '66 + 74 = 81',
-    '2 + 39 = 51', '4 + 8 = 17', '13 + 51 = 79', '1 + 62 = 94','1 + 74 = 94','1 + 73 = 102','2 + 32 = 106','2 + 73 = 101','3 + 7 = 115','3 + 27 = 115','3 + 35 = 115','4 + 32 = 99','4 + 52 = 113','5 + 52 = 93','6 + 7 = 97','6 + 32 = 97','6 + 34 = 97','6 + 35 = 97','6 + 73 = 101','7 + 27 = 65','7 + 37 = 65','8 + 52 = 93','9 + 52 = 114','10 + 13 = 24','10 + 34 = 24','11 + 17 = 96','12 + 13 = 105','12 + 34 = 105','12 + 36 = 105','14 + 52 = 103','14 + 66 = 95','14 + 73 = 100','17 + 32 = 96','17 + 34 = 96','17 + 52 = 93','26 + 37 = 65','26 + 73 = 100','27 + 73 = 101','29 + 32 = 107','29 + 34 = 92','29 + 36 = 107','29 + 73 = 102','30 + 51 = 98','31 + 52 = 103','32 + 34 = 91','32 + 39 = 99','32 + 51 = 99','32 + 66 = 95','32 + 67 = 89','32 + 103 = 104','34 + 62 = 91','34 + 66 = 95','34 + 73 = 100','35 + 52 = 73','39 + 52 = 111','46 + 52 = 111','50 + 74 = 108','51 + 52 = 110','51 + 73 = 102','52 + 3 = 112','52 + 7 = 112','52 + 8 = 112','52 + 9 = 114','52 + 17 = 109','52 + 27 = 112','62 + 66 = 95','77 + 115 = 116'
+    '4 + 5 = 27', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 8 = 17', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 38 = 45', '4 + 39 = 46', '4 + 46 = 39', '4 + 50 = 3', '4 + 51 = 31', '4 + 52 = 22', '4 + 62 = 74',
+    '5 + 6 = 27', '5 + 8 = 23', '5 + 13 = 34', '5 + 17 = 2', '5 + 27 = 14', '5 + 28 = 42', '5 + 30 = 42', '5 + 32 = 36', '5 + 33 = 36', '5 + 35 = 33', '5 + 37 = 33', '5 + 38 = 43', '5 + 39 = 14', '5 + 47 = 42', '5 + 50 = 29', '5 + 51 = 12', '6 + 8 = 56', '6 + 13 = 5', '6 + 27 = 5', '6 + 29 = 5', '6 + 34 = 5', '6 + 39 = 46', '6 + 52 = 57', '6 + 62 = 5', '7 + 8 = 30', '7 + 9 = 26', '7 + 11 = 70', '7 + 26 = 65', '7 + 29 = 14', '7 + 32 = 77', '7 + 33 = 73', '7 + 35 = 10', '7 + 49 = 77', '7 + 50 = 29', '7 + 51 = 29', '8 + 9 = 58', '8 + 12 = 17', '8 + 13 = 41', '8 + 27 = 30', '8 + 28 = 15', '8 + 30 = 56', '8 + 31 = 15', '8 + 33 = 52', '8 + 37 = 64', '8 + 38 = 15', '8 + 51 = 17', '9 + 27 = 4', '9 + 29 = 4', '9 + 30 = 20', '9 + 34 = 71', '9 + 51 = 4', '10 + 12 = 31', '10 + 27 = 26', '10 + 28 = 53', '10 + 29 = 46', '10 + 31 = 50', '10 + 34 = 24', '10 + 35 = 7', '10 + 38 = 53', '10 + 39 = 46', '10 + 50 = 3', '10 + 52 = 53', '11 + 13 = 40', '11 + 17 = 70', '11 + 34 = 70', '11 + 35 = 10', '11 + 36 = 63', '11 + 52 = 67', '12 + 13 = 54', '12 + 17 = 76', '12 + 26 = 54', '12 + 31 = 37', '12 + 39 = 51', '12 + 46 = 39', '12 + 50 = 51', '12 + 51 = 5', '13 + 14 = 60', '13 + 26 = 54', '13 + 29 = 92', '13 + 30 = 72', '13 + 33 = 44', '13 + 36 = 34', '13 + 38 = 41', '14 + 26 = 59', '14 + 32 = 49', '14 + 36 = 49', '17 + 27 = 8', '17 + 31 = 38', '17 + 35 = 76', '17 + 36 = 66', '17 + 51 = 76', '26 + 27 = 65', '26 + 31 = 75', '26 + 32 = 36', '26 + 34 = 69', '26 + 49 = 77', '26 + 51 = 75', '26 + 62 = 26', '27 + 29 = 1', '27 + 30 = 65', '27 + 34 = 13', '27 + 35 = 65', '27 + 47 = 42', '27 + 51 = 12', '27 + 62 = 13', '28 + 30 = 2', '28 + 33 = 53', '28 + 35 = 33', '28 + 38 = 53', '28 + 47 = 42', '28 + 50 = 3', '28 + 52 = 38', '28 + 62 = 30', '29 + 31 = 50', '29 + 50 = 35', '29 + 52 = 38', '30 + 34 = 62', '30 + 47 = 42', '30 + 52 = 57', '30 + 62 = 5', '30 + 73 = 82', '31 + 32 = 47', '31 + 33 = 38', '31 + 39 = 50', '31 + 51 = 50', '31 + 52 = 67', '31 + 67 = 38', '32 + 33 = 45', '32 + 34 = 44', '32 + 35 = 36', '32 + 36 = 66', '32 + 37 = 33', '32 + 38 = 47', '32 + 43 = 80', '32 + 47 = 38', '32 + 53 = 38', '32 + 67 = 89', '33 + 34 = 44', '33 + 35 = 38', '33 + 36 = 52', '33 + 37 = 73', '33 + 50 = 3', '33 + 52 = 73', '34 + 35 = 69', '34 + 36 = 48', '34 + 38 = 43', '35 + 36 = 66', '35 + 38 = 10', '35 + 50 = 29', '35 + 51 = 31', '35 + 52 = 38', '35 + 62 = 13', '35 + 67 = 11', '35 + 73 = 52', '36 + 37 = 63', '36 + 52 = 68', '36 + 66 = 81', '36 + 74 = 81', '37 + 52 = 33', '37 + 63 = 61', '38 + 43 = 47', '38 + 46 = 53', '38 + 47 = 42', '38 + 51 = 31', '38 + 52 = 67', '39 + 46 = 31', '39 + 62 = 26', '43 + 47 = 38', '43 + 52 = 38', '46 + 51 = 31', '47 + 52 = 38', '47 + 67 = 38', '50 + 51 = 29', '51 + 62 = 26', '52 + 53 = 38', '52 + 73 = 33', '53 + 67 = 38', '66 + 74 = 81',
+    '2 + 39 = 51', '4 + 8 = 17', '13 + 51 = 79', '1 + 62 = 94','1 + 74 = 94','1 + 73 = 102','2 + 32 = 106','2 + 73 = 101','3 + 7 = 115','3 + 27 = 115','3 + 35 = 115','4 + 32 = 99','4 + 52 = 113','5 + 52 = 93','6 + 7 = 97','6 + 32 = 97','6 + 34 = 97','6 + 35 = 97','6 + 73 = 101','7 + 27 = 65','7 + 37 = 65','8 + 52 = 93','9 + 52 = 114','10 + 13 = 24','10 + 34 = 24','11 + 17 = 96','12 + 13 = 105','12 + 34 = 105','12 + 36 = 105','14 + 52 = 103','14 + 66 = 95','14 + 73 = 100','17 + 32 = 96','17 + 34 = 96','17 + 52 = 93','26 + 37 = 65','26 + 73 = 100','27 + 73 = 101','29 + 32 = 107','29 + 34 = 92','29 + 36 = 107','29 + 73 = 102','30 + 51 = 98','31 + 52 = 103','32 + 34 = 44','32 + 39 = 99','32 + 51 = 99','32 + 66 = 95','32 + 67 = 89','32 + 103 = 104','34 + 62 = 91','34 + 66 = 95','34 + 73 = 100','35 + 52 = 73','39 + 52 = 111','46 + 52 = 111','50 + 74 = 108','51 + 52 = 110','51 + 73 = 102','52 + 3 = 112','52 + 7 = 112','52 + 8 = 112','52 + 9 = 114','52 + 17 = 109','52 + 27 = 112','62 + 66 = 95','77 + 115 = 116'
 ];
 
 // Encounter Data
 const encounterEffects = {
-    'A': { name: 'Fire- Phoenix', hint1: 'Physical damage seems to be ineffective against it, he is made not of solid material but flame itself.', hint2: 'You will need to put out his fire somehow.', effects: ['1A', '4A', '-9A', '-9B', '-35A', '-42A', '46B', '40A', '45A', '-28A', '-37A', '98A', '106A'] },
+    'A': { name: 'Fire- Phoenix', hint1: 'Physical damage seems to be ineffective against it, he is made not of solid material but flame itself.', hint2: 'You will need to put out his fire somehow.', effects: ['1A', '4A', '18A', '-9A', '-9B', '-35A', '-42A', '46B', '40A', '45A', '-28A', '-37A', '98A', '106A'] },
     'B': { name: 'Earth- Desert Golem', hint1: 'A large tough humanoid creature made of tightly compacted sand.', hint2: 'No physical wounds seems to harm it, it must be separated.', effects: ['4A', '1A', '3B', '26B', '28B', '-28A', '35B', '-37A', '38A', '42A', '47A', '40A', '90A', '106A'] },
     'C': { name: 'Water- Whispghost', hint1: 'No physical wounds seem to harm it.', hint2: 'It is made of mist and smoke that need to be torn apart somehow.', effects: ['1A', '28B', '6A', '6B', '10A', '51A', '-28A', '-35B', '38A', '-42A', '-47A', '40A', '90A'] },
     'D': { name: 'Air- Sacmonster', hint1: 'A beast that looks like a pair of giant lungs.', hint2: 'You will need to stop its air flow somehow.', effects: ['42A', '2A', '8A', '10A', '11B', '15A', '27A', '28A', '38A', '40A', '41A', '42A', '43A', '47A', '52A', '53A', '55A', '65A', '111A'] },
     'E': { name: 'Plant- Plantnnochio', hint1: 'The creature is a sturdy old toy.', hint2: 'Its distinctive nose is made of wood and looks vulnerable.', effects: ['2A', '5A', '28B', '34A', '-37A', '41A', '42A', '40A', '47A', '38A', '104A', '109A'] },
-    'F': { name: 'Ice- Frozen Tower', hint1: "This narrow siege tower is made of slippery ice", hint2: 'It seems easy to knock over', effects: ['-1A', '3A', '26B', '-28B', '-30B', '-51A', '40A', '47A','-34A', '78A', '42A', '-43A', '104A', '97A'] },
+    'F': { name: 'Ice- Frozen Tower', hint1: "This narrow siege tower is made of slippery ice", hint2: 'It seems easy to knock over', effects: ['-1A', '-2A', '3A', '26B', '-28B', '-30B', '-51A', '40A', '47A','-34A', '78A', '42A', '-43A', '104A', '97A'] },
     'G': { name: 'Rope- Mummy', hint1: 'This creature seems to be wrapped in many strips.', hint2: 'The ropes and fabrics are its defences.', effects: ['2A', '-4A', '-1A', '-5A', '11A', '42A', '-30B', '-37A', '47A', '78A', '38A', '104A', '90A', '106A'] },
     'H': { name: 'Light- Gorgon', hint1: 'The creature turns anyone it faces into stone.', hint2: 'The way it turns you to stone is by looking at you.', effects: ['-7A', '-29B', '-39A', '-40A', '-31A', '12B', '54A', '-37A', '38A', '10B', '51B', '-111A', '111B'] },
     'I': { name: 'Metal- Automaton', hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A', '102A'] },
-    'J': { name: 'Sound- Banshee', hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '-13A', '-26A', '14A', '-40A', '50A', '38A', '92A', '94A', '115A', '104A'] },
+    'J': { name: 'Sound- Banshee', hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '7A', '-13A', '-26A', '14A', '-40A', '50A', '38A', '92A', '94A', '115A', '104A'] },
     'K': { name: 'Glass- Illusionist', hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11C', '9B', '26B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A', '104A'] },
     'L': { name: 'Pressure- The Press', hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B', '112B'] },
     'M': { name: 'Chemical- The Valley', hint1: 'Something invisible is causing you to get sick.', hint2: 'You must deal with the cloud of chemicals.', effects: ['1A', '28B', '6A', '29B', '39A', '90A', '94A', '115A'] },
-    'N': { name: 'Gravity- The Abnormality', hint1: 'The gravitational abnormality is slamming you against the roof, unable to move.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '29A', '39A', '-11A', '-13A', '62A', '102A'] },
+    'N': { name: 'Gravity- The Abnormality', hint1: 'The gravitational abnormality is slamming you against the ceiling, unable to move.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '29A', '39A', '-11A', '-13A', '62A', '102A'] },
     'O': { name: 'Oil- The Swamp', hint1: 'When you try to cross you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '11A', '-11C', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A', '94A', '92A'] },
     'P': { name: 'Darkness- Alucard', hint1: 'It is a man in a cape and bat wings.', hint2: 'He is a vampire who has never left the darkness of the indoors.', effects: ['12A', '-37A', '38A', '41A', '40A', '54A', '104A', '111B'] },
-    'Q': { name: 'Man- The Child', hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['20A', '22A', '48A', '-52A', '-7B', '-59B', '-61A', '-49A', '-63B', '-66A', '-68B', '-69A', '-74B', '-78B', '89A', '-91A', '96A', '100B', '104B', '108A', '114A'] },
-    'R': { name: 'Energy- Terror of the Tides', hint1: 'It takes the form of a deadly Eel.', hint2: 'It attacks using electricity.', effects: ['-4A', '-4B', '-10A', '-35A', '38A', '47A', '40A', '-37A', '104A', '106A', '111B', '114A'] },
-    'S': { name: 'Life- The Exchange', hint1: 'The being tells you that you will need to provide life in order to proceed.', hint2: 'You must give it life itself, or something similar.', effects: ['-52A', '33B', '32B', '-68B', '-67B', '89A', '93A', '102B', '103A', '104B', '109A', '110A', '111A', '112A', '113A', '114A'] },
+    'Q': { name: 'Man- The Child', hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['20A', '22A', '23A', '48A', '-19A', '-44A', '-52A', '-7B', '-59B', '-61A', '-49A', '-63B', '-66A', '-68B', '-69A', '-74B', '-78B', '89A', '-91A', '96A', '100B', '104B', '108A', '114A'] },
+    'R': { name: 'Energy- Terror of the Tides', hint1: 'It takes the form of a deadly Eel.', hint2: 'It attacks using electricity.', effects: ['-4A', '-4B', '-10A', '-35A', '38A', '43A', '47A', '40A', '-37A', '104A', '106A', '111B', '114A'] },
+    'S': { name: 'Life- The Exchange', hint1: 'The being tells you that you will need to provide life in order to proceed.', hint2: 'You must give it life itself, or something similar.', effects: ['-52A', '17B', '33B', '32B', '-68B', '-67B', '89A', '93A', '102B', '103A', '104B', '109A', '110A', '111A', '112A', '113A', '114A'] },
     'T': { name: 'Machine- Geared Dragon', hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from the air.', effects: ['-28A', '35A', '35B', '5A', '40A', '-34A', '-39A', '-29B', '-11B', '65A', '90A', '92A', '94A', '111B', '115A'] },
-    'U': { name: 'Time- Ritualists', hint1: 'The magicians are about to complete their ritual, which will make it impossible to beat them.', hint2: 'They are putting together a large clock, you will need to disrupt them.', effects: ['-34A', '-31A', '35B', '12B', '14B', '38A', '-104A', '111B', '113A', '97A'] },
-    'V': { name: 'Intelligence- Doppelganger', hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-12B', '-54A', '-39A', '-29B', '11C', '36A', '32A', '62A', '37A', '70A', '91A'] },
-    'W': { name: 'Love- The Gift', hint1: 'A lover tells you she feels heartbroken, she was expecting to receive something special from her valentine.', hint2: 'She wants to receive a heartfelt present.', effects: ['49A', '32B', '-37A', '64A', '79A', '65C', '54B', '95A', '101A', '114A', '116A'] },
-    'X': { name: 'Death- The Tribute', hint1: 'A solemn ceremony is taking place, one might wonder what would be appropriate to do here.', hint2: "An old man requests something to commemorate and honor his friend's memory.", effects: ['77A', '-59A', '-78A', '-17A', '-64A', '-65C', '-33A', '-32A', '49A'] },
+    'U': { name: 'Time- Ritualists', hint1: 'The magicians are about to complete their ritual, which will make it impossible to beat them.', hint2: 'They are putting together a large clock, you will need to disrupt them.', effects: ['-34A', '-31A', '10B', '35B', '12B', '14B', '38A', '43A', '40A', '-104A', '111B', '113A', '97A', '-60A'] },
+    'V': { name: 'Intelligence- Doppelganger', hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-12B', '-54A', '-39A', '-29B', '11C', '36A', '32A', '62A', '37A', '70A', '91A', '-9B', '-11A', '-11B'] },
+    'W': { name: 'Love- The Gift', hint1: 'A lover tells you she feels heartbroken, she was expecting to receive something special from her valentine.', hint2: 'She wants to receive a heartfelt present.', effects: ['49A', '32B', '-15B', '-37A', '64A', '79A', '65C', '54B', '95A', '101A', '114A', '116A', '-33A'] },
+    'X': { name: 'Death- The Tribute', hint1: 'A solemn ceremony is taking place, one might wonder what would be appropriate to do here.', hint2: "An old man requests something to commemorate and honor his friend's memory.", effects: ['77A', '33A', '-59A', '-78A', '-17A', '-64A', '-65C', '-33A', '-32A', '49A'] },
     'Z': { name: 'FINAL ROOM: The Alchemists Endgame', hint1: 'To win the game, enter this room and provide the alchemists most prized creation. Each completed encounter in the final row will reveal another hint.', hint2: "They say it is a metal that shines with the power of the sun", hint3: "The sun itself is fire in the sky", hint4: "The sky is clouds and air", hint5: "Clouds are steam and air, steam is water and air, try to piece this all together into a metal that shines like the sun", hint6: "You will need to give it gold which can be formed by combining sun and metal",  unlocksHints: ['U', 'W', 'K', 'X'], effects: ['79A'] }
 
 };
@@ -912,6 +1241,17 @@ fuseList.forEach(entry => {
     fuseMap[sortedKey] = result.trim();
 });
 
+const fusionOutputCounts = {};
+Object.entries(fuseMap).forEach(([pairKey, resultId]) => {
+    const uniqueIngredients = new Set(pairKey.split('+'));
+    uniqueIngredients.forEach(elementId => {
+        if (!fusionOutputCounts[elementId]) {
+            fusionOutputCounts[elementId] = new Set();
+        }
+        fusionOutputCounts[elementId].add(resultId);
+    });
+});
+
 // Global list to store successful combinations
 let successfulCombinations = [];
 
@@ -920,7 +1260,9 @@ let successfulCombinations = [];
 const grid = document.getElementById("grid");
 const preview = document.getElementById("preview");
 const previewTitle = document.getElementById("previewTitle");
+const selectedEncounterHint = document.getElementById("selectedEncounterHint");
 const hintBox = document.getElementById("hintBox"); // Get the hint box
+const previewArt = document.getElementById("previewArt");
 const row1 = document.getElementById("row1");
 const row2 = document.getElementById("row2");
 const fuseButton = document.getElementById("fuseButton");
@@ -928,6 +1270,35 @@ const untapButton = document.getElementById("clearButton");
 const combinationsList = document.getElementById('combinationsList');
 const encounterMessageBox = document.getElementById('encounterMessageBox');
 const elementNameSubtitle = document.getElementById('elementNameSubtitle');
+const SAVE_KEY = 'alxGameStateV1';
+
+const encounterArtMap = {
+    A: 'alchemyart/phoenix.png',
+    B: 'alchemyart/golem.png',
+    C: 'alchemyart/whispghost.png',
+    D: 'alchemyart/sacmonster.png',
+    E: 'alchemyart/plantnocchio.png',
+    F: 'alchemyart/frozentower.png',
+    G: 'alchemyart/mummy.png',
+    H: 'alchemyart/gorgon.png',
+    I: 'alchemyart/automaton.png',
+    J: 'alchemyart/banshee.png',
+    K: 'alchemyart/illusionist.png',
+    L: 'alchemyart/press.png',
+    M: 'alchemyart/valley.png',
+    N: 'alchemyart/abnormality.png',
+    O: 'alchemyart/swamp.png',
+    P: 'alchemyart/alucard.png',
+    Q: 'alchemyart/child.png',
+    R: 'alchemyart/eel.png',
+    S: 'alchemyart/exchange.png',
+    T: 'alchemyart/dragon.png',
+    U: 'alchemyart/time.png',
+    V: 'alchemyart/doppelganger.png',
+    W: 'alchemyart/lover.png',
+    X: 'alchemyart/tribute.png',
+    Z: 'alchemyart/thealchemistsendgame.png'
+};
 
 let pawn;
 let selectedReagents = [];
@@ -935,10 +1306,12 @@ let currentEncounterCell = null;
 let persistentHalfSuccesses = {}; // Stores half-successes for ALL encounters
 let halfSuccesses = {};
 let locationFailureCounter = {};
+let totalFailureCounter = {};
 let previousEncounterKey = null;
 let persistentHints = {};
 let moveCounter = 0;
 const defeatedEncounters = new Set();
+const bottomRowEncounterKeys = new Set(['U', 'W', 'K', 'X', 'Z']);
 let startingElements = [];
 while (startingElements.length < 2) {
     const randomId = String(Math.floor(Math.random() * 4) + 1);
@@ -970,7 +1343,7 @@ function findCardById(id) {
     return document.querySelector(`.card-slot[data-element-id="${id}"]`);
 }
 // Helper to display messages in the dedicated box
-function displayMessage(text, type = 'default') {
+function displayMessage(text, type = 'default', holdMs) {
     // Clear any previous message item to ensure only one is displayed/fading
     encounterMessageBox.innerHTML = '';
 
@@ -978,16 +1351,206 @@ function displayMessage(text, type = 'default') {
     msgItem.className = `message-item ${type}`;
     msgItem.textContent = text;
 
-    // Use a unique key to prevent re-adding identical messages instantly if they haven't faded
+    const totalMs = holdMs != null ? holdMs : (type === 'warning' ? 4200 : 3000);
+    const fadeSec = Math.min(6, Math.max(2, totalMs / 1000));
+    msgItem.style.animation = `fadeout ${fadeSec}s forwards`;
+
     msgItem.dataset.messageId = Date.now();
 
     encounterMessageBox.appendChild(msgItem);
 
-    // Remove the element after the animation duration (3000ms from CSS keyframe)
-    setTimeout(() => msgItem.remove(), 3000);
+    setTimeout(() => msgItem.remove(), totalMs);
+}
+
+function triggerFeedback(element, className) {
+    if (!element) return;
+    element.classList.remove(className);
+    void element.offsetWidth; // Restart animation
+    element.classList.add(className);
+    setTimeout(() => element.classList.remove(className), 500);
+}
+
+function stabilizeProductsRow() {
+    // Clear inline overflow from older single-lane builds so flex-wrap isn’t overridden.
+    if (!row2) return;
+    row2.style.overflowX = '';
+    row2.style.overflowY = '';
+    void row2.offsetHeight;
+}
+
+function getOwnedElementIds() {
+    const ids = new Set();
+    document.querySelectorAll('.card-slot[data-element-id]').forEach(card => {
+        if (card.dataset.elementId) ids.add(card.dataset.elementId);
+    });
+    return ids;
+}
+
+function getCraftableClosure(baseIds) {
+    const known = new Set(baseIds);
+    let changed = true;
+    while (changed) {
+        changed = false;
+        Object.entries(fuseMap).forEach(([pairKey, resultId]) => {
+            const [a, b] = pairKey.split('+');
+            if (known.has(a) && known.has(b) && !known.has(resultId)) {
+                known.add(resultId);
+                changed = true;
+            }
+        });
+    }
+    return known;
+}
+
+function encounterHasAnyPossibleOutcome(encounterKey) {
+    const encounter = encounterEffects[encounterKey];
+    if (!encounter || !encounter.effects) return false;
+    const knownIds = getCraftableClosure(getOwnedElementIds());
+    for (const id of knownIds) {
+        const data = elementData[id];
+        if (!data || !Array.isArray(data.verbs)) continue;
+        for (let i = 0; i < data.verbs.length && i < verbLetters.length; i++) {
+            const key = `${id}${verbLetters[i]}`;
+            if (encounter.effects.includes(key) || encounter.effects.includes(`-${key}`)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function moveRewardToReagentsIfOwned(rewardId) {
+    const existingCard = findCardById(rewardId);
+    if (existingCard && existingCard.parentElement === row2) {
+        row1.appendChild(existingCard);
+    }
 }
 
 
+
+function serializeCards(rowElement) {
+    return Array.from(rowElement.querySelectorAll('.card-slot[data-element-id]')).map(card => ({
+        id: card.dataset.elementId,
+        tapped: card.classList.contains('tapped')
+    }));
+}
+
+function serializeHalfSuccesses() {
+    return Object.fromEntries(
+        Object.entries(persistentHalfSuccesses).map(([key, value]) => [key, Array.from(value)])
+    );
+}
+
+function saveGameState() {
+    try {
+        const state = {
+            row1: serializeCards(row1),
+            row2: serializeCards(row2),
+            defeatedEncounters: Array.from(defeatedEncounters),
+            currentEncounterKey: currentEncounterCell?.dataset.encounterKey || null,
+            previousEncounterKey,
+            persistentHalfSuccesses: serializeHalfSuccesses(),
+            locationFailureCounter,
+            totalFailureCounter,
+            persistentHints,
+            successfulCombinations,
+            moveCounter
+        };
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    } catch (e) {
+        // Saving should never interrupt play.
+    }
+}
+
+function restoreCards(cards, rowElement) {
+    cards.forEach(({ id, tapped }) => {
+        if (!elementData[id]) return;
+        addCardToRow(id, rowElement);
+        const card = rowElement.querySelector(`.card-slot[data-element-id="${id}"]`);
+        if (card && tapped) card.classList.add('tapped');
+    });
+}
+
+function restoreHalfSuccessCounters() {
+    Object.entries(persistentHalfSuccesses).forEach(([encounterKey, successes]) => {
+        if (successes.size !== 1) return;
+        const cell = document.querySelector(`.cell[data-encounter-key="${encounterKey}"]`);
+        if (!cell || cell.classList.contains('defeated')) return;
+        const counter = document.createElement('div');
+        counter.className = 'half-success-counter';
+        counter.textContent = '1/2';
+        cell.appendChild(counter);
+    });
+}
+
+function loadGameState() {
+    let state;
+    try {
+        state = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+    } catch (e) {
+        return false;
+    }
+    if (!state || !Array.isArray(state.row1) || !Array.isArray(state.row2)) {
+        return false;
+    }
+
+    row1.innerHTML = '';
+    row2.innerHTML = '';
+    selectedReagents = [];
+    currentEncounterCell = null;
+    previousEncounterKey = state.previousEncounterKey || null;
+    locationFailureCounter = state.locationFailureCounter || {};
+    totalFailureCounter = state.totalFailureCounter || {};
+    persistentHints = state.persistentHints || {};
+    successfulCombinations = state.successfulCombinations || [];
+    moveCounter = state.moveCounter || 0;
+    persistentHalfSuccesses = Object.fromEntries(
+        Object.entries(state.persistentHalfSuccesses || {}).map(([key, value]) => [key, new Set(value)])
+    );
+
+    restoreCards(state.row1, row1);
+    restoreCards(state.row2, row2);
+    stabilizeProductsRow();
+
+    defeatedEncounters.clear();
+    document.querySelectorAll('.cell[data-encounter-key]').forEach(cell => {
+        const key = cell.dataset.encounterKey;
+        if (state.defeatedEncounters?.includes(key)) {
+            defeatedEncounters.add(key);
+            cell.classList.add('defeated');
+            cell.innerHTML = cell.dataset.icon;
+        }
+    });
+    restoreHalfSuccessCounters();
+
+    updateCombinationsList();
+    document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
+    if (pawn) pawn.remove();
+
+    const selectedCell = state.currentEncounterKey
+        ? document.querySelector(`.cell[data-encounter-key="${state.currentEncounterKey}"]:not(.defeated)`)
+        : null;
+    if (selectedCell) {
+        selectedCell.classList.add('selected');
+        currentEncounterCell = selectedCell;
+        previousEncounterKey = selectedCell.dataset.encounterKey;
+        updatePreview(selectedCell.dataset.encounterKey);
+        pawn = document.createElement("div");
+        pawn.className = "pawn";
+        pawn.textContent = "♙";
+        selectedCell.appendChild(pawn);
+    } else {
+        updatePreview(null);
+        const centerCell = grid.children[12];
+        if (centerCell) {
+            pawn = document.createElement("div");
+            pawn.className = "pawn";
+            pawn.textContent = "♙";
+            centerCell.appendChild(pawn);
+        }
+    }
+    return true;
+}
 
 // Function to update the Past Combinations list
 function updateCombinationsList() {
@@ -1124,8 +1687,12 @@ function createCard(elementId) {
         actionButton.className = 'action-btn';
         const cleanedVerb = cleanVerb(verb);
 
-        // Only show the verb itself, no A:, B:, C:
-        actionButton.textContent = cleanedVerb;
+        // Show gift verbs as "Gift <element>"
+        if (cleanedVerb.toLowerCase() === 'gift') {
+            actionButton.textContent = `Gift ${data.name.toLowerCase()}`;
+        } else {
+            actionButton.textContent = cleanedVerb;
+        }
 
         // Store the verb key as element ID + verb letter (e.g., '1A')
         actionButton.dataset.verbKey = `${elementId}${verbLetters[index]}`;
@@ -1139,7 +1706,7 @@ function createCard(elementId) {
             if (currentEncounterCell) {
                 // Check if the current encounter is locked out from too many failures
                 const encounterKey = currentEncounterCell.dataset.encounterKey;
-                if (locationFailureCounter[encounterKey] >= 3 & countIncompleteEncounters() > 2) {
+                if (!bottomRowEncounterKeys.has(encounterKey) && locationFailureCounter[encounterKey] >= 3 && countIncompleteEncounters() > 2) {
                     displayMessage('BLOCKED! Choose a different location first.', 'default');
                     return; // Prevent handleEncounter from running
                 }
@@ -1152,6 +1719,12 @@ function createCard(elementId) {
     });
 
     card.innerHTML = `<div class="label">${data.name}</div><div class="emoji">${data.emoji}</div>`;
+    const fusionCount = fusionOutputCounts[elementId]?.size || 0;
+    const fusionBadge = document.createElement("span");
+    fusionBadge.className = "fusion-count-badge";
+    fusionBadge.textContent = fusionCount;
+    fusionBadge.title = `${fusionCount} possible fusion result${fusionCount === 1 ? '' : 's'} with ${data.name}`;
+    card.appendChild(fusionBadge);
     if (data.terminal) {
         const dot = document.createElement("span");
         dot.className = "terminal-dot"; 
@@ -1173,6 +1746,8 @@ function setupCardClickListener(card, id) {
         if (isSelected) {
             // If the clicked card is already selected, deselect it.
             card.classList.remove('selected-reagent', 'fusable', 'unfusable');
+            card.style.border = '';
+            card.style.boxShadow = '';
             selectedReagents = selectedReagents.filter(el => el !== id);
         } else {
             // If the clicked card is NOT selected:
@@ -1187,6 +1762,8 @@ function setupCardClickListener(card, id) {
                 // 3. Visually deselect it.
                 if (cardToDeselect) {
                     cardToDeselect.classList.remove('selected-reagent', 'fusable', 'unfusable');
+                    cardToDeselect.style.border = '';
+                    cardToDeselect.style.boxShadow = '';
                 }
                 
                 // 4. Remove it from the beginning of the selection array.
@@ -1222,7 +1799,18 @@ function setupCardClickListener(card, id) {
 
 function handleFailure(encounterKey) {
     locationFailureCounter[encounterKey] = (locationFailureCounter[encounterKey] || 0) + 1;
-    displayMessage('FAILURE', 'default');
+    totalFailureCounter[encounterKey] = (totalFailureCounter[encounterKey] || 0) + 1;
+
+    const stuck = !encounterHasAnyPossibleOutcome(encounterKey);
+    if (totalFailureCounter[encounterKey] >= 9 && stuck) {
+        displayMessage(
+            'This encounter cannot be won with your current elements and fusions. Fuse something new or try another space.',
+            'warning',
+            6500
+        );
+    } else {
+        displayMessage('FAILURE', 'default');
+    }
 
     // Permanently record the highest hint level unlocked
     const currentHintLevel = persistentHints[encounterKey] || 0;
@@ -1234,13 +1822,18 @@ function handleFailure(encounterKey) {
 
     // Update hint box display
     updateHintBox(encounterKey);
+    saveGameState();
 }
 
 function updatePreview(encounterKey) {
     if (!encounterKey) {
         preview.textContent = '♙';
         previewTitle.textContent = '';
+        selectedEncounterHint.textContent = '';
         elementNameSubtitle.textContent = ''; 
+        previewArt.style.display = 'none';
+        previewArt.src = '';
+        previewArt.alt = '';
         preview.style.fontSize = '60px';
         updateHintBox(null);
         return;
@@ -1260,6 +1853,19 @@ function updatePreview(encounterKey) {
 
     // 1. Set the main title (e.g., "Desert Golem")
     previewTitle.textContent = mainTitle; 
+    selectedEncounterHint.textContent = 'Selected Encounter';
+
+    // 1.5 Show encounter art (if available) between title and description
+    const artPath = encounterArtMap[encounterKey];
+    if (artPath) {
+        previewArt.src = artPath;
+        previewArt.alt = `${mainTitle} art`;
+        previewArt.style.display = 'block';
+    } else {
+        previewArt.style.display = 'none';
+        previewArt.src = '';
+        previewArt.alt = '';
+    }
 
     // 2. Set the emoji/icon (logic remains the same)
     const elementId = currentEncounterCell.dataset.elementId;
@@ -1317,17 +1923,14 @@ function handleEncounter(card, verbKey) {
     if (isSuccess) {
         // FULL SUCCESS
         displayMessage('SUCCESS!', 'success');
+        triggerFeedback(encounterCell, 'feedback-success');
 
         // Start dissolve animation and mark as defeated after it's done
         encounterCell.classList.add('dissolve');
         setTimeout(() => {
             encounterCell.classList.remove('dissolve');
             encounterCell.classList.add('defeated');
-            const existingCard = findCardById(rewardId);
-            // Check if the card exists and is in the products row
-            if (existingCard && existingCard.parentElement === row2) {
-                row1.appendChild(existingCard); // Moves the card to the reagents row
-            }
+            moveRewardToReagentsIfOwned(rewardId);
             encounterCell.innerHTML = encounterCell.dataset.icon;
             // Add the rewarded element (will untap or add new)
             addCardToRow(rewardId, row1);
@@ -1338,6 +1941,7 @@ function handleEncounter(card, verbKey) {
             }
             // Reset encounter state (clears preview and selection)
             resetEncounterState();
+            saveGameState();
         }, 500); // 500ms matches the CSS animation duration
 
     } else if (isHalfSuccess) {
@@ -1359,6 +1963,7 @@ function handleEncounter(card, verbKey) {
             if (persistentHalfSuccesses[encounterKey].size >= 2) {
                 // TWO UNIQUE HALF SUCCESSES = FULL SUCCESS
                 displayMessage('TWO HALF SUCCESSES', 'success');
+                triggerFeedback(encounterCell, 'feedback-success');
 
                 encounterCell.classList.add('dissolve');
                 setTimeout(() => {
@@ -1366,9 +1971,11 @@ function handleEncounter(card, verbKey) {
                     encounterCell.classList.add('defeated');
                     encounterCell.innerHTML = encounterCell.dataset.icon;
                     defeatedEncounters.add(encounterKey);
+                    moveRewardToReagentsIfOwned(rewardId);
                     addCardToRow(rewardId, row1);
                     refreshZHintsIfSelected();
                     resetEncounterState();
+                    saveGameState();
                 }, 500);
 
             } else {
@@ -1382,14 +1989,18 @@ function handleEncounter(card, verbKey) {
                 }
                 counter.textContent = '1/2';
                 displayMessage('HALF SUCCESS', 'warning');
+                triggerFeedback(encounterCell, 'feedback-success');
+                saveGameState();
             }
         } else {
              // This verb has already been used for this encounter
              displayMessage('VERB ALREADY USED', 'warning');
+             triggerFeedback(encounterCell, 'feedback-failure');
              handleFailure(encounterKey);
         }
     } else {
         // FAILURE
+        triggerFeedback(encounterCell, 'feedback-failure');
         handleFailure(encounterKey);
     }
 }
@@ -1460,6 +2071,7 @@ function resetEncounterState() {
     currentEncounterCell = null;
     updatePreview(null); // This clears all preview elements back to the pawn
     document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
+    saveGameState();
 }
 
 // Function to display the win screen
@@ -1518,7 +2130,7 @@ for(let r=0;r<5;r++){
             }
 
             const remainingEncounters = countIncompleteEncounters();
-            const isBlockingActive = remainingEncounters > 2;
+            const isBlockingActive = remainingEncounters > 2 && !bottomRowEncounterKeys.has(data.key);
 
             if (isBlockingActive) {
                 // 2. If the block is active, perform the 3x failure check
@@ -1554,6 +2166,7 @@ for(let r=0;r<5;r++){
             pawn.className="pawn";
             pawn.textContent="♙";
             cell.appendChild(pawn);
+            saveGameState();
 
         });
     } else {
@@ -1579,10 +2192,12 @@ startingElements.forEach(id => {
     addCardToRow(id, row1);
 });
 
-// Initialize combinations list
-updateCombinationsList();
-
-initializeDefeatedEncounters();
+if (!loadGameState()) {
+    // Initialize combinations list
+    updateCombinationsList();
+    initializeDefeatedEncounters();
+    saveGameState();
+}
 
 // Event listeners for buttons
 fuseButton.addEventListener('click', () => {
@@ -1591,8 +2206,10 @@ fuseButton.addEventListener('click', () => {
         document.querySelectorAll('.card-slot.selected-reagent').forEach(c => {
              c.classList.remove('selected-reagent', 'fusable', 'unfusable');
              c.style.border = ''; // Clear custom border from single selection
+             c.style.boxShadow = '';
         });
         selectedReagents = [];
+        saveGameState();
         return;
     }
 
@@ -1605,6 +2222,7 @@ fuseButton.addEventListener('click', () => {
         // SUCCESSFUL FUSION
         const productAdded = addCardToRow(product, row2, true); // Add to row2
         if (productAdded) {
+            stabilizeProductsRow();
             // Tap the FIRST selected card. `selectedReagents` is still in its original click order.
             const cardToTap = document.querySelector(`.card-slot[data-element-id="${selectedReagents[0]}"]:not(.tapped)`);
             if (cardToTap) {
@@ -1615,34 +2233,45 @@ fuseButton.addEventListener('click', () => {
             const recipeString = `${selectedReagents[0]} + ${selectedReagents[1]} = ${product}`;
             successfulCombinations.push(recipeString);
             updateCombinationsList();
+            document.querySelectorAll('.card-slot.selected-reagent').forEach(c => triggerFeedback(c, 'feedback-success'));
         }
     } else {
-        // FAILED FUSION: NO REACTION - NO TAP
-        const elementName = elementData[product].name;
-        displayMessage(`Element "${elementName}" already obtained`, 'warning');
+        // FAILED FUSION: no reaction or duplicate result
+        if (!product) {
+            displayMessage('NO REACTION', 'warning');
+        } else {
+            const elementName = elementData[product]?.name || 'Unknown';
+            displayMessage(`Element "${elementName}" already obtained`, 'warning');
+        }
+        document.querySelectorAll('.card-slot.selected-reagent').forEach(c => triggerFeedback(c, 'feedback-failure'));
     }
 
     // 2. Clear selection and highlighting after attempt (success or failure)
     document.querySelectorAll('.card-slot.selected-reagent').forEach(c => {
         c.classList.remove('selected-reagent', 'fusable', 'unfusable');
         c.style.border = ''; // Clear custom border
+        c.style.boxShadow = '';
     });
 
     selectedReagents = [];
+    saveGameState();
 });
 
 untapButton.addEventListener('click', () => {
     // 1. Remove all elements from the products row
     row2.innerHTML = '';
+    stabilizeProductsRow();
 
     // 2. Untap all cards in the reagents row
     row1.querySelectorAll('.card-slot').forEach(card => {
         card.classList.remove('tapped', 'selected-reagent', 'fusable', 'unfusable');
         card.style.border = ''; // Reset any highlight borders
+        card.style.boxShadow = '';
     });
 
     // 3. Clear the selected reagents array
     selectedReagents = [];
+    saveGameState();
 
 });
 
@@ -1666,6 +2295,29 @@ document.addEventListener('DOMContentLoaded', (event) => {
         closeButton.addEventListener('click', hideWinScreen);
     }
 });
+
+// Rules column toggle (close with X, reopen with floating Rules button)
+const rulesOpenBtn = document.getElementById('rulesOpenBtn');
+const rulesCloseBtn = document.getElementById('rulesCloseBtn');
+const resetGameBtn = document.getElementById('resetGameBtn');
+function setRulesClosed(closed) {
+    document.body.classList.toggle('rules-closed', !!closed);
+    try {
+        localStorage.setItem('alxRulesClosed', closed ? '1' : '0');
+    } catch (e) { /* ignore */ }
+}
+// Start OPEN by default (regardless of prior localStorage state).
+setRulesClosed(false);
+if (rulesOpenBtn) rulesOpenBtn.addEventListener('click', () => setRulesClosed(false));
+if (rulesCloseBtn) rulesCloseBtn.addEventListener('click', () => setRulesClosed(true));
+function resetSavedGame() {
+        if (!confirm('Reset the game and erase saved progress?')) return;
+        try {
+            localStorage.removeItem(SAVE_KEY);
+        } catch (e) { /* ignore */ }
+        window.location.reload();
+}
+if (resetGameBtn) resetGameBtn.addEventListener('click', resetSavedGame);
 
 </script>
 
