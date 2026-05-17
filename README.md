@@ -20,6 +20,8 @@ Fusing elements
 
 In order to create a new element, click on two elements in your reagents row and click the “fuse” button. The first element you clicked on will be temporarily deactivated as a cost. If you want these back, you can click “Untap all”, which gives reactivated all your elements but gets rid of all the new elements you have created in the products row. Some combinations of elements are not possible and will be highlighted in red when you select them. Some elements with a special symbol are final products and cannot be used to make any new fusions. 
 
+Developer note: **Encounter resolver helper** (`alchemyhelper.html`) can be refreshed from game data with `npm run sync-helper` after editing encounter definitions or `fuseList` in `alx.html`. Optional: `npm run analyze-depth` reports fusion-wave depth from encounter rewards (ids ≤ 60 in `scripts/analyze-reward-depth.mjs`, excludes terminal elements from rankings). **`npm run simulate-solvability`** runs a Monte Carlo *fusion-closure* solvability study (`scripts/simulate-solvability.mjs`; see file header for model limits).
+
 Improvements roadmap: 
 
 Improve rules and add visuals, tutorial

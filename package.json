@@ -1,0 +1,9 @@
+{
+  "name": "periodic-fable",
+  "private": true,
+  "scripts": {
+    "sync-helper": "node scripts/sync-alchemy-helper.mjs",
+    "analyze-depth": "node scripts/analyze-reward-depth.mjs",
+    "simulate-solvability": "node scripts/simulate-solvability.mjs"
+  }
+}

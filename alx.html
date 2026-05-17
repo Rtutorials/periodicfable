@@ -38,6 +38,8 @@
   --sidebar-w: clamp(280px, 26vw, 360px);
   /* Second grid column: rules panel width, or 0 when hidden (keeps column 1 width math stable) */
   --rules-track: minmax(260px, var(--sidebar-w));
+  --floating-dock-pad-bottom: clamp(116px, 22vw, 155px);
+  --floating-dock-offset-right: calc(var(--sidebar-w) + 42px); /* sidebar + gap + breathing room */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -60,7 +62,7 @@ body{
   grid-column:2/3; /* Rules panel column */
   grid-row:1/2;
   position: relative;
-  z-index: 2100;
+  z-index: 1050;
   background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);
   border-radius:var(--radius);
   padding:15px;
@@ -72,6 +74,7 @@ body{
   overflow-y:auto;
   justify-self:end;
   width:min(100vw, var(--sidebar-w));
+  padding-bottom: calc(15px + var(--floating-dock-pad-bottom));
 }
 .logo{
   width:50px;height:50px;
@@ -173,6 +176,7 @@ p.subtitle{color:var(--muted);font-size:12px}
   min-width: 0; /* Safari/grid: allow shrinking so inner flex rows stay horizontal */
   gap:10px;
   padding-top: 10px;
+  padding-bottom: var(--floating-dock-pad-bottom);
   overflow-y: auto; /* Allow vertical scrolling if needed */
   overflow-x: hidden; /* Avoid ugly horizontal scroll bar */
 }
@@ -208,39 +212,95 @@ p.subtitle{color:var(--muted);font-size:12px}
   color: #fce38a;
 }
 
-.rules-open-btn{
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 2000;
-  background: var(--panel);
-  border: 1px solid rgba(201,168,74,0.35);
-  color: var(--accent);
-  border-radius: 12px;
-  padding: 12px 18px;
-  cursor: pointer;
-  font-weight: 800;
-  font-size: 15px;
-  min-height: 44px;
-  display: none;
-  box-shadow: var(--glow);
+.rules-open-inline{
+  background: var(--panel) !important;
+  border: 1px solid rgba(201,168,74,0.35) !important;
+  color: var(--accent) !important;
 }
-.rules-open-btn:hover{
-  background: rgba(255,255,255,0.03);
+.rules-open-inline:hover{
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(201,168,74,0.5) !important;
 }
+
 .floating-controls{
   position: fixed;
   top: auto;
   bottom: 14px;
   right: 14px;
-  z-index: 2000;
-  display:flex;
-  gap:8px;
-  align-items:center;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 10px 12px;
+  margin: 0;
+  box-sizing: border-box;
+  max-width: calc(100vw - 28px);
+  background: rgba(8, 5, 9, 0.92);
+  border: 1px solid rgba(201,168,74,0.14);
+  border-radius: var(--radius);
+  box-shadow:
+    var(--glow),
+    0 -4px 32px rgba(0,0,0,0.45);
 }
-.floating-controls .rules-open-btn{
-  position: static;
+
+/* Side-by-side layout: tuck dock above the sidebar column so rules never obscure it */
+@media (min-width: 1201px) {
+  body:not(.rules-closed) .floating-controls{
+    right: var(--floating-dock-offset-right);
+    max-width: min(
+      840px,
+      max(280px, calc(100vw - var(--floating-dock-offset-right) - 48px))
+    );
+  }
 }
+
+@media (max-width: 1200px) {
+  body:not(.rules-closed) .floating-controls{
+    max-width: calc(100vw - 28px);
+  }
+}
+
+.floating-dock-row--dock-bar{
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.floating-dock-rules-btn{
+  flex: 0 0 auto;
+}
+/* Compact Rules chip — matches challenge row height */
+.floating-dock-row--dock-bar .floating-reset-btn.rules-open-inline{
+  padding: 7px 11px !important;
+  font-size: 11px !important;
+  min-height: 36px !important;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.floating-dock-row--dock-bar .floating-reset-btn.rules-open-inline.rules-toggle-active{
+  border-color: rgba(201, 168, 74, 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(201, 168, 74, 0.25),
+    0 0 14px rgba(201, 168, 74, 0.28),
+    var(--glow);
+}
+
+.floating-dock-row--dock-bar .floating-reset-btn.challenge-map-btn{
+  flex: 1 1 72px;
+  min-width: 72px;
+  padding: 7px 5px !important;
+  font-size: 9.5px !important;
+  min-height: 36px !important;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 .floating-reset-btn{
   background:rgba(120, 20, 28, 0.88);
   color:#ffd9dd;
@@ -257,20 +317,31 @@ p.subtitle{color:var(--muted);font-size:12px}
   background:rgba(150, 28, 38, 0.96);
   border-color:rgba(255, 120, 135, 0.6);
 }
+.floating-reset-btn.challenge-map-btn{
+  font-size: 12px;
+  padding: 8px 10px;
+  min-height: 40px;
+  background: rgba(40, 62, 90, 0.88);
+  color: #cce7ff;
+  border-color: rgba(100, 160, 220, 0.35);
+}
+.floating-reset-btn.challenge-map-btn:hover{
+  background: rgba(50, 82, 120, 0.96);
+  border-color: rgba(120, 180, 255, 0.5);
+}
+.floating-reset-btn.challenge-map-btn.challenge-map-btn--active{
+  box-shadow: 0 0 0 2px rgba(201, 168, 74, 0.85), 0 0 14px rgba(201, 168, 74, 0.4);
+  border-color: rgba(201, 168, 74, 0.9);
+  background: rgba(55, 45, 22, 0.95);
+  color: #ffe8b0;
+}
+.floating-reset-btn.challenge-map-btn.challenge-map-btn--active:hover{
+  background: rgba(65, 52, 24, 0.98);
+  border-color: rgba(230, 200, 120, 0.95);
+}
 
 body.rules-closed .sidebar{
   display:none;
-}
-body:not(.rules-closed) .floating-controls{
-  top: auto;
-  bottom: 14px;
-  right: 14px;
-}
-body:not(.rules-closed) .floating-reset-btn{
-  display:none;
-}
-body.rules-closed .rules-open-btn{
-  display:block;
 }
 body.rules-closed{
   --rules-track: 0px;
@@ -279,23 +350,15 @@ body.rules-closed .main{
   grid-column: 1 / 2;
 }
 
-/* On smaller windows, keep the floating Rules button
-   away from the encounter panel area. */
-@media (max-width: 1100px) {
-  .floating-controls{
-    top: auto;
-    bottom: 14px;
-    right: 14px;
-  }
-}
-
 /* Responsive: avoid horizontal scroll by stacking on narrow widths */
 @media (max-width: 1200px) {
   body{
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
     justify-content: stretch;
-    padding: 12px 12px 12px 14px;
+    padding: 12px 14px 16px max(14px, env(safe-area-inset-left, 0px));
+    padding-right: max(14px, env(safe-area-inset-right, 0px));
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
   }
   .main{
     grid-column: 1 / 2;
@@ -527,7 +590,7 @@ body.rules-closed .main{
 /* NEW: Encounter Message Box Styling - in normal flow so messages are never clipped (Safari/Main overflow) */
 .encounter-message-box {
     width: 100%;
-    min-height: 0;
+    min-height: 58px; /* Stable slot — messages overlay here so fading does not reflow preview */
     position: relative;
     left: auto;
     bottom: auto;
@@ -538,10 +601,7 @@ body.rules-closed .main{
     border-radius: var(--radius);
     padding: 0 4px;
     box-shadow: none;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    display: block;
     pointer-events: none;
     z-index: 20;
 }
@@ -565,18 +625,20 @@ body.rules-closed .main{
 
 /* The actual message item that appears and fades */
 .message-item {
-    width: 100%;
+    width: calc(100% - 8px);
+    max-width: 100%;
     padding: 8px;
     border-radius: 6px;
     text-align: center;
     font-weight: 800;
     box-shadow: 0 0 10px rgba(0,0,0,0.3);
     animation: fadeout 3s forwards;
-    position: relative;
-    top: 0;
-    left: 0;
-    transform: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     pointer-events: none;
+    margin: 0;
 }
 .message-item.default {
     background: rgba(139, 0, 0, 0.9);
@@ -851,7 +913,7 @@ body.rules-closed .main{
     display: none; /* Starts hidden */
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure it's on top of everything */
+    z-index: 12000; /* Above sidebar (1050), nicely-done (1002), floating dock (3000) */
     opacity: 0;
     transition: opacity 0.5s ease;
 }
@@ -885,7 +947,26 @@ body.rules-closed .main{
 .win-message {
     color: var(--muted);
     font-size: 1.5rem;
-    margin-bottom: 30px;
+    margin-bottom: 16px;
+}
+.win-finale-art {
+    display: block;
+    width: 100%;
+    max-width: min(440px, 90vw);
+    max-height: min(40vh, 380px);
+    height: auto;
+    object-fit: contain;
+    margin: 0 auto 18px;
+    border-radius: 8px;
+}
+.win-finale-art[hidden] {
+    display: none !important;
+}
+.win-challenge {
+    font-size: 1.25rem;
+    color: rgba(230, 220, 200, 0.95);
+    margin-bottom: 12px;
+    font-weight: 600;
 }
 .win-moves {
     font-size: 1.2rem;
@@ -908,6 +989,73 @@ body.rules-closed .main{
 .win-close-button:hover {
     background-color: #fce38a; /* Lighter gold/yellow */
     transform: scale(1.05);
+}
+
+/* Notable-success overlay (paired with …x artwork in /alchemyart) */
+.nicely-done-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1002;
+    background: rgba(0, 0, 0, 0.72);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+}
+.nicely-done-overlay.visible {
+    display: flex;
+}
+.nicely-done-dialog {
+    position: relative;
+    max-width: min(460px, 92vw);
+    width: 100%;
+    background: var(--panel);
+    border: 0;
+    outline: none;
+    /* Hairline gold frame (readable as thinner than 1px border on retina) */
+    box-shadow:
+        inset 0 0 0 1px rgba(201, 168, 74, 0.35),
+        0 8px 32px rgba(0, 0, 0, 0.48);
+    border-radius: var(--radius);
+    padding: 10px 12px 14px;
+}
+.nicely-done-title {
+    margin: 0 28px 8px 0;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    color: var(--accent);
+    text-align: center;
+    letter-spacing: 0.03em;
+    text-shadow: 0 0 10px rgba(201, 168, 74, 0.35);
+}
+.nicely-done-art {
+    display: block;
+    width: 100%;
+    max-height: min(52vh, 420px);
+    height: auto;
+    object-fit: contain;
+    border-radius: 6px;
+    margin: 0 auto;
+}
+.nicely-done-close {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    width: 36px;
+    height: 36px;
+    line-height: 32px;
+    padding: 0;
+    font-size: 1.55rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--muted);
+    transition: background 0.15s, color 0.15s;
+}
+.nicely-done-close:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
 }
 
 /* Animation for the celebratory effect */
@@ -954,9 +1102,16 @@ body.rules-closed .main{
 </style>
 </head>
 <body>
-<div class="floating-controls">
-  <button id="resetGameBtn" class="floating-reset-btn" type="button">Reset Game</button>
-  <button id="rulesOpenBtn" class="rules-open-btn" type="button" aria-label="Open rules">Rules</button>
+<div class="floating-controls" role="toolbar" aria-label="Game controls">
+  <div class="floating-dock-row floating-dock-row--dock-bar" role="group" aria-label="Rules and challenges">
+    <button id="rulesOpenBtn" type="button" class="floating-reset-btn rules-open-inline floating-dock-rules-btn" aria-label="Open rules panel">Rules</button>
+    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="1" data-finale-key="AZ" title="Sandwich finale">Challenge&nbsp;1</button>
+    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="2" data-finale-key="Z" title="The Alchemists Endgame finale">Challenge&nbsp;2</button>
+    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="3" data-finale-key="EZ" title="The Alchemists Voyage finale">Challenge&nbsp;3</button>
+    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="4" data-finale-key="BZ" title="Hero finale">Challenge&nbsp;4</button>
+    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="5" data-finale-key="DZ" title="Landmark finale">Challenge&nbsp;5</button>
+    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="6" data-finale-key="FZ" title="Accident finale — Humpty Dumpty">Challenge&nbsp;6</button>
+  </div>
 </div>
 <div class="sidebar">
   <div class="rules-header">
@@ -964,14 +1119,14 @@ body.rules-closed .main{
     <button class="rules-close-btn" id="rulesCloseBtn" type="button" aria-label="Close rules">×</button>
   </div>
   <p class="subtitle">    
-  <div class="instructions">  Welcome to Periodic Fable (name subject to change), a solo alchemy puzzle game. In this game you are trying to use elements to clear encounters, gain rewards, and fuse together elements to make new ones. In the same style of games such as Little Alchemy and Doodle God, you can combine two elements to make a new one, for example Fire + Earth would give you Rock. The goal of the first scenario is to create Gold in the final room. 
+  <div class="instructions">  Welcome to Periodic Fable, a solo alchemy puzzle game. In this game you are trying to use elements to clear encounters, gain rewards, and fuse together elements to make new ones. For example, Fire + Earth would give you Rock. The goal of the each scenario is to win the encounter in the final room. 
     <br>
     <br>
     <strong>Encounters</strong>
     <br>
     <br>
     <p>
-        The map is a grid of encounters, each with an element that is both the theme of the challenge and the element you get as a reward. For example, if you move to the “Fire” space of the map you face the Phoenix. Encounters that start with “The” are not combats and are more like physical puzzles. Encounters in the first rows are easier, while those in later rows are more difficult.
+        The map is a grid of encounters, each with an element that is both the theme of the challenge and the element you get as a reward. For example, if you move to the “Fire” space of the map you face the Phoenix. Encounters that start with “The” are not combats and are more like physical puzzles. Encounters in the first rows are easier, while those in later rows are more difficult. Solving each encounter in the bottom row will unlock a hint to solve the final encounter.
     </p>
     <br>
     <p>
@@ -1012,7 +1167,7 @@ body.rules-closed .main{
             <div class="selected-encounter-hint" id="selectedEncounterHint"></div>
             <div class="preview-title" id="previewTitle"></div>
             <img class="preview-art" id="previewArt" alt="">
-            <div class="big" id="preview">♙</div>
+            <div class="big" id="previewGlyph">♙</div>
             <div class="element-name-subtitle" id="elementNameSubtitle"></div> 
             <div class="hint-box" id="hintBox"></div>
         </div>
@@ -1047,6 +1202,7 @@ body.rules-closed .main{
 </div>
 
 <script>
+const SAVE_KEY = 'alxGameStateV1';
 // --- START: DATA SETUP ---
 // Map element IDs to their appropriate CSS color variable name
 const elementColorMap = {
@@ -1086,7 +1242,7 @@ const elementData = {
     '4': { name: 'Water', emoji: '💧', verbs: ['Flood'], terminal: false },
     '5': { name: 'Energy', emoji: '⚡', verbs: ['Zap'], terminal: false },
     '6': { name: 'Steam', emoji: '💨', verbs: ['Puff', 'Boil'], terminal: false },
-    '7': { name: 'Rock', emoji: '🪨', verbs: ['Block', 'Gift'], terminal: false },
+    '7': { name: 'Rock', emoji: '🪨', verbs: ['Block', 'Throw', 'Gift'], terminal: false },
     '8': { name: 'Plant', emoji: '🌿', verbs: ['Entangle'], terminal: false },
     '9': { name: 'Ice', emoji: '❄️', verbs: ['Cool', 'Freeze'], terminal: false },
     '10': { name: 'Dust', emoji: '✨', verbs: ['Dry', 'Blind'], terminal: false },
@@ -1095,7 +1251,7 @@ const elementData = {
     '13': { name: 'Metal', emoji: '🔩', verbs: ['Protect'], terminal: false },
     '14': { name: 'Sound', emoji: '🔊', verbs: ['Deafen', 'Yell'], terminal: false },
     '15': { name: 'Tobacco', emoji: '🚬', verbs: ['Smoke', 'Gift'], terminal: true },
-    '16': { name: 'Kelp', emoji: '🌿', verbs: ['Gift'], terminal: true },
+    '16': { name: 'Music', emoji: '🎵', verbs: ['Groove'], terminal: true },
     '17': { name: 'Tree', emoji: '🌳', verbs: ['Grow', 'Gift'], terminal: false },
     '18': { name: 'Snow', emoji: '🌨️', verbs: ['Chill'], terminal: true },
     '19': { name: 'Soup', emoji: '🥣', verbs: ['Gift'], terminal: true },
@@ -1119,10 +1275,10 @@ const elementData = {
     '37': { name: 'Love', emoji: '❤️', verbs: ['Romance'], terminal: false },
     '38': { name: 'Death', emoji: '💀', verbs: ['Kill'], terminal: false },
     '39': { name: 'Sky', emoji: '🌤️', verbs: ['Fly'], terminal: false },
-    '40': { name: 'Bow', emoji: '🏹', verbs: ['Shoot'], terminal: true },
-    '41': { name: 'Sword', emoji: '🗡️', verbs: ['Stab'], terminal: true },
+    '40': { name: 'Bow', emoji: '🏹', verbs: ['Shoot', 'Gift'], terminal: true },
+    '41': { name: 'Sword', emoji: '🗡️', verbs: ['Stab', 'Gift'], terminal: true },
     '42': { name: 'Explosion', emoji: '💥', verbs: ['Combust'], terminal: true },
-    '43': { name: 'Gun', emoji: '🔫', verbs: ['Shoot'], terminal: false },
+    '43': { name: 'Gun', emoji: '🔫', verbs: ['Shoot', 'Gift'], terminal: false },
     '44': { name: 'Robot', emoji: '🤖', verbs: ['Gift'], terminal: true },
     '45': { name: 'Blood', emoji: '🩸', verbs: ['Throw', 'Gift'], terminal: true },
     '46': { name: 'Cloud', emoji: '☁️', verbs: ['Obscure', 'Cushion'], terminal: false },
@@ -1159,7 +1315,7 @@ const elementData = {
     '77': { name: 'Statue', emoji: '🗽', verbs: ['Gift'], terminal: false },
     '78': { name: 'Fireworks', emoji: '🎆', verbs: ['Ignite', 'Gift'], terminal: true },
     '79': { name: 'Gold', emoji: '🏅', verbs: ['Gift'], terminal: true },
-    '80': { name: 'Police', emoji: '👮', verbs: ['Fight', 'Gift'], terminal: true },
+    '80': { name: 'Police', emoji: '👮', verbs: ['Arrest', 'Gift'], terminal: true },
     '81': { name: 'Map', emoji: '🗺️', verbs: ['Gift'], terminal: true },
     '82': { name: 'Mayonnaise', emoji: '🧴', verbs: ['Gift'], terminal: true },
     '89': { name: 'Spiderman', emoji: '🦸🏻‍♂️', verbs: ['Gift'], terminal: true },
@@ -1170,7 +1326,7 @@ const elementData = {
     '94': { name: 'Airplane', emoji: '✈️', verbs: ['Soar'], terminal: true },
     '95': { name: 'Audiobook', emoji: '🎧', verbs: ['Gift'], terminal: true },
     '96': { name: 'Treehouse', emoji: '🏡', verbs: ['Gift'], terminal: true },
-    '97': { name: 'Sauna', emoji: '🧖‍♀️', verbs: ['Heat'], terminal: true },
+    '97': { name: 'Sauna', emoji: '🧖‍♀️', verbs: ['Warm'], terminal: true },
     '98': { name: 'Sunscreen', emoji: '🧴', verbs: ['Spread'], terminal: true },
     '99': { name: 'Sweat', emoji: '💦', verbs: ['Perspire'], terminal: true },
     '100': { name: 'Maraca', emoji: '🪇', verbs: ['Shake', 'Gift'], terminal: true },
@@ -1196,40 +1352,499 @@ const fuseList = [
     '1 + 2 = 5', '1 + 3 = 10', '1 + 4 = 9', '1 + 5 = 27', '1 + 6 = 46', '1 + 7 = 10', '1 + 8 = 11', '1 + 9 = 18', '1 + 10 = 46', '1 + 11 = 70', '1 + 26 = 59', '1 + 27 = 14', '1 + 28 = 53', '1 + 29 = 50', '1 + 31 = 50', '1 + 34 = 71', '1 + 38 = 53', '1 + 39 = 46', '1 + 46 = 39', '1 + 50 = 39', '1 + 62 = 94',
     '2 + 3 = 7', '2 + 4 = 6', '2 + 5 = 12', '2 + 8 = 55', '2 + 9 = 4', '2 + 10 = 26', '2 + 11 = 10', '2 + 12 = 78', '2 + 13 = 12', '2 + 17 = 5', '2 + 26 = 65', '2 + 28 = 5', '2 + 29 = 51', '2 + 30 = 42', '2 + 31 = 12', '2 + 32 = 38', '2 + 33 = 37', '2 + 34 = 43', '2 + 35 = 10', '2 + 43 = 38', '2 + 47 = 42', '2 + 51 = 12', '2 + 52 = 57', '2 + 62 = 30', '2 + 66 = 10', '2 + 67 = 10', '2 + 74 = 10',
     '3 + 4 = 8', '3 + 5 = 29', '3 + 7 = 29', '3 + 8 = 30', '3 + 9 = 18', '3 + 10 = 35', '3 + 11 = 70', '3 + 13 = 7', '3 + 26 = 65', '3 + 27 = 65', '3 + 28 = 33', '3 + 29 = 7', '3 + 30 = 7', '3 + 31 = 13', '3 + 33 = 32', '3 + 36 = 81', '3 + 50 = 29', '3 + 51 = 29', '3 + 66 = 81', '4 + 10 = 46',
-    '4 + 5 = 27', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 8 = 17', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 38 = 45', '4 + 39 = 46', '4 + 46 = 39', '4 + 50 = 3', '4 + 51 = 31', '4 + 52 = 22', '4 + 62 = 74',
+    '4 + 5 = 27', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 8 = 17', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 36 = 113', '4 + 38 = 45', '4 + 39 = 46', '4 + 46 = 39', '4 + 50 = 3', '4 + 51 = 31', '4 + 52 = 22', '4 + 62 = 74',
     '5 + 6 = 27', '5 + 8 = 23', '5 + 13 = 34', '5 + 17 = 2', '5 + 27 = 14', '5 + 28 = 42', '5 + 30 = 42', '5 + 32 = 36', '5 + 33 = 36', '5 + 35 = 33', '5 + 37 = 33', '5 + 38 = 43', '5 + 39 = 14', '5 + 47 = 42', '5 + 50 = 29', '5 + 51 = 12', '6 + 8 = 56', '6 + 13 = 5', '6 + 27 = 5', '6 + 29 = 5', '6 + 34 = 5', '6 + 39 = 46', '6 + 52 = 57', '6 + 62 = 5', '7 + 8 = 30', '7 + 9 = 26', '7 + 11 = 70', '7 + 26 = 65', '7 + 29 = 14', '7 + 32 = 77', '7 + 33 = 73', '7 + 35 = 10', '7 + 49 = 77', '7 + 50 = 29', '7 + 51 = 29', '8 + 9 = 58', '8 + 12 = 17', '8 + 13 = 41', '8 + 27 = 30', '8 + 28 = 15', '8 + 30 = 56', '8 + 31 = 15', '8 + 33 = 52', '8 + 37 = 64', '8 + 38 = 15', '8 + 51 = 17', '9 + 27 = 4', '9 + 29 = 4', '9 + 30 = 20', '9 + 34 = 71', '9 + 51 = 4', '10 + 12 = 31', '10 + 27 = 26', '10 + 28 = 53', '10 + 29 = 46', '10 + 31 = 50', '10 + 34 = 24', '10 + 35 = 7', '10 + 38 = 53', '10 + 39 = 46', '10 + 50 = 3', '10 + 52 = 53', '11 + 13 = 40', '11 + 17 = 70', '11 + 34 = 70', '11 + 35 = 10', '11 + 36 = 63', '11 + 52 = 67', '12 + 13 = 54', '12 + 17 = 76', '12 + 26 = 54', '12 + 31 = 37', '12 + 39 = 51', '12 + 46 = 39', '12 + 50 = 51', '12 + 51 = 5', '13 + 14 = 60', '13 + 26 = 54', '13 + 29 = 92', '13 + 30 = 72', '13 + 33 = 44', '13 + 36 = 34', '13 + 38 = 41', '14 + 26 = 59', '14 + 32 = 49', '14 + 36 = 49', '17 + 27 = 8', '17 + 31 = 38', '17 + 35 = 76', '17 + 36 = 66', '17 + 51 = 76', '26 + 27 = 65', '26 + 31 = 75', '26 + 32 = 36', '26 + 34 = 69', '26 + 49 = 77', '26 + 51 = 75', '26 + 62 = 26', '27 + 29 = 1', '27 + 30 = 65', '27 + 34 = 13', '27 + 35 = 65', '27 + 47 = 42', '27 + 51 = 12', '27 + 62 = 13', '28 + 30 = 2', '28 + 33 = 53', '28 + 35 = 33', '28 + 38 = 53', '28 + 47 = 42', '28 + 50 = 3', '28 + 52 = 38', '28 + 62 = 30', '29 + 31 = 50', '29 + 50 = 35', '29 + 52 = 38', '30 + 34 = 62', '30 + 47 = 42', '30 + 52 = 57', '30 + 62 = 5', '30 + 73 = 82', '31 + 32 = 47', '31 + 33 = 38', '31 + 39 = 50', '31 + 51 = 50', '31 + 52 = 67', '31 + 67 = 38', '32 + 33 = 45', '32 + 34 = 44', '32 + 35 = 36', '32 + 36 = 66', '32 + 37 = 33', '32 + 38 = 47', '32 + 43 = 80', '32 + 47 = 38', '32 + 53 = 38', '32 + 67 = 89', '33 + 34 = 44', '33 + 35 = 38', '33 + 36 = 52', '33 + 37 = 73', '33 + 50 = 3', '33 + 52 = 73', '34 + 35 = 69', '34 + 36 = 48', '34 + 38 = 43', '35 + 36 = 66', '35 + 38 = 10', '35 + 50 = 29', '35 + 51 = 31', '35 + 52 = 38', '35 + 62 = 13', '35 + 67 = 11', '35 + 73 = 52', '36 + 37 = 63', '36 + 52 = 68', '36 + 66 = 81', '36 + 74 = 81', '37 + 52 = 33', '37 + 63 = 61', '38 + 43 = 47', '38 + 46 = 53', '38 + 47 = 42', '38 + 51 = 31', '38 + 52 = 67', '39 + 46 = 31', '39 + 62 = 26', '43 + 47 = 38', '43 + 52 = 38', '46 + 51 = 31', '47 + 52 = 38', '47 + 67 = 38', '50 + 51 = 29', '51 + 62 = 26', '52 + 53 = 38', '52 + 73 = 33', '53 + 67 = 38', '66 + 74 = 81',
-    '2 + 39 = 51', '4 + 8 = 17', '13 + 51 = 79', '1 + 62 = 94','1 + 74 = 94','1 + 73 = 102','2 + 32 = 106','2 + 73 = 101','3 + 7 = 115','3 + 27 = 115','3 + 35 = 115','4 + 32 = 99','4 + 52 = 113','5 + 52 = 93','6 + 7 = 97','6 + 32 = 97','6 + 34 = 97','6 + 35 = 97','6 + 73 = 101','7 + 27 = 65','7 + 37 = 65','8 + 52 = 93','9 + 52 = 114','10 + 13 = 24','10 + 34 = 24','11 + 17 = 96','12 + 13 = 105','12 + 34 = 105','12 + 36 = 105','14 + 52 = 103','14 + 66 = 95','14 + 73 = 100','17 + 32 = 96','17 + 34 = 96','17 + 52 = 93','26 + 37 = 65','26 + 73 = 100','27 + 73 = 101','29 + 32 = 107','29 + 34 = 92','29 + 36 = 107','29 + 73 = 102','30 + 51 = 98','31 + 52 = 103','32 + 34 = 44','32 + 39 = 99','32 + 51 = 99','32 + 66 = 95','32 + 67 = 89','32 + 103 = 104','34 + 62 = 91','34 + 66 = 95','34 + 73 = 100','35 + 52 = 73','39 + 52 = 111','46 + 52 = 111','50 + 74 = 108','51 + 52 = 110','51 + 73 = 102','52 + 3 = 112','52 + 7 = 112','52 + 8 = 112','52 + 9 = 114','52 + 17 = 109','52 + 27 = 112','62 + 66 = 95','77 + 115 = 116'
+    '2 + 39 = 51', '4 + 8 = 17', '13 + 51 = 79', '1 + 62 = 94','1 + 74 = 94','1 + 73 = 102','2 + 32 = 106','2 + 73 = 101','3 + 7 = 115','3 + 27 = 115','3 + 35 = 115','4 + 32 = 99','4 + 52 = 113','5 + 52 = 93','6 + 7 = 97','6 + 32 = 97','6 + 34 = 97','6 + 35 = 97','6 + 73 = 101','7 + 27 = 65','7 + 37 = 65','8 + 52 = 93','9 + 52 = 114','10 + 13 = 24','10 + 34 = 24','11 + 17 = 96','12 + 13 = 105','12 + 34 = 105','12 + 36 = 105','14 + 52 = 103','14 + 66 = 95','14 + 73 = 100','17 + 32 = 96','17 + 34 = 96','17 + 52 = 93','26 + 37 = 65','26 + 73 = 100','27 + 73 = 101','29 + 32 = 107','29 + 34 = 92','29 + 36 = 107','29 + 73 = 102','30 + 51 = 98','31 + 52 = 103','32 + 34 = 44','32 + 39 = 99','32 + 51 = 99','32 + 66 = 95','32 + 67 = 89','32 + 103 = 104','34 + 62 = 91','34 + 66 = 95','34 + 73 = 100','35 + 52 = 73','39 + 52 = 111','46 + 52 = 111','50 + 74 = 108','51 + 52 = 110','51 + 73 = 102','52 + 3 = 112','52 + 7 = 112','52 + 8 = 112','52 + 9 = 114','52 + 17 = 109',    '52 + 27 = 112',
+    '62 + 66 = 95','77 + 115 = 116',
+    '1 + 14 = 16','1 + 49 = 16','2 + 7 = 21'
 ];
 
 // Encounter Data
 const encounterEffects = {
-    'A': { name: 'Fire- Phoenix', hint1: 'Physical damage seems to be ineffective against it, he is made not of solid material but flame itself.', hint2: 'You will need to put out his fire somehow.', effects: ['1A', '4A', '18A', '-9A', '-9B', '-35A', '-42A', '46B', '40A', '45A', '-28A', '-37A', '98A', '106A'] },
-    'B': { name: 'Earth- Desert Golem', hint1: 'A large tough humanoid creature made of tightly compacted sand.', hint2: 'No physical wounds seems to harm it, it must be separated.', effects: ['4A', '1A', '3B', '26B', '28B', '-28A', '35B', '-37A', '38A', '42A', '47A', '40A', '90A', '106A'] },
-    'C': { name: 'Water- Whispghost', hint1: 'No physical wounds seem to harm it.', hint2: 'It is made of mist and smoke that need to be torn apart somehow.', effects: ['1A', '28B', '6A', '6B', '10A', '51A', '-28A', '-35B', '38A', '-42A', '-47A', '40A', '90A'] },
-    'D': { name: 'Air- Sacmonster', hint1: 'A beast that looks like a pair of giant lungs.', hint2: 'You will need to stop its air flow somehow.', effects: ['42A', '2A', '8A', '10A', '11B', '15A', '27A', '28A', '38A', '40A', '41A', '42A', '43A', '47A', '52A', '53A', '55A', '65A', '111A'] },
-    'E': { name: 'Plant- Plantnnochio', hint1: 'The creature is a sturdy old toy.', hint2: 'Its distinctive nose is made of wood and looks vulnerable.', effects: ['2A', '5A', '28B', '34A', '-37A', '41A', '42A', '40A', '47A', '38A', '104A', '109A'] },
-    'F': { name: 'Ice- Frozen Tower', hint1: "This narrow siege tower is made of slippery ice", hint2: 'It seems easy to knock over', effects: ['-1A', '-2A', '3A', '26B', '-28B', '-30B', '-51A', '40A', '47A','-34A', '78A', '42A', '-43A', '104A', '97A'] },
-    'G': { name: 'Rope- Mummy', hint1: 'This creature seems to be wrapped in many strips.', hint2: 'The ropes and fabrics are its defences.', effects: ['2A', '-4A', '-1A', '-5A', '11A', '42A', '-30B', '-37A', '47A', '78A', '38A', '104A', '90A', '106A'] },
-    'H': { name: 'Light- Gorgon', hint1: 'The creature turns anyone it faces into stone.', hint2: 'The way it turns you to stone is by looking at you.', effects: ['-7A', '-29B', '-39A', '-40A', '-31A', '12B', '54A', '-37A', '38A', '10B', '51B', '-111A', '111B'] },
-    'I': { name: 'Metal- Automaton', hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A', '102A'] },
-    'J': { name: 'Sound- Banshee', hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '7A', '-13A', '-26A', '14A', '-40A', '50A', '38A', '92A', '94A', '115A', '104A'] },
-    'K': { name: 'Glass- Illusionist', hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11C', '9B', '26B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A', '104A'] },
-    'L': { name: 'Pressure- The Press', hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B', '112B'] },
-    'M': { name: 'Chemical- The Valley', hint1: 'Something invisible is causing you to get sick.', hint2: 'You must deal with the cloud of chemicals.', effects: ['1A', '28B', '6A', '29B', '39A', '90A', '94A', '115A'] },
-    'N': { name: 'Gravity- The Abnormality', hint1: 'The gravitational abnormality is slamming you against the ceiling, unable to move.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '29A', '39A', '-11A', '-13A', '62A', '102A'] },
-    'O': { name: 'Oil- The Swamp', hint1: 'When you try to cross you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '11A', '-11C', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A', '94A', '92A'] },
-    'P': { name: 'Darkness- Alucard', hint1: 'It is a man in a cape and bat wings.', hint2: 'He is a vampire who has never left the darkness of the indoors.', effects: ['12A', '-37A', '38A', '41A', '40A', '54A', '104A', '111B'] },
-    'Q': { name: 'Man- The Child', hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['20A', '22A', '23A', '48A', '-19A', '-44A', '-52A', '-7B', '-59B', '-61A', '-49A', '-63B', '-66A', '-68B', '-69A', '-74B', '-78B', '89A', '-91A', '96A', '100B', '104B', '108A', '114A'] },
-    'R': { name: 'Energy- Terror of the Tides', hint1: 'It takes the form of a deadly Eel.', hint2: 'It attacks using electricity.', effects: ['-4A', '-4B', '-10A', '-35A', '38A', '43A', '47A', '40A', '-37A', '104A', '106A', '111B', '114A'] },
-    'S': { name: 'Life- The Exchange', hint1: 'The being tells you that you will need to provide life in order to proceed.', hint2: 'You must give it life itself, or something similar.', effects: ['-52A', '17B', '33B', '32B', '-68B', '-67B', '89A', '93A', '102B', '103A', '104B', '109A', '110A', '111A', '112A', '113A', '114A'] },
-    'T': { name: 'Machine- Geared Dragon', hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from the air.', effects: ['-28A', '35A', '35B', '5A', '40A', '-34A', '-39A', '-29B', '-11B', '65A', '90A', '92A', '94A', '111B', '115A'] },
-    'U': { name: 'Time- Ritualists', hint1: 'The magicians are about to complete their ritual, which will make it impossible to beat them.', hint2: 'They are putting together a large clock, you will need to disrupt them.', effects: ['-34A', '-31A', '10B', '35B', '12B', '14B', '38A', '43A', '40A', '-104A', '111B', '113A', '97A', '-60A'] },
-    'V': { name: 'Intelligence- Doppelganger', hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-12B', '-54A', '-39A', '-29B', '11C', '36A', '32A', '62A', '37A', '70A', '91A', '-9B', '-11A', '-11B'] },
-    'W': { name: 'Love- The Gift', hint1: 'A lover tells you she feels heartbroken, she was expecting to receive something special from her valentine.', hint2: 'She wants to receive a heartfelt present.', effects: ['49A', '32B', '-15B', '-37A', '64A', '79A', '65C', '54B', '95A', '101A', '114A', '116A', '-33A'] },
-    'X': { name: 'Death- The Tribute', hint1: 'A solemn ceremony is taking place, one might wonder what would be appropriate to do here.', hint2: "An old man requests something to commemorate and honor his friend's memory.", effects: ['77A', '33A', '-59A', '-78A', '-17A', '-64A', '-65C', '-33A', '-32A', '49A'] },
-    'Z': { name: 'FINAL ROOM: The Alchemists Endgame', hint1: 'To win the game, enter this room and provide the alchemists most prized creation. Each completed encounter in the final row will reveal another hint.', hint2: "They say it is a metal that shines with the power of the sun", hint3: "The sun itself is fire in the sky", hint4: "The sky is clouds and air", hint5: "Clouds are steam and air, steam is water and air, try to piece this all together into a metal that shines like the sun", hint6: "You will need to give it gold which can be formed by combining sun and metal",  unlocksHints: ['U', 'W', 'K', 'X'], effects: ['79A'] }
+    'A': { name: 'Fire- Phoenix', difficultyLevel: 0, hint1: 'Physical damage seems to be ineffective against it, he is made not of solid material but flame itself.', hint2: 'You will need to put out his fire somehow.', effects: ['1A', '4A', '18A', '-9A', '-9B', '-35A', '-42A', '46B', '40A', '45A', '-28A', '-37A', '98A', '106A'] },
+    'B': { name: 'Earth- Desert Golem', difficultyLevel: 0, hint1: 'A large tough humanoid creature made of tightly compacted sand.', hint2: 'No physical wounds seems to harm it, it must be separated.', effects: ['4A', '1A', '-3A', '26B', '28B', '-28A', '35B', '-37A', '38A', '42A', '47A', '40A', '90A', '106A'] },
+    'C': { name: 'Water- Whispghost', difficultyLevel: 0, hint1: 'No physical wounds seem to harm it.', hint2: 'It is made of mist and smoke that need to be torn apart somehow.', effects: ['1A', '28B', '6A', '6B', '10A', '51A', '-28A', '-35B', '38A', '-42A', '-47A', '40A', '90A'] },
+    'D': { name: 'Air- Sacmonster', difficultyLevel: 0, hint1: 'A beast that looks like a pair of giant lungs.', hint2: 'You will need to stop its air flow somehow.', effects: ['42A', '2A', '8A', '10A', '11B', '15A', '27A', '28A', '38A', '40A', '41A', '42A', '43A', '47A', '52A', '53A', '55A', '65A', '111A'] },
+    'E': { name: 'Plant- Plantnnochio', difficultyLevel: 1, hint1: 'The creature is a sturdy old toy.', hint2: 'Its distinctive nose is made of wood and looks vulnerable.', effects: ['2A', '5A', '28B', '34A', '-37A', '41A', '42A', '40A', '47A', '38A', '104A', '109A'] },
+    'F': { name: 'Ice- Frozen Tower', difficultyLevel: 1, hint1: "This narrow siege tower is made of slippery ice", hint2: 'It seems easy to knock over', effects: ['-1A', '-2A', '3A', '26B', '-28B', '-30B', '-51A', '40A', '47A','-34A', '78A', '42A', '-43A', '104A', '97A'] },
+    'G': { name: 'Rope- Mummy', difficultyLevel: 1, hint1: 'This creature seems to be wrapped in many strips.', hint2: 'The ropes and fabrics are its defences.', effects: ['2A', '-4A', '-1A', '-5A', '11A', '42A', '-30B', '-37A', '47A', '78A', '38A', '104A', '90A', '106A'] },
+    'H': { name: 'Light- Gorgon', difficultyLevel: 5, hint1: 'The creature turns anyone it faces into stone.', hint2: 'The way it turns you to stone is by looking at you.', effects: ['-7A', '-29B', '-39A', '-40A', '-31A', '12B', '54A', '-37A', '38A', '10B', '51B', '-111A', '111B'] },
+    'I': { name: 'Metal- Automaton', difficultyLevel: 2, hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A', '102A'] },
+    'J': { name: 'Sound- Banshee', difficultyLevel: 3, hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '7A', '-13A', '-26A', '14A', '-40A', '-14A', '38A', '92A', '94A', '115A', '104A'] },
+    'K': { name: 'Glass- Illusionist', difficultyLevel: 3, hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11A', '9B', '26B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A', '104A'] },
+    'L': { name: 'Pressure- The Press', difficultyLevel: 2, hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B', '112B'] },
+    'M': { name: 'Chemical- The Valley', difficultyLevel: 1, hint1: 'Something invisible is causing you to get sick.', hint2: 'You must deal with the cloud of chemicals.', effects: ['1A', '28B', '6A', '29B', '39A', '90A', '94A', '115A'] },
+    'N': { name: 'Gravity- The Abnormality', difficultyLevel: 5, hint1: 'The gravitational abnormality is slamming you against the ceiling, unable to move.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '29A', '39A', '-11A', '-13A', '62A', '102A'] },
+    'O': { name: 'Oil- The Swamp', difficultyLevel: 2, hint1: 'When you try to cross you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '11A', '-11B', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A', '94A', '92A'] },
+    'P': { name: 'Darkness- Alucard', difficultyLevel: 4, hint1: 'It is a man in a cape and bat wings.', hint2: 'He is a vampire who has never left the darkness of the indoors.', effects: ['12A', '-37A', '38A', '41A', '40A', '54A', '104A', '111B'] },
+    'Q': { name: 'Man- The Child', difficultyLevel: 4, hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['20A', '22A', '23A', '48A', '68B', '-19A', '-44A', '-52A', '-7C', '-59B', '-61A', '-49A', '-63B', '-66A', '-69A', '-74B', '-78B', '89A', '-91A', '96A', '100B', '104B', '108A', '114A'] },
+    'R': { name: 'Energy- Terror of the Tides', difficultyLevel: 3, hint1: 'It takes the form of a deadly Eel.', hint2: 'It attacks using electricity.', effects: ['-4A', '-18A', '-10A', '-35A', '38A', '43A', '47A', '40A', '-37A', '104A', '106A', '111B', '114A'] },
+    'S': { name: 'Life- The Exchange', difficultyLevel: 2, hint1: 'The being tells you that you will need to provide life in order to proceed.', hint2: 'You must give it life itself, or something similar.', effects: ['-52A', '17B', '33B', '32B', '-68B', '-67B', '89A', '93A', '102B', '103A', '104B', '109A', '110A', '111A', '112A', '113A', '114A'] },
+    'T': { name: 'Machine- Geared Dragon', difficultyLevel: 2, hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from the air.', effects: ['-28A', '35A', '35B', '5A', '40A', '-34A', '-39A', '-29B', '-11B', '65A', '90A', '92A', '94A', '111B', '115A', '-7B'] },
+    'U': { name: 'Time- Ritualists', difficultyLevel: 4, hint1: 'The magicians are about to complete their ritual, which will make it impossible to beat them.', hint2: 'They are putting together a large clock, you will need to disrupt them.', effects: ['-34A', '-31A', '10B', '35B', '12B', '14B', '38A', '43A', '40A', '-104A', '111B', '113A', '97A', '-60A'] },
+    'V': { name: 'Intelligence- Doppelganger', difficultyLevel: 4, hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-12B', '-54A', '-39A', '-29B', '11A', '36A', '32A', '62A', '37A', '70A', '91A', '-9B', '-11A', '-11B'] },
+    'W': { name: 'Love- The Gift', difficultyLevel: 4, hint1: 'A lover tells you she feels heartbroken, she was expecting to receive something special from her valentine.', hint2: 'She wants to receive a heartfelt present.', effects: ['49A', '32B', '-15B', '-37A', '64A', '79A', '65C', '54B', '95A', '101A', '114A', '-33A', '-16A'] },
+    'X': { name: 'Death- The Tribute', difficultyLevel: 5, hint1: 'A solemn ceremony is taking place, one might wonder what would be appropriate to do here.', hint2: "An old man requests something to commemorate and honor his friend's memory.", effects: ['77A', '33A', '-59A', '-78A', '-17A', '-64A', '-65C', '-33A', '-32A', '49A'] },
+    'Z': { name: 'FINAL ROOM: The Alchemists Endgame', difficultyLevel: 6, hint1: 'To win the game, enter this room and provide the alchemists most prized creation. Each completed encounter in the final row will reveal another hint.', hint2: "They say it is a metal that shines with the power of the sun", hint3: "The sun itself is fire in the sky", hint4: "The sky is clouds and air", hint5: "Clouds are steam and air, steam is water and air, try to piece this all together into a metal that shines like the sun", hint6: "You will need to give it gold which can be formed by combining sun and metal",  unlocksHints: ['U', 'W', 'K', 'X'], effects: ['79A'] },
 
+    // Draft encounters reserved for random/scenario pools (middle band). Includes chemical sets AU & BR–BS,
+    // B-set greenhouse BT (ex-CB); A* row AA–AU and B row BA–BT each aim for at most one encounter per theme.
+    // Draft keys plus C‑set row (CA–CQ: merged legacy DA/DB → CD/CE) stay out of the fixed A–Z starter grid.
+    'AA': { name: 'Life- The Fish', difficultyLevel: 3, hint1: 'You are a fisherman trying to catch as many trout as possible.', hint2: 'They are bunched up together in a river, there must be a way to get all of them at once.', effects: ['45A', '5A', '-10A', '-29B', '-6B', '-28A', '-40A', '-43A', '-42A', '57B', '-74A', '90A'] },
+    'AB': { name: 'Animal- The Butcher', difficultyLevel: 4, hint1: 'The man tells you he is quite hungry.', hint2: 'You will need to provide him something tasty.', effects: ['-52A', '-68B', '73B', '82A', '56B', '57B', '-72B', '55B', '58B', '20A', '19A', '-23A'] },
+    'AC': { name: 'Machine- The Repairman', difficultyLevel: 4, hint1: "Someone needs to fix an engine. It won't power up.", hint2: 'They need something that will fuel it.', effects: ['-5A', '30A', '25A', '-6B', '-30B', '-36A'] },
+    'AD': { name: 'Time- The Hour', difficultyLevel: 5, hint1: 'An old lady politely asks you what time is it.', hint2: 'You will need to provide her with a timepiece.', effects: ['69A'] },
+    'AE': { name: 'Intelligence- The Citation', difficultyLevel: 4, hint1: 'You have been stopped by the sheriff for committing a serious traffic violation.', hint2: 'He is susceptible to bribes.', effects: ['79A', '65C', '-31A', '-11B', '-8A', '-10B', '32A', '36A', '35B', '39A', '37A', '38A', '-57B', '-64A', '-77A', '-49A', '94A', '-75B', '-15B', '89A', '104B'] },
+    'AF': { name: 'Metal- The Match', difficultyLevel: 3, hint1: 'An athlete challenges you to a game of Golf.', hint2: 'You must find a way to give yourself the advantage.', effects: ['-3A', '7C', '-9B', '10B', '11B', '29A', '-31A', '-35B', '38A', '40A', '43A', '12B', '90A'] },
+    'AG': { name: 'Oil- The Mosquito', difficultyLevel: 2, hint1: 'A tiny bug is flying around the room.', hint2: 'It is very difficult to catch.', effects: ['5A', '-11B', '-29A', '-35A', '40A', '43A', '-7C', '-13A', '67B', '89A', '90A', '-7B'] },
+    'AH': { name: 'Energy- The Sheep', difficultyLevel: 2, hint1: 'A large sheep is blocking the gate and needs to be gently removed.', hint2: 'Sheep are known for being fearful animals.', effects: ['-78A', '-35A', '-31A', '-26B', '-12A', '-7B', '-5A', '-3A', '14B', '38A', '40A', '42A', '43A', '45B', '47A', '55A', '60A', '67A', '67B', '68A', '68B', '103A', '111B', '113A'] },
+    'AI': { name: 'Rope- The Hill', difficultyLevel: 1, hint1: 'There is no other way to go but up the steep hill.', hint2: 'You will need to get to the top somehow.', effects: ['62A', '29B', '39A', '-11A', '-42A', '-70A', '-76A'] },
+    'AJ': { name: 'Glass- The Pool', difficultyLevel: 2, hint1: 'You need to get across a large swimming pool.', hint2: 'It is made of glass and filled with water.', effects: ['9B', '10A', '2A', '90A', '41A', '7C', '11A', '70A', '74A'] },
+    'AK': { name: 'Ice- The Melting Scoop', difficultyLevel: 3, hint1: 'A scoop of ice cream is melting in the sun.', hint2: 'You must keep it from melting somehow.', effects: ['-9B', '46A', '18A', '76A', '72A'] },
+    'AL': { name: 'Dust- The Weather', difficultyLevel: 3, hint1: 'A friendly old man is sitting on a park bench, he looks warm.', hint2: 'He tells you he would prefer to sit in the shade.', effects: ['-1A', '-31A', '-54A', '76A', '75B', '46A'] },
+    'AM': { name: 'Light- Laserbug', difficultyLevel: 3, hint1: 'A large beetle with a light beam coming from his back.', hint2: 'You will need to stop the light somehow.', effects: ['54A', '-76A', '75B', '46A', '-31A', '38A', '-40A', '-43A'] },
+    'AN': { name: 'Love- The Proposal', difficultyLevel: 5, hint1: 'The time has come to pop the question to the love of your life.', hint2: 'It is customary to provide a particular gemstone.', effects: ['65C', '79A'] },
+    'AO': { name: 'Man- The Explorer', difficultyLevel: 4, hint1: 'A navigator tells you he is lost.', hint2: 'He will need to find his way to the treasure.', effects: ['81A', '-68B', '-79A', '-65C', '-32A', '48A', '-39A'] },
+    'AP': { name: 'Sound- The Critics', difficultyLevel: 4, hint1: 'Two old men are complaining to you that nothing is original or creative anymore.', hint2: 'They want to see something entertaining and avant-garde.', effects: ['59A', '78A', '49A', '-73A', '-32A', '-67A', '45A', '-14B', '16A'] },
+    'AQ': { name: 'Death- The Wound', difficultyLevel: 4, hint1: 'A boxer tells you that he has been hurt in a fight.', hint2: 'You will need to help with the pain of the injury.', effects: ['33A', '35A', '25A', '-27A', '-30B', '-11B', '-58B', '-15B', '-56B'] },
+    'AR': { name: 'Pressure- The Experiment', difficultyLevel: 3, hint1: "There is a science contest where the winner's egg must survive a fall.", hint2: 'Find a way to prevent your egg from cracking when dropped.', effects: ['-13A', '27A', '-9B', '-25A', '6B', '29B', '46B', '39A', '72A'] },
+    'AS': { name: 'Gravity- The Carnival', difficultyLevel: 2, hint1: 'If you can knock over a stack of milk containers, you can win a prize.', hint2: 'You could throw something at it.', effects: ['29A', '-1A', '-3A', '-34A', '-28B', '-7C', '73A', '56A', '57A', '63A', '40A', '43A', '-7B'] },
+    'AT': { name: 'Plant- The Maze', difficultyLevel: 3, hint1: 'You need to find the exit of a large hedge maze.', hint2: 'There has to be a way to more easily see where the exit is.', effects: ['-2A', '36A', '39A', '29B', '81A', '-11A', '35B', '62A'] },
+    'AU': { name: 'Chemical- The Stain', difficultyLevel: 4, hint1: 'Something has spilled onto the carpet and will not come out.', hint2: 'Remove the material somehow to make the floor clean.', effects: ['-30B', '90A', '28B', '106A', '-4A', '25A', '35B'] },
+    'AZ': { name: "FINAL ROOM: The Alchemist's Lunch", difficultyLevel: 6, hint1: 'A famed alchemist is eating his lunch and complains that his sandwich is too dry.', hint2: 'He needs a famed white alchemical substance which contains oil.', hint3: 'Egg itself comes from Life, Animal, Rock and Time.', hint4: 'Clear the bottom row to reveal more of this recipe, one clue per encounter.', hint5: 'Mayonnaise is the classic oily spread for bread.', unlocksHints: ['U', 'W', 'K', 'X'], effects: ['82A'] },
+    'BA': { name: 'Life- The Punishment', difficultyLevel: 4, hint1: 'A dark criminal mastermind was found committing an unspeakable crime.', hint2: 'Justice must be served, they must never think about harming anyone again.', effects: ['80A', '-38A', '-2A', '-5A', '6B', '11B', '10B', '-14A', '40A', '43A', '41A', '-28A', '55A', '73A', '-7B'] },
+    'BB': { name: 'Machine- The Report', difficultyLevel: 5, hint1: 'Someone has just had their vehicle stolen.', hint2: 'They ask you to call the police.', effects: ['80B', '62A', '-32A', '35B', '-37A', '89A', '104B'] },
+    'BC': { name: 'Time- The Slumber', difficultyLevel: 2, hint1: 'A cat has fallen deeply asleep in a field of flowers.', hint2: 'You will need to wake it up somehow.', effects: ['35A', '35B', '26B', '12A', '-7C', '-51A', '-2A', '-3A', '-14B', '55A', '68A', '60A', '78A', '57B', '16A'] },
+    'BD': { name: 'Intelligence- The Swap', difficultyLevel: 5, hint1: 'You are partaking in a gift exchange game.', hint2: 'After all the shuffling is complete, you want to have ended up with more than you spent.', effects: ['-7C', '55B', '56B', '-57B', '73B', '-61A', '58B', '-63B', '-66A', '72B', '82A', '19A', '23A', '103A', '93A', '67B'] },
+    'BE': { name: 'Metal- The Distraction', difficultyLevel: 3, hint1: 'You are trying to steal precious metal and get away in the chaos.', hint2: 'You will need to create a distraction to slip away unnoticed.', effects: ['31A', '-12A', '-3A', '-42A', '-10B', '-39A', '-60A', '-65A', '-73A', '-67A', '-78A', '-104A', '-89A', '-57B', '-93A', '-103A', '-52A', '16A'] },
+    'BF': { name: 'Oil- The Mariner', difficultyLevel: 4, hint1: 'An old sailor tells you he used to work on a rig.', hint2: 'He misses the sea and wants to be reminded of it.', effects: ['74B', '74A', '22A', '81A', '15B'] },
+    'BG': { name: 'Energy- The Race', difficultyLevel: 3, hint1: 'You must win a race against a very fast feline.', hint2: 'It is still a cat at heart and can be distracted away from the finish line.', effects: ['-8A', '-10B', '-11B', '-30B', '38A', '40A', '43A', '62A', '-12B', '57B', '63B', '68A'] },
+    'BH': { name: 'Rope- The Knot', difficultyLevel: 2, hint1: 'A confusing knot is giving you trouble.', hint2: 'You must find a way to untie it.', effects: ['41A', '28B', '34A', '36A', '52A', '-2A', '-5A', '30B', '-8A', '35B'] },
+    'BI': { name: 'Glass- The Unseen', difficultyLevel: 4, hint1: 'An invisible rodent runs rampant.', hint2: "You need to catch it somehow, it can't be seen.", effects: ['-11B', '-8A', '-12A', '-27A', '68A', '-4A', '-2A', '53A', '90A'] },
+    'BJ': { name: 'Animal- The Rotting Meat', difficultyLevel: 3, hint1: 'A perfect cut of ribeye is sitting out in the open, about to go bad.', hint2: 'Someone really ought to put it in the fridge.', effects: ['18A', '-9B', '72A', '-31A', '-13A', '-15A'] },
+    'BK': { name: 'Darkness- The Nuisance', difficultyLevel: 3, hint1: 'A customer is being a jerk to everyone.', hint2: 'You must get them to leave without harming them.', effects: ['80A', '51A', '-14B', '73A', '67A', '-3A', '35A', '32A', '-36A', '-5A', '55A', '56A', '56B', '57B', '58B', '-60A', '45A', '45B', '106A', '-7B'] },
+    'BL': { name: 'Light- The Signal', difficultyLevel: 3, hint1: 'You are stranded on an island and an airplane is flying overhead.', hint2: 'You must make some kind of signal to be rescued.', effects: ['-2A', '12A', '-39A', '-32A', '-94A', '-54A', '78A', '42A', '-6A'] },
+    'BM': { name: 'Love- The Break-Up', difficultyLevel: 5, hint1: 'A man tells you he misses someone dearly.', hint2: 'He wants to feel better and get over it.', effects: ['35A', '33A', '-36A', '-37A', '-68B', '-64A', '15B', '-20A', '-44A'] },
+    'BN': { name: 'Man- The Fraternity', difficultyLevel: 5, hint1: 'You must signal your status to gain entry into a society of elites.', hint2: 'The members are impressed by style and class.', effects: ['15A', '79A', '65C', '-32A', '-36A', '-37A', '74B', '-49A', '-59A', '-57B', '75A'] },
+    'BO': { name: 'Sound- The Performance', difficultyLevel: 3, hint1: 'The man singing to the crowd is an old enemy from your past.', hint2: 'You will need to humiliate him.', effects: ['-14A', '-14B', '-34A', '52A', '45B', '55A', '56B', '57B', '68B', '73A', '67A', '-7C', '-29A'] },
+    'BP': { name: 'Pressure- The Hammer', difficultyLevel: 3, hint1: 'A carnival offers a prize to whoever can hit the hammer and make the bell ring at the top.', hint2: 'You just need to make the bell ring in order to win.', effects: ['-27A', '40A', '43A', '60A', '34A', '35B', '7B', '7C'] },
+    'BQ': { name: 'Gravity- The Demolition', difficultyLevel: 3, hint1: 'An old building needs to be removed safely.', hint2: 'You must find a safe and practical way to knock it down.', effects: ['29A', '-1A', '-3A', '34A', '-28B', '-27A', '-42A'] },
+    'BR': { name: 'Chemical- The Odor', difficultyLevel: 4, hint1: 'For whatever reason, you are trying to create the most unpleasant stench possible.', hint2: 'You will need to do something that makes the air smell bad.', effects: ['99A', '113A', '113B', '-101A', '15A', '73A', '73B', '-28A', '-28B', '-53A', '-90A'] },
+    'BS': { name: 'Chemical- The Potion', difficultyLevel: 5, hint1: 'A witch is brewing something that requires magical essences.', hint2: 'You need to provide unique and potent ingredients that will give the elixir strong effects.', effects: ['-52A', '-45B', '-79A', '-65C', '-55B', '-57B', '-56B', '-58B', '-103A', '-93A', '-99A', '-68B', '-73B', '-82A', '-67B', '-15B', '-109A', '-112C', '-110A', '-111C', '-114A', '-113B'] },
+    'BT': { name: 'Plant- The Greenhouse', difficultyLevel: 4, hint1: 'The plants are not growing well in the greenhouse.', hint2: 'They need something to improve crop health.', effects: ['-12A', '-4A', '106A', '51A', '-26A', '-65B', '33A'] },
+    'BZ': { name: "FINAL ROOM: The Alchemist's Hero", difficultyLevel: 6, hint1: 'A news journalist demands to see a mysterious vigilante who has been fighting crime in the city.', hint2: 'They say he slings webs and swings from building to building.', hint3: 'You are looking for a superhero who is part man part arachnid.', hint4: 'Each encounter you clear in the row above this room adds another clue.', hint5: 'Think of a friendly neighborhood hero spun from silk.', unlocksHints: ['U', 'W', 'K', 'X'], effects: ['89A'] },
+    'CA': { name: 'Animal- The Companion', difficultyLevel: 3, hint1: 'A girl is lonely and wants a pet.', hint2: 'An animal might be a good pet for her.', effects: ['110A', '-111C', '112C', '-113B', '114A', '-103A', '-109A', '68B', '-52A'] },
+    'CC': { name: 'Death- The Excuse', difficultyLevel: 4, hint1: "A doctor doesn't believe you when you say that you are sick enough to miss school.", hint2: "To get a doctor's note, you must demonstrate that you are medically unwell.", effects: ['53A', '45A', '45B', '79A', '65C', '37A', '99A', '-51A', '10B', '14B', '28A', '-32A', '-36A', '55A'] },
+    'CD': { name: 'Intelligence- The Prank', difficultyLevel: 4, hint1: 'Your neighbor is at home, it is time to get revenge.', hint2: 'You must bother him back for what he did to you.', effects: ['73A', '45A', '67A', '113A', '103A', '106A', '109A', '51A', '-12A', '-3A', '-34A', '-16A'] },
+    'CE': { name: 'Metal- The Vandalism', difficultyLevel: 5, hint1: 'You want to decrease the tax value of your home by defacing it somehow.', hint2: 'Find a way to temporarily spoil the desirability of living there.', effects: ['-4A', '-3A', '-28B', '34A', '42A', '-78A', '67A', '45A', '-113A', '-15A', '-102A', '109A', '-7B'] },
+    'CF': { name: 'Life- The Diet', difficultyLevel: 4, hint1: 'You are brainstorming ways to lose weight and be healthier.', hint2: 'Perhaps some healthy food would help.', effects: ['56B', '73B', '19A', '113B', '101A', '58B', '-55B', '-57B', '-33A'] },
+    'CG': { name: 'Oil- The Checkpoint', difficultyLevel: 4, hint1: 'You are trying to get some contraband resources past a security checkpoint.', hint2: 'The guards may be more corrupt than they seem.', effects: ['79A', '37A', '38A', '65C', '80A', '49A', '46A', '64A', '-12B', '-74B', '-77A', '-36A', '-41A', '-32A', '-20A', '-10B'] },
+    'CH': { name: 'Ice- The Stream', difficultyLevel: 5, hint1: 'You are very thirsty, but the water in the stream might not be clean.', hint2: 'You must find a way to get rid of bacteria.', effects: ['6B', '51A', '-28B', '-10A', '-71A', '-72A', '-38A'] },
+    'CI': { name: 'Glass- The Pawnshop', difficultyLevel: 4, hint1: 'You are at an old antiques shop that purchases valuables.', hint2: 'Perhaps you could provide them some item of worth.', effects: ['22A', '15B', '69A', '74B', '41B', '75B', '-24A', '-90A', '-36A', '-44A', '-59A', '-60A', '-61A', '-64A', '-66A', '-71B', '-114A', '-40B', '-108A'] },
+    'CJ': { name: 'Art- The Sigil', difficultyLevel: 4, hint1: 'A sigil maker is looking for inspiration for emblems to engrave.', hint2: 'You could provide something that would look artistic on a shield.', effects: ['77A', '65C', '64A', '41A', '40A', '17B', '103A', '-74B', '-79A', '-60B', '-49A'] },
+    'CK': { name: 'Rope- The Hunter', difficultyLevel: 3, hint1: 'A hunter has tracked down his prey, but is unprepared.', hint2: 'They could urgently use a weapon.', effects: ['41B', '40B', '43B', '42A', '47A', '68A', '-11B', '-8A', '-52A', '-38A', '-7B'] },
+    'CL': { name: 'Love- The Nihilist', difficultyLevel: 4, hint1: 'A despondent philosopher complains that everything feels meaningless.', hint2: 'They could use something that would make them feel alive again.', effects: ['37A', '33A', '33B', '51B', '12A', '64A', '68B', '-38A', '-31A', '-47A'] },
+    'CM': { name: 'Machine- The Nerd', difficultyLevel: 4, hint1: 'It is time to get your geeky friend a birthday present.', hint2: 'You know they like useful gear.', effects: ['48A', '44A', '69A', '104B', '108A', '95A', '107A', '114A', '112C', '41B', '40B', '59A', '-36A', '-20A', '-37A', '-49A', '-56B', '-60B', '-71B', '-77A', '-81A', '-96A', '-103A', '-110A', '-24A', '-90A'] },
+    'CN': { name: 'Sound- The Celebration', difficultyLevel: 4, hint1: 'You are at a New Year’s bash and want something that will get people to celebrate.', hint2: 'Maybe something grand and loud that gets people’s attention.', effects: ['78A', '60A', '100A', '16A', '-57B', '-39A', '-42A', '-26B', '-14B', '-12A', '-59A'] },
+    'CO': { name: 'Darkness- The Cave', difficultyLevel: 3, hint1: 'You are trying to navigate through a dark cave.', hint2: 'It would be useful if you could see better.', effects: ['78A', '12A', '105A', '68A', '81A', '-111A', '-2A', '-36A', '-62A', '-11A'] },
+    'CQ': { name: 'Chemical- The Stain', difficultyLevel: 4, hint1: 'Something has spilled and left a mark.', hint2: 'You must make it go away somehow.', effects: ['28B', '106A', '24A', '25A', '-4A', '-6B'] },
+    'DZ': { name: "FINAL ROOM: The Alchemist's Landmark", difficultyLevel: 6, hint1: 'Four faces frozen in time, the silent statue gazes, a mountain above the plains.', hint2: 'In the USA there is a famous mountain of US presidents.', hint3: 'A statue is rock and intelligence', hint4: 'A mountain is earth and time.', hint5: 'Solve that row to chisel the path to Rushmore.', unlocksHints: ['U', 'W', 'K', 'X'], effects: ['116A'] },
+    'EZ': { name: "FINAL ROOM: The Alchemist's Voyage", difficultyLevel: 6, hint1: 'An alchemist is on the planet Mercury and needs a way to travel to the moon.', hint2: 'He needs a craft that can fly through the expanse of space.', hint3: 'A ship itself is a car on water.', hint4: 'Space itself is dust and gravity.', hint5: 'Defeat the four encounters above to chart a course outward.', unlocksHints: ['U', 'W', 'K', 'X'], effects: ['108A'] },
+    'FZ': { name: "FINAL ROOM: The Alchemist's Accident", difficultyLevel: 6, hint1: 'Someone has fallen from the walls, the situation must be dealt with.', hint2: 'The guards are trying to put him back together again.', hint3: 'They say the man shattered into many eggshells.', hint4: 'You recognize the story from a popular children\'s nursery rhyme.', hint5: 'Clear the bottom row for clues—then fuse until you can Gift the fairy‑tale egg‑man himself.', unlocksHints: ['U', 'W', 'K', 'X'], effects: ['102B'] },
 };
+
+/** Story finale encounters (win condition + trophy cell). Kept disjoint from difficulty 1–5 pool */
+const FINAL_ENCOUNTER_KEYS = new Set(['Z', 'AZ', 'BZ', 'DZ', 'EZ', 'FZ']);
+/** Short names for confirms when starting a numbered challenge map */
+const FINALE_CHALLENGE_LABEL = Object.freeze({
+    AZ: 'Sandwich',
+    Z: 'Endgame',
+    EZ: 'Voyage',
+    BZ: 'Hero',
+    DZ: 'Landmark',
+    FZ: 'Accident',
+});
+/** Stable iteration order when picking a random finale (no Random Map UI; kept for generators) */
+const FINAL_ENCOUNTER_KEYS_ORDERED = ['Z', 'AZ', 'BZ', 'DZ', 'EZ', 'FZ'];
+/** Finale key → challenge button number (dock order) */
+const CHALLENGE_NUM_BY_FINALE = Object.freeze({
+    AZ: 1,
+    Z: 2,
+    EZ: 3,
+    BZ: 4,
+    DZ: 5,
+    FZ: 6,
+});
+/** Finale encounter key → victory splash image on the win modal */
+const FINALE_WIN_ART_BY_KEY = Object.freeze({
+    AZ: 'alchemyart/sandwichx.png',
+    Z: 'alchemyart/thealchemistsendgamex.png',
+    EZ: 'alchemyart/voyagex.png',
+    BZ: 'alchemyart/herox.png',
+    DZ: 'alchemyart/landmarkx.png',
+    FZ: 'alchemyart/humptydumptyx.png',
+});
+/** Row cells 20–23 unlock progressive hints on the finale (index 24); refreshed whenever the map layout applies */
+let runtimeFinalUnlockOverrides = {};
+/** Current challenge dock selection (persisted for button highlight + new-game default). */
+let activeChallengeN = null;
+let activeFinaleKey = null;
+
+const ENCOUNTER_THEME_TO_ELEMENT_ID = {
+    Fire: '2',
+    Earth: '3',
+    Water: '4',
+    Air: '1',
+    Animal: '52',
+    Plant: '8',
+    Ice: '9',
+    Rope: '11',
+    Light: '12',
+    Metal: '13',
+    Sound: '14',
+    Glass: '26',
+    Pressure: '27',
+    Chemical: '28',
+    Gravity: '29',
+    Oil: '30',
+    Darkness: '31',
+    Dust: '10',
+    Man: '32',
+    Energy: '5',
+    Life: '33',
+    Machine: '34',
+    Time: '35',
+    Intelligence: '36',
+    Love: '37',
+    Death: '38',
+    Art: '49',
+};
+
+/** Legacy finals were ZD/ZE before rename to DZ/EZ — migrate saved games and payloads */
+function migrateEncounterKeySlug(key) {
+    if (key === 'ZD') return 'DZ';
+    if (key === 'ZE') return 'EZ';
+    if (key === 'CB') return 'BT';
+    if (key === 'DC') return 'BR';
+    if (key === 'EA') return 'BS';
+    if (key === 'DA') return 'CD';
+    if (key === 'DB') return 'CE';
+    return key;
+}
+
+function migrateEncounterKeyArray(keys) {
+    return Array.isArray(keys) ? keys.map(migrateEncounterKeySlug) : keys;
+}
+
+function migrateFinalUnlockOverridesObject(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    const out = {};
+    for (const [k, arr] of Object.entries(obj)) {
+        const nk = migrateEncounterKeySlug(k);
+        out[nk] = Array.isArray(arr) ? migrateEncounterKeyArray(arr) : arr;
+    }
+    return out;
+}
+
+function migrateCounterMapKeyedByEncounter(map) {
+    if (!map || typeof map !== 'object') return map || {};
+    const out = {};
+    Object.entries(map).forEach(([k, v]) => {
+        out[migrateEncounterKeySlug(k)] = v;
+    });
+    return out;
+}
+
+function migratePersistedGameStateEncounterKeys(state) {
+    if (!state || typeof state !== 'object') return;
+    if (Array.isArray(state.gridEncounterLayout) && state.gridEncounterLayout.length === 25) {
+        state.gridEncounterLayout = migrateEncounterKeyArray(state.gridEncounterLayout);
+    }
+    state.finalEncounterUnlockOverrides = migrateFinalUnlockOverridesObject(state.finalEncounterUnlockOverrides || {});
+    if (Array.isArray(state.defeatedEncounters)) {
+        state.defeatedEncounters = migrateEncounterKeyArray(state.defeatedEncounters);
+    }
+    if (state.currentEncounterKey) state.currentEncounterKey = migrateEncounterKeySlug(state.currentEncounterKey);
+    if (state.previousEncounterKey) state.previousEncounterKey = migrateEncounterKeySlug(state.previousEncounterKey);
+    state.locationFailureCounter = migrateCounterMapKeyedByEncounter(state.locationFailureCounter);
+    state.totalFailureCounter = migrateCounterMapKeyedByEncounter(state.totalFailureCounter);
+    state.persistentHints = migrateCounterMapKeyedByEncounter(state.persistentHints);
+    const ph = state.persistentHalfSuccesses;
+    if (ph && typeof ph === 'object') {
+        const next = {};
+        Object.entries(ph).forEach(([k, v]) => {
+            next[migrateEncounterKeySlug(k)] = v;
+        });
+        state.persistentHalfSuccesses = next;
+    }
+}
+
+function shuffleArrayInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function peekStoredGridBootstrap() {
+    try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return { layout: null, unlockOverrides: null };
+        const state = JSON.parse(raw);
+        migratePersistedGameStateEncounterKeys(state);
+        const layout = state?.gridEncounterLayout;
+        const ov = state?.finalEncounterUnlockOverrides;
+        const layoutOk = Array.isArray(layout) && layout.length === 25;
+        return {
+            layout: layoutOk ? layout.slice() : null,
+            unlockOverrides: ov && typeof ov === 'object' ? ov : null,
+        };
+    } catch (_) {
+        return { layout: null, unlockOverrides: null };
+    }
+}
+
+function encounterThemeRewardElementId(encounterKey) {
+    if (FINAL_ENCOUNTER_KEYS.has(encounterKey)) return null;
+    const e = encounterEffects[encounterKey];
+    if (!e?.name) return null;
+    const name = e.name.trim();
+    if (name.startsWith('FINAL ROOM')) return null;
+    const dash = name.indexOf('-');
+    if (dash <= 0) return null;
+    const theme = name.slice(0, dash).trim();
+    const id = ENCOUNTER_THEME_TO_ELEMENT_ID[theme];
+    return id || null;
+}
+
+/** Theme prefix before "— …" title; unique per elemental/narrative track for random-map dedup. */
+function getEncounterThemeDedupSlug(encounterKey) {
+    const enc = encounterEffects[encounterKey];
+    if (!enc?.name) return encounterKey;
+    const name = enc.name.trim();
+    if (name.startsWith('FINAL ROOM')) return '__FINALE__';
+    const dash = name.indexOf('-');
+    if (dash <= 0) return encounterKey;
+    return name.slice(0, dash).trim();
+}
+
+function effectiveFinalUnlockHints(encounterKey) {
+    const ov = runtimeFinalUnlockOverrides[encounterKey];
+    if (Array.isArray(ov) && ov.length) return ov.slice();
+    const base = encounterEffects[encounterKey]?.unlocksHints;
+    return base?.length ? base.slice() : null;
+}
+
+function inferFinalEncounterUnlockOverridesFromLayout(encounterKeys) {
+    const fin = encounterKeys[24];
+    if (!FINAL_ENCOUNTER_KEYS.has(fin)) return;
+    runtimeFinalUnlockOverrides[fin] = [
+        encounterKeys[20],
+        encounterKeys[21],
+        encounterKeys[22],
+        encounterKeys[23],
+    ];
+}
+
+function countEncounterHintSlots(encounterData) {
+    if (!encounterData) return 0;
+    let n = 1;
+    while (encounterData[`hint${n}`] != null && encounterData[`hint${n}`] !== '') n++;
+    return n - 1;
+}
+
+/** Middle pool for indices 4–23: every non-tutorial, non-finale encounter with difficultyLevel 1–5 */
+function getRandomMiddleEncounterPoolKeys() {
+    const fixed = new Set(['A', 'B', 'C', 'D']);
+    return Object.keys(encounterEffects).filter((key) => {
+        if (fixed.has(key) || FINAL_ENCOUNTER_KEYS.has(key)) return false;
+        const lev = encounterEffects[key]?.difficultyLevel;
+        return typeof lev === 'number' && lev >= 1 && lev <= 5;
+    });
+}
+
+/** Challenge 6 (FZ): no middle-board encounters whose theme prefix is Man or Animal */
+const CHALLENGE_6_FORBIDDEN_THEME_SLUGS = new Set(['Man', 'Animal']);
+
+function generateRandomEncounterLayoutInner(forcedFinalKey = null) {
+    if (forcedFinalKey != null && !FINAL_ENCOUNTER_KEYS.has(forcedFinalKey)) {
+        throw new Error(`Invalid finale encounter key: ${forcedFinalKey}`);
+    }
+    const FIXED_CORNERS = ['A', 'C', 'B', 'D'];
+    const CORNER_THEME_SLUGS = new Set(FIXED_CORNERS.map((k) => getEncounterThemeDedupSlug(k)));
+    let baseMiddlePool = getRandomMiddleEncounterPoolKeys().filter(
+        (key) => !CORNER_THEME_SLUGS.has(getEncounterThemeDedupSlug(key))
+    );
+    if (forcedFinalKey === 'FZ') {
+        baseMiddlePool = baseMiddlePool.filter((key) => {
+            const slug = getEncounterThemeDedupSlug(key);
+            return !CHALLENGE_6_FORBIDDEN_THEME_SLUGS.has(slug);
+        });
+    }
+    const DISTINCT_THEMES = new Set(baseMiddlePool.map((k) => getEncounterThemeDedupSlug(k)));
+    if (DISTINCT_THEMES.size < 20) {
+        throw new Error(
+            `Need encounters spanning 20 distinct themes for the inner map (after reserving Fire/Air/Water/Earth corners); found only ${DISTINCT_THEMES.size}.`
+        );
+    }
+
+    const canonByDiff = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    baseMiddlePool.forEach((key) => {
+        const lev = encounterEffects[key]?.difficultyLevel;
+        if (canonByDiff[lev]) canonByDiff[lev].push(key);
+    });
+    const slugUniqCount = (arr) => new Set(arr.map((k) => getEncounterThemeDedupSlug(k))).size;
+    if (
+        canonByDiff[5].length < 4 ||
+        slugUniqCount(canonByDiff[5]) < 4 ||
+        canonByDiff[4].length < 8 ||
+        slugUniqCount(canonByDiff[4]) < 8
+    ) {
+        throw new Error(
+            'Random middle band needs ≥4 themed difficulty‑5 encounters and ≥8 themed difficulty‑4 encounters (distinct encounter themes vs corners). Expand the catalog or relax filters.'
+        );
+    }
+    for (let d = 1; d <= 5; d++) {
+        if (!canonByDiff[d]?.length) {
+            throw new Error(`No encounters with difficulty ${d} — cannot satisfy random-map constraints.`);
+        }
+    }
+
+    const MAX_ATTEMPTS = 2500;
+
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        const poolKeys = shuffleArrayInPlace([...baseMiddlePool]);
+        const picks = [];
+        const usedEncounterKeys = new Set();
+        const usedThemes = new Set(FIXED_CORNERS.map((k) => getEncounterThemeDedupSlug(k)));
+
+        if (forcedFinalKey === 'AZ') {
+            if (!baseMiddlePool.includes('O')) {
+                throw new Error(
+                    'Challenge 1 (Sandwich finale) requires Oil·The Swamp (O); it is missing from the random encounter pool.'
+                );
+            }
+            picks.push('O');
+            usedEncounterKeys.add('O');
+            usedThemes.add(getEncounterThemeDedupSlug('O'));
+
+            const animalCandidates = shuffleArrayInPlace(
+                baseMiddlePool.filter((k) => getEncounterThemeDedupSlug(k) === 'Animal')
+            );
+            if (!animalCandidates.length) {
+                throw new Error(
+                    'Challenge 1 (Sandwich finale) requires at least one Animal‑themed encounter in the random encounter pool.'
+                );
+            }
+            const animalPick = animalCandidates[0];
+            picks.push(animalPick);
+            usedEncounterKeys.add(animalPick);
+            usedThemes.add('Animal');
+        }
+
+        if (forcedFinalKey === 'Z') {
+            if (!baseMiddlePool.includes('AL')) {
+                throw new Error(
+                    'Challenge 2 (Endgame finale) requires Dust·The Weather (AL); it is missing from the random encounter pool.'
+                );
+            }
+            picks.push('AL');
+            usedEncounterKeys.add('AL');
+            usedThemes.add(getEncounterThemeDedupSlug('AL'));
+        }
+
+        let stratFail = false;
+        for (let i = 0; i < 4 && !stratFail; i++) {
+            const candidates = shuffleArrayInPlace(
+                canonByDiff[5].filter(
+                    (key) =>
+                        !usedEncounterKeys.has(key) && !usedThemes.has(getEncounterThemeDedupSlug(key))
+                )
+            );
+            if (!candidates.length) {
+                stratFail = true;
+                break;
+            }
+            const chosen = candidates[0];
+            picks.push(chosen);
+            usedEncounterKeys.add(chosen);
+            usedThemes.add(getEncounterThemeDedupSlug(chosen));
+        }
+        for (let i = 0; i < 8 && !stratFail; i++) {
+            const candidates = shuffleArrayInPlace(
+                canonByDiff[4].filter(
+                    (key) =>
+                        !usedEncounterKeys.has(key) && !usedThemes.has(getEncounterThemeDedupSlug(key))
+                )
+            );
+            if (!candidates.length) {
+                stratFail = true;
+                break;
+            }
+            const chosen = candidates[0];
+            picks.push(chosen);
+            usedEncounterKeys.add(chosen);
+            usedThemes.add(getEncounterThemeDedupSlug(chosen));
+        }
+        if (stratFail) continue;
+
+        const restPool = shuffleArrayInPlace(
+            poolKeys.filter(
+                (key) =>
+                    !usedEncounterKeys.has(key) &&
+                    !usedThemes.has(getEncounterThemeDedupSlug(key)) &&
+                    encounterEffects[key].difficultyLevel !== 5
+            )
+        );
+
+        while (picks.length < 20 && restPool.length) {
+            const next = restPool.pop();
+            if (!next || usedEncounterKeys.has(next)) continue;
+            const slug = getEncounterThemeDedupSlug(next);
+            if (usedThemes.has(slug)) continue;
+            picks.push(next);
+            usedEncounterKeys.add(next);
+            usedThemes.add(slug);
+        }
+
+        if (picks.length !== 20) continue;
+
+        picks.sort((a, b) => {
+            const da = encounterEffects[a].difficultyLevel;
+            const db = encounterEffects[b].difficultyLevel;
+            if (da !== db) return da - db;
+            return String(a).localeCompare(String(b));
+        });
+
+        let finalPick;
+        if (forcedFinalKey != null) {
+            finalPick = forcedFinalKey;
+        } else {
+            const finals = shuffleArrayInPlace(FINAL_ENCOUNTER_KEYS_ORDERED.slice());
+            finalPick = finals[0];
+        }
+
+        const layout = [];
+        layout[0] = 'A';
+        layout[1] = 'C';
+        layout[2] = 'B';
+        layout[3] = 'D';
+        for (let i = 0; i < 20; i++) layout[4 + i] = picks[i];
+        layout[24] = finalPick;
+        return layout;
+    }
+
+    throw new Error(
+        'Could not assemble a random map: need 20 distinct inner themes — exactly four difficulty‑5, at least ' +
+            'eight difficulty‑4, remainder difficulty ≤4 — while avoiding corner themes.'
+    );
+}
+
+function serializeGridEncounterLayout() {
+    if (!grid) return [];
+    return Array.from(grid.children).map((cell) => cell.dataset.encounterKey || '');
+}
 
 
 // Generate fuseMap from the fuseList
@@ -1258,7 +1873,7 @@ let successfulCombinations = [];
 // --- END: DATA SETUP ---
 
 const grid = document.getElementById("grid");
-const preview = document.getElementById("preview");
+const preview = document.getElementById("previewGlyph");
 const previewTitle = document.getElementById("previewTitle");
 const selectedEncounterHint = document.getElementById("selectedEncounterHint");
 const hintBox = document.getElementById("hintBox"); // Get the hint box
@@ -1270,8 +1885,6 @@ const untapButton = document.getElementById("clearButton");
 const combinationsList = document.getElementById('combinationsList');
 const encounterMessageBox = document.getElementById('encounterMessageBox');
 const elementNameSubtitle = document.getElementById('elementNameSubtitle');
-const SAVE_KEY = 'alxGameStateV1';
-
 const encounterArtMap = {
     A: 'alchemyart/phoenix.png',
     B: 'alchemyart/golem.png',
@@ -1293,12 +1906,151 @@ const encounterArtMap = {
     R: 'alchemyart/eel.png',
     S: 'alchemyart/exchange.png',
     T: 'alchemyart/dragon.png',
-    U: 'alchemyart/time.png',
+    U: 'alchemyart/ritual.png',
     V: 'alchemyart/doppelganger.png',
     W: 'alchemyart/lover.png',
     X: 'alchemyart/tribute.png',
-    Z: 'alchemyart/thealchemistsendgame.png'
+    Z: 'alchemyart/thealchemistsendgame.png',
+    AA: 'alchemyart/fisherman.png',
+    AB: 'alchemyart/order.png',
+    AC: 'alchemyart/repair.png',
+    AD: 'alchemyart/hour.png',
+    AE: 'alchemyart/citation.png',
+    AF: 'alchemyart/match.png',
+    AG: 'alchemyart/mosquito.png',
+    AH: 'alchemyart/sheep.png',
+    AI: 'alchemyart/hill.png',
+    AJ: 'alchemyart/pool.png',
+    AK: 'alchemyart/melt.png',
+    AL: 'alchemyart/heat.png',
+    AM: 'alchemyart/laserbug.png',
+    AN: 'alchemyart/proposal.png',
+    AO: 'alchemyart/explorer.png',
+    AP: 'alchemyart/critics.png',
+    AQ: 'alchemyart/wound.png',
+    AR: 'alchemyart/experiment.png',
+    AS: 'alchemyart/carnival.png',
+    AT: 'alchemyart/maze.png',
+    AU: 'alchemyart/stain.png',
+    AZ: 'alchemyart/sandwich.png',
+    BA: 'alchemyart/punishment.png',
+    BB: 'alchemyart/report.png',
+    BC: 'alchemyart/sleep.png',
+    BD: 'alchemyart/swap.png',
+    BE: 'alchemyart/distraction.png',
+    BF: 'alchemyart/mariner.png',
+    BG: 'alchemyart/race.png',
+    BH: 'alchemyart/knot.png',
+    BI: 'alchemyart/invisible.png',
+    BJ: 'alchemyart/rot.png',
+    BK: 'alchemyart/nuisance.png',
+    BL: 'alchemyart/signal.png',
+    BM: 'alchemyart/breakup.png',
+    BN: 'alchemyart/fraternity.png',
+    BO: 'alchemyart/ruinedperformance.png',
+    BP: 'alchemyart/hammer.png',
+    BQ: 'alchemyart/demolition2.png',
+    BR: 'alchemyart/stink.png',
+    BS: 'alchemyart/potion.png',
+    BT: 'alchemyart/greenhouse.png',
+    BZ: 'alchemyart/hero.png',
+    CA: 'alchemyart/companion.png',
+    CC: 'alchemyart/excuse.png',
+    CD: 'alchemyart/prank.png',
+    CE: 'alchemyart/vandalism.png',
+    CF: 'alchemyart/diet.png',
+    CG: 'alchemyart/checkpoint.png',
+    CH: 'alchemyart/stream.png',
+    CI: 'alchemyart/pawnshop.png',
+    CJ: 'alchemyart/sigil.png',
+    CK: 'alchemyart/hunter.png',
+    CL: 'alchemyart/nihilist.png',
+    CM: 'alchemyart/nerd.png',
+    CN: 'alchemyart/celebration.png',
+    CO: 'alchemyart/cave.png',
+    CQ: 'alchemyart/stain.png',
+    DZ: 'alchemyart/landmark.png',
+    EZ: 'alchemyart/voyage.png',
+    FZ: 'alchemyart/humptydumpty.png'
 };
+
+/** Encounter key + verb key ("CA|112C") → bonus art shown in "Nicely done!" overlay */
+const nicelyDoneArtByEncounterVerb = Object.freeze({
+    'H|54A': 'alchemyart/gorgonx.png',
+    'Q|68B': 'alchemyart/childx.png',
+    'W|64A': 'alchemyart/loverx.png',
+    'AA|5A': 'alchemyart/fishermanx.png',
+    'AF|11B': 'alchemyart/matchx.png',
+    'AG|43A': 'alchemyart/mosquitox.png',
+    'AH|14B': 'alchemyart/sheepx.png',
+    'AJ|9B': 'alchemyart/poolx.png',
+    'AE|37A': 'alchemyart/citationx.png',
+    'AR|46B': 'alchemyart/experimentx.png',
+    'AT|39A': 'alchemyart/mazex.png',
+    'AT|29B': 'alchemyart/mazex.png',
+    'BC|12A': 'alchemyart/slumberx.png',
+    'BD|56B': 'alchemyart/swapx.png',
+    'BG|62A': 'alchemyart/racex.png',
+    'BG|57B': 'alchemyart/racex2.png',
+    'BK|73A': 'alchemyart/nuisancex.png',
+    'BK|80A': 'alchemyart/nusiance2x.png',
+    'BN|75A': 'alchemyart/fraternityx.png',
+    'AL|75B': 'alchemyart/heatx.png',
+    'CG|65C': 'alchemyart/checkpointx.png',
+    'T|43A': 'alchemyart/dragonx.png',
+    'L|112B': 'alchemyart/pressx.png',
+    'BO|56B': 'alchemyart/ruinedperformancex.png',
+    'AI|62A': 'alchemyart/hillx.png',
+    'BP|7B': 'alchemyart/hammerx.png',
+    'CA|112C': 'alchemyart/companionx.png',
+    'CD|106A': 'alchemyart/prankx.png',
+    'CD|73A': 'alchemyart/prankx2.png',
+    'CL|68B': 'alchemyart/nihilistx.png',
+});
+
+function nicelyDoneLookup(encounterKey, verbKey) {
+    return nicelyDoneArtByEncounterVerb[`${encounterKey}|${verbKey}`] || null;
+}
+
+let nicelyDoneKeyHandler = null;
+
+function hideNicelyDoneOverlay() {
+    const overlay = document.getElementById('nicely-done-overlay');
+    const img = document.getElementById('nicely-done-art');
+    if (nicelyDoneKeyHandler) {
+        document.removeEventListener('keydown', nicelyDoneKeyHandler, true);
+        nicelyDoneKeyHandler = null;
+    }
+    if (overlay) {
+        overlay.classList.remove('visible');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+    if (img) {
+        img.removeAttribute('src');
+        img.alt = '';
+    }
+}
+
+function tryNicelyDoneOverlay(encounterKey, verbKey) {
+    if (FINAL_ENCOUNTER_KEYS.has(encounterKey)) return;
+    const path = nicelyDoneLookup(encounterKey, verbKey);
+    if (!path) return;
+    hideNicelyDoneOverlay();
+    const overlay = document.getElementById('nicely-done-overlay');
+    const img = document.getElementById('nicely-done-art');
+    if (!overlay || !img) return;
+    img.src = path;
+    img.alt = 'Nicely done';
+    overlay.classList.add('visible');
+    overlay.setAttribute('aria-hidden', 'false');
+    nicelyDoneKeyHandler = (e) => {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            hideNicelyDoneOverlay();
+        }
+    };
+    document.addEventListener('keydown', nicelyDoneKeyHandler, true);
+}
 
 let pawn;
 let selectedReagents = [];
@@ -1311,17 +2063,140 @@ let previousEncounterKey = null;
 let persistentHints = {};
 let moveCounter = 0;
 const defeatedEncounters = new Set();
-const bottomRowEncounterKeys = new Set(['U', 'W', 'K', 'X', 'Z']);
-let startingElements = [];
-while (startingElements.length < 2) {
-    const randomId = String(Math.floor(Math.random() * 4) + 1);
-    if (!startingElements.includes(randomId)) {
-        startingElements.push(randomId);
+let bottomRowEncounterKeys = new Set();
+
+function rollStartingElementsPair() {
+    const picks = [];
+    while (picks.length < 2) {
+        const r = String(Math.floor(Math.random() * 4) + 1);
+        if (!picks.includes(r)) picks.push(r);
     }
+    return picks;
 }
+
+let startingElements = rollStartingElementsPair();
 
 // FIX: MOVED verbLetters to the global scope so handleEncounter can access it
 const verbLetters = ['A', 'B', 'C'];
+
+function refreshBottomRowEncounterKeysFromLayout(encounterKeys) {
+    bottomRowEncounterKeys.clear();
+    for (let i = 20; i <= 24 && i < encounterKeys.length; i++) {
+        bottomRowEncounterKeys.add(encounterKeys[i]);
+    }
+}
+
+function placeInitialPawnOnCenterCellIfNeeded() {
+    if (!grid || grid.children.length < 13) return;
+    if (pawn) pawn.remove();
+    const centerCell = grid.children[12];
+    centerCell.textContent = centerCell.dataset.icon || '';
+    pawn = document.createElement('div');
+    pawn.className = 'pawn';
+    pawn.textContent = '♙';
+    centerCell.appendChild(pawn);
+}
+
+function applyEncounterKeysToDOM(encounterKeys) {
+    if (!grid || !Array.isArray(encounterKeys) || encounterKeys.length !== 25) return;
+    inferFinalEncounterUnlockOverridesFromLayout(encounterKeys);
+    refreshBottomRowEncounterKeysFromLayout(encounterKeys);
+
+    for (let idx = 0; idx < 25; idx++) {
+        const cell = grid.children[idx];
+        if (!cell || !cell.classList.contains('cell')) continue;
+
+        const encounterKey = encounterKeys[idx];
+        const encounter = encounterEffects[encounterKey];
+        if (!encounter) continue;
+
+        const rewardId = encounterThemeRewardElementId(encounterKey);
+        cell.dataset.encounterKey = encounterKey;
+        cell.dataset.encounterName = encounter.name || '';
+        if (rewardId && elementData[rewardId]) {
+            cell.dataset.elementId = rewardId;
+            cell.dataset.icon = elementData[rewardId].emoji;
+        } else {
+            cell.dataset.elementId = '';
+            cell.dataset.icon = '🔚';
+        }
+        cell.style.cursor = 'pointer';
+        cell.style.border = '';
+        cell.style.background = '';
+        cell.style.boxShadow = '';
+        cell.classList.remove('defeated', 'selected', 'dissolve');
+        const half = cell.querySelector('.half-success-counter');
+        if (half) half.remove();
+        cell.textContent = cell.dataset.icon || '';
+    }
+    placeInitialPawnOnCenterCellIfNeeded();
+}
+
+function wipeGameplayProgress() {
+    row1.innerHTML = '';
+    row2.innerHTML = '';
+    stabilizeProductsRow();
+    defeatedEncounters.clear();
+    persistentHalfSuccesses = {};
+    locationFailureCounter = {};
+    totalFailureCounter = {};
+    persistentHints = {};
+    successfulCombinations = [];
+    selectedReagents = [];
+    halfSuccesses = {};
+    moveCounter = 0;
+    previousEncounterKey = null;
+    currentEncounterCell = null;
+    document.querySelectorAll('.cell').forEach((c) => c.classList.remove('selected'));
+    if (pawn) pawn.remove();
+}
+
+function repopulateStartingDeck() {
+    startingElements = rollStartingElementsPair();
+    startingElements.forEach((id) => addCardToRow(id, row1));
+}
+
+function generateRandomEncounterLayout(forcedFinalKey = null) {
+    return generateRandomEncounterLayoutInner(forcedFinalKey);
+}
+
+function confirmAndApplyRandomEncounterMap(finKey, challengeNum) {
+    if (!finKey || !FINAL_ENCOUNTER_KEYS.has(finKey)) {
+        displayMessage('Invalid challenge finale.', 'warning', 4000);
+        return;
+    }
+    const num = String(challengeNum || '').trim();
+    const challengePhrase = num ? `Challenge ${num}` : 'this challenge setup';
+    if (!confirm(`Erase all progress and shuffle the map for ${challengePhrase}? This cannot be undone.`)) return;
+    let layout;
+    try {
+        layout = generateRandomEncounterLayout(finKey);
+    } catch (err) {
+        displayMessage('Could not build a random map (see console).', 'warning', 5000);
+        console.error(err);
+        return;
+    }
+    runtimeFinalUnlockOverrides = {};
+    wipeGameplayProgress();
+    applyEncounterKeysToDOM(layout);
+    repopulateStartingDeck();
+    updateCombinationsList();
+    initializeDefeatedEncounters();
+    activeFinaleKey = finKey;
+    activeChallengeN = CHALLENGE_NUM_BY_FINALE[finKey] ?? null;
+    updatePreview(null);
+    updateChallengeButtonHighlight();
+    saveGameState();
+}
+
+function randomEncounterMapResetWithForcedFinal(finKey, challengeNum) {
+    confirmAndApplyRandomEncounterMap(finKey, challengeNum);
+}
+
+function refreshFinalEncounterHintsIfSelected() {
+    const cur = currentEncounterCell?.dataset.encounterKey;
+    if (cur && FINAL_ENCOUNTER_KEYS.has(cur)) updateHintBox(cur);
+}
 
 function countIncompleteEncounters() {
     // Assuming all encounter cells have the class 'cell' and completed ones get 'defeated'
@@ -1420,6 +2295,7 @@ function encounterHasAnyPossibleOutcome(encounterKey) {
 }
 
 function moveRewardToReagentsIfOwned(rewardId) {
+    if (!rewardId) return;
     const existingCard = findCardById(rewardId);
     if (existingCard && existingCard.parentElement === row2) {
         row1.appendChild(existingCard);
@@ -1454,7 +2330,11 @@ function saveGameState() {
             totalFailureCounter,
             persistentHints,
             successfulCombinations,
-            moveCounter
+            moveCounter,
+            gridEncounterLayout: serializeGridEncounterLayout(),
+            finalEncounterUnlockOverrides: { ...runtimeFinalUnlockOverrides },
+            activeChallengeN,
+            activeFinaleKey,
         };
         localStorage.setItem(SAVE_KEY, JSON.stringify(state));
     } catch (e) {
@@ -1494,6 +2374,8 @@ function loadGameState() {
         return false;
     }
 
+    migratePersistedGameStateEncounterKeys(state);
+
     row1.innerHTML = '';
     row2.innerHTML = '';
     selectedReagents = [];
@@ -1507,6 +2389,33 @@ function loadGameState() {
     persistentHalfSuccesses = Object.fromEntries(
         Object.entries(state.persistentHalfSuccesses || {}).map(([key, value]) => [key, new Set(value)])
     );
+
+    runtimeFinalUnlockOverrides = { ...(state.finalEncounterUnlockOverrides || {}) };
+    if (state.gridEncounterLayout?.length === 25) {
+        applyEncounterKeysToDOM(state.gridEncounterLayout);
+        const storedFin = state.activeFinaleKey;
+        const storedN = state.activeChallengeN;
+        const finCell = state.gridEncounterLayout[24];
+        if (
+            typeof storedFin === 'string' &&
+            FINAL_ENCOUNTER_KEYS.has(storedFin) &&
+            typeof storedN === 'number' &&
+            !Number.isNaN(storedN) &&
+            storedFin === finCell
+        ) {
+            activeFinaleKey = storedFin;
+            activeChallengeN = storedN;
+        } else if (FINAL_ENCOUNTER_KEYS.has(finCell)) {
+            activeFinaleKey = finCell;
+            activeChallengeN = CHALLENGE_NUM_BY_FINALE[finCell] ?? null;
+        } else {
+            activeFinaleKey = null;
+            activeChallengeN = null;
+        }
+    } else {
+        activeFinaleKey = null;
+        activeChallengeN = null;
+    }
 
     restoreCards(state.row1, row1);
     restoreCards(state.row2, row2);
@@ -1541,15 +2450,20 @@ function loadGameState() {
         selectedCell.appendChild(pawn);
     } else {
         updatePreview(null);
-        const centerCell = grid.children[12];
-        if (centerCell) {
-            pawn = document.createElement("div");
-            pawn.className = "pawn";
-            pawn.textContent = "♙";
-            centerCell.appendChild(pawn);
-        }
+        placeInitialPawnOnCenterCellIfNeeded();
     }
+    updateChallengeButtonHighlight();
+    saveGameState();
     return true;
+}
+
+function updateChallengeButtonHighlight() {
+    document.querySelectorAll('.js-start-challenge[data-challenge-n]').forEach((btn) => {
+        const on =
+            activeChallengeN != null && String(btn.dataset.challengeN) === String(activeChallengeN);
+        btn.classList.toggle('challenge-map-btn--active', !!on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
 }
 
 // Function to update the Past Combinations list
@@ -1912,17 +2826,17 @@ function handleEncounter(card, verbKey) {
     
 
     if (isSuccess || isHalfSuccess) {
-        // Reset failure counter on any success/half-success
-        if (encounterKey === 'Z') {
-        displayWinScreen();
-    }
         locationFailureCounter[encounterKey] = 0;
         updateHintBox(encounterKey);
     }
 
     if (isSuccess) {
-        // FULL SUCCESS
-        displayMessage('SUCCESS!', 'success');
+        const finaleWin = FINAL_ENCOUNTER_KEYS.has(encounterKey);
+        // FULL SUCCESS — finale uses the win modal as primary feedback (toast skipped)
+        if (!finaleWin) {
+            displayMessage('SUCCESS!', 'success');
+            tryNicelyDoneOverlay(encounterKey, verbKey);
+        }
         triggerFeedback(encounterCell, 'feedback-success');
 
         // Start dissolve animation and mark as defeated after it's done
@@ -1932,13 +2846,11 @@ function handleEncounter(card, verbKey) {
             encounterCell.classList.add('defeated');
             moveRewardToReagentsIfOwned(rewardId);
             encounterCell.innerHTML = encounterCell.dataset.icon;
-            // Add the rewarded element (will untap or add new)
-            addCardToRow(rewardId, row1);
+            if (rewardId) addCardToRow(rewardId, row1);
             defeatedEncounters.add(encounterKey);
-            
-            if (previousEncounterKey === 'Z') { 
-                 updateHintBox('Z');
-            }
+            if (finaleWin) displayWinScreen(encounterKey);
+
+            refreshFinalEncounterHintsIfSelected();
             // Reset encounter state (clears preview and selection)
             resetEncounterState();
             saveGameState();
@@ -1961,8 +2873,10 @@ function handleEncounter(card, verbKey) {
 
             // Check if this new success makes the total count 2 or more
             if (persistentHalfSuccesses[encounterKey].size >= 2) {
-                // TWO UNIQUE HALF SUCCESSES = FULL SUCCESS
-                displayMessage('TWO HALF SUCCESSES', 'success');
+                // TWO UNIQUE HALF SUCCESSES = FULL SUCCESS (finale uses win modal only)
+                if (!FINAL_ENCOUNTER_KEYS.has(encounterKey)) {
+                    displayMessage('TWO HALF SUCCESSES', 'success');
+                }
                 triggerFeedback(encounterCell, 'feedback-success');
 
                 encounterCell.classList.add('dissolve');
@@ -1971,9 +2885,12 @@ function handleEncounter(card, verbKey) {
                     encounterCell.classList.add('defeated');
                     encounterCell.innerHTML = encounterCell.dataset.icon;
                     defeatedEncounters.add(encounterKey);
+                    if (FINAL_ENCOUNTER_KEYS.has(encounterKey)) {
+                        displayWinScreen(encounterKey);
+                    }
                     moveRewardToReagentsIfOwned(rewardId);
-                    addCardToRow(rewardId, row1);
-                    refreshZHintsIfSelected();
+                    if (rewardId) addCardToRow(rewardId, row1);
+                    refreshFinalEncounterHintsIfSelected();
                     resetEncounterState();
                     saveGameState();
                 }, 500);
@@ -2010,59 +2927,34 @@ function updateHintBox(encounterKey) {
     if (!encounterKey) return;
 
     const encounterData = encounterEffects[encounterKey];
-    
-    // --- SPECIAL LOGIC FOR ENCOUNTER 'Z' ---
-    if (encounterKey === 'Z') {
-        let hintsToShow = [];
-        let unlockCount = 0;
+    if (!encounterData) return;
 
-        // 1. Define the specific unlocker keys for the final row
-        const unlockers = ['U', 'W', 'K', 'X']; 
-
-        // 2. Count how many of those unlockers are 'defeated' 
-        //    by checking the global defeatedEncounters Set.
-        unlockers.forEach(key => {
-            if (defeatedEncounters.has(key)) {
-                unlockCount++;
-            }
-        });
-        console.log(unlockers, unlockCount);
-        
-        // 3. Determine the maximum number of hints to show.
-
-        const maxHints = unlockCount + 1;
-
-        // 4. Iterate sequentially from Hint 1 up to maxHints
-        for (let i = 1; i <= maxHints; i++) {
-            const hintKey = `hint${i}`;
-            const hintText = encounterData[hintKey];
-            
-            if (hintText) {
-                // Removed numbering
+    if (FINAL_ENCOUNTER_KEYS.has(encounterKey)) {
+        const progressiveSlots = countEncounterHintSlots(encounterData);
+        const unlockHints = effectiveFinalUnlockHints(encounterKey);
+        if (progressiveSlots >= 2 && unlockHints?.length) {
+            let unlockCount = 0;
+            unlockHints.forEach((key) => {
+                if (defeatedEncounters.has(key)) unlockCount++;
+            });
+            const maxHints = unlockCount + 1;
+            const hintsToShow = [];
+            for (let i = 1; i <= maxHints; i++) {
+                const hintText = encounterData[`hint${i}`];
+                if (!hintText) break;
                 hintsToShow.push(`<span>${hintText}</span>`);
-            } else {
-                break;
             }
+            hintsToShow.forEach((html) => {
+                hintBox.innerHTML += html;
+            });
+            return;
         }
-        
-        // Display all accumulated hints
-        hintsToShow.forEach(hintHTML => {
-            hintBox.innerHTML += hintHTML;
-        });
-        
-        return; 
     }
-    // --- END SPECIAL LOGIC FOR ENCOUNTER 'Z' ---
 
-    // --- DEFAULT LOGIC FOR ALL OTHER ENCOUNTERS ---
-    
-    const hintLevel = persistentHints[encounterKey] || 0; 
-
-    // Hint 1:
+    const hintLevel = persistentHints[encounterKey] || 0;
     if (hintLevel >= 0 && encounterData.hint1) {
         hintBox.innerHTML = `<span>${encounterData.hint1}</span>`;
     }
-    // Hint 2:
     if (hintLevel >= 2 && encounterData.hint2) {
         hintBox.innerHTML += `<span>${encounterData.hint2}</span>`;
     }
@@ -2075,18 +2967,84 @@ function resetEncounterState() {
 }
 
 // Function to display the win screen
-function displayWinScreen() {
+function resolveWinFinaleEncounterKey(encounterKeyOverride) {
+    let fin =
+        encounterKeyOverride && FINAL_ENCOUNTER_KEYS.has(encounterKeyOverride)
+            ? encounterKeyOverride
+            : null;
+    if (!fin || !FINAL_ENCOUNTER_KEYS.has(fin)) fin = activeFinaleKey;
+    if (!fin || !FINAL_ENCOUNTER_KEYS.has(fin)) {
+        const layout = serializeGridEncounterLayout();
+        fin = layout[24];
+    }
+    return FINAL_ENCOUNTER_KEYS.has(fin) ? fin : null;
+}
+
+function getWinChallengeLine(finaleKeyOverride) {
+    const fin = resolveWinFinaleEncounterKey(finaleKeyOverride);
+    if (!fin) return '';
+    const subtitle = FINALE_CHALLENGE_LABEL[fin] || fin;
+    const n = CHALLENGE_NUM_BY_FINALE[fin];
+    return typeof n === 'number' ? `Challenge ${n} (${subtitle})` : subtitle;
+}
+
+function displayWinScreen(encounterKeyOverride) {
     const modal = document.getElementById('win-modal');
-    const movesDisplay = document.getElementById('win-moves-display'); // <-- ADD THIS
-    movesDisplay.textContent = `You won in ${moveCounter} moves.`; // <-- ADD THIS
+    const movesDisplay = document.getElementById('win-moves-display');
+    const challengeDisplay = document.getElementById('win-challenge-display');
+    const flavorEl = document.getElementById('win-flavor-message');
+    const winArt = document.getElementById('win-finale-art');
+
+    const finKey = resolveWinFinaleEncounterKey(encounterKeyOverride);
+    const line = getWinChallengeLine(encounterKeyOverride);
+    challengeDisplay.textContent = line ? `You completed ${line}!` : 'You cleared the finale!';
+    movesDisplay.textContent = `You won in ${moveCounter} moves.`;
+
+    const meta = finKey && encounterEffects[finKey];
+    if (flavorEl) {
+        if (finKey === 'Z') {
+            flavorEl.textContent =
+                "You delivered the alchemists' prize and escaped The Alchemists Endgame.";
+        } else if (finKey === 'FZ') {
+            flavorEl.textContent =
+                "You handled the alchemist's accident—all the king's urgency, settled by one nursery rhyme.";
+        } else if (meta?.name) {
+            flavorEl.textContent = `You triumphed in ${meta.name}.`;
+        } else {
+            flavorEl.textContent = 'Congratulations!';
+        }
+    }
+
+    if (winArt) {
+        const path = finKey && FINALE_WIN_ART_BY_KEY[finKey];
+        if (path) {
+            winArt.src = path;
+            winArt.alt = finKey ? `Victory — ${FINALE_CHALLENGE_LABEL[finKey] || finKey}` : '';
+            winArt.hidden = false;
+        } else {
+            winArt.removeAttribute('src');
+            winArt.alt = '';
+            winArt.hidden = true;
+        }
+    }
+
     modal.classList.add('visible');
+    modal.setAttribute('aria-hidden', 'false');
 }
 
 // Function to hide the win screen
 function hideWinScreen() {
     const modal = document.getElementById('win-modal');
     modal.classList.remove('visible');
-    
+    modal.setAttribute('aria-hidden', 'true');
+
+    const winArt = document.getElementById('win-finale-art');
+    if (winArt) {
+        winArt.removeAttribute('src');
+        winArt.alt = '';
+        winArt.hidden = true;
+    }
+
     // Optional: You could reload the page or reset the game state here
 }
 
@@ -2100,92 +3058,76 @@ const gridIconsMap = [
    { icon: '❄️', id: '9', key: 'F' }, { icon: '⚙️', id: '34', key: 'T' }, { icon: '🌿', id: '8', key: 'E' }, { icon: '⛓️', id: '11', key: 'G' },
    { icon: '🛢️', id: '30', key: 'O' },  { icon: '🧪', id: '28', key: 'M' }, { icon: '🧠', id: '36', key: 'V' }, { icon: '⚡', id: '5', key: 'R' }, { icon: '🔩', id: '13', key: 'I' },
    { icon: '⬛', id: '31', key: 'P' }, { icon: '🧍', id: '32', key: 'Q' }, { icon: '🧬', id: '33', key: 'S' },  { icon: '🤜', id: '27', key: 'L' },
-   { icon: '💡', id: '12', key: 'H' }, { icon: '⬇️', id: '29', key: 'N' }, { icon: '🔊', id: '14', key: 'J' }, { icon: '⏱️', id: '35', key: 'U' }, 
-   { icon: '❤️', id: '37', key: 'W' }, { icon: '🔮', id: '26', key: 'K' }, { icon: '💀', id: '38', key: 'X' }, 
+   { icon: '💡', id: '12', key: 'H' }, { icon: '⬇️', id: '29', key: 'N' }, { icon: '🔊', id: '14', key: 'J' }, { icon: '⏱️', id: '35', key: 'U' },
+   { icon: '❤️', id: '37', key: 'W' }, { icon: '🔮', id: '26', key: 'K' }, { icon: '💀', id: '38', key: 'X' },
    { icon: '🔚', id: null, key: 'Z' }
 ];
 
-for(let r=0;r<5;r++){
-  for(let c=0;c<5;c++){
-    const cell=document.createElement("div");
-    cell.className="cell";
-    const index = r*5+c;
-    const data = gridIconsMap[index];
-
-    if (data.icon) {
-        const encounter = encounterEffects[data.key];
-
-        cell.dataset.encounterKey = data.key;
-        cell.dataset.icon = data.icon;
-        cell.dataset.elementId = data.id;
-        cell.dataset.encounterName = encounter.name;
-        cell.textContent = data.icon;
-
-        cell.addEventListener("click",()=>{
-            // TAPPED ELEMENTS SHOULD NEVER BE HIGHLIGHTED OR SELECTED
-            if (cell.classList.contains('defeated')) return;
-
-            if (currentEncounterCell !== cell) {
-                moveCounter++;
-            }
-
-            const remainingEncounters = countIncompleteEncounters();
-            const isBlockingActive = remainingEncounters > 2 && !bottomRowEncounterKeys.has(data.key);
-
-            if (isBlockingActive) {
-                // 2. If the block is active, perform the 3x failure check
-                if (locationFailureCounter[data.key] >= 4 && currentEncounterCell && currentEncounterCell.dataset.encounterKey === data.key) {
-                    displayMessage('Fourth failure in a row, must try another encounter!', 'default');
-                    return;
-                }
-            }
-
-            // When selecting a new location, clear the failure block on the OLD location
-            if (previousEncounterKey && previousEncounterKey !== data.key) {
-                locationFailureCounter[previousEncounterKey] = 0;
-            }
-
-
-            // Clear selection for all cells
-            document.querySelectorAll(".cell").forEach(c => c.classList.remove("selected"));
-            cell.classList.add("selected");
-            // Set the new encounter
-            currentEncounterCell = cell;
-            previousEncounterKey = data.key;
-
-            // Reset half successes for the NEW encounter
-            halfSuccesses = {};
-
-            // <--- THE CRITICAL FIX: CALL THE NEW FUNCTION --->
-            updatePreview(data.key); 
-            // <--- THE CRITICAL FIX: END --->
-
-            // Update pawn position
-            if (pawn) pawn.remove();
-            pawn=document.createElement("div");
-            pawn.className="pawn";
-            pawn.textContent="♙";
-            cell.appendChild(pawn);
-            saveGameState();
-
-        });
-    } else {
-        cell.textContent = '';
-        cell.style.cursor = 'default';
-        cell.style.border = '1px solid transparent';
-        cell.style.background = 'transparent';
-        cell.style.boxShadow = 'none';
-
-        if(index === 12){
-            pawn=document.createElement("div");
-            pawn.className="pawn";
-            pawn.textContent="♙";
-            cell.appendChild(pawn);
-        }
-    }
-    grid.appendChild(cell);
-  }
+const DEFAULT_GRID_ENCOUNTER_KEYS = gridIconsMap.map((entry) => entry.key);
+const BOOT_STORED = peekStoredGridBootstrap();
+if (BOOT_STORED.unlockOverrides && Object.keys(BOOT_STORED.unlockOverrides).length > 0) {
+    runtimeFinalUnlockOverrides = { ...BOOT_STORED.unlockOverrides };
 }
+let INITIAL_ENCOUNTER_KEYS;
+if (BOOT_STORED.layout && BOOT_STORED.layout.length === 25) {
+    INITIAL_ENCOUNTER_KEYS = BOOT_STORED.layout.slice();
+} else {
+    try {
+        INITIAL_ENCOUNTER_KEYS = generateRandomEncounterLayout('AZ');
+    } catch (e) {
+        console.error(e);
+        INITIAL_ENCOUNTER_KEYS = DEFAULT_GRID_ENCOUNTER_KEYS.slice();
+    }
+}
+
+for (let idx = 0; idx < 25; idx++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+
+    cell.addEventListener('click', () => {
+        const ek = cell.dataset.encounterKey;
+        if (!ek) return;
+        if (cell.classList.contains('defeated')) return;
+
+        if (currentEncounterCell !== cell) {
+            moveCounter++;
+        }
+
+        const remainingEncounters = countIncompleteEncounters();
+        const isBlockingActive = remainingEncounters > 2 && !bottomRowEncounterKeys.has(ek);
+
+        if (isBlockingActive) {
+            if (locationFailureCounter[ek] >= 4 && currentEncounterCell && currentEncounterCell.dataset.encounterKey === ek) {
+                displayMessage('Fourth failure in a row, must try another encounter!', 'default');
+                return;
+            }
+        }
+
+        if (previousEncounterKey && previousEncounterKey !== ek) {
+            locationFailureCounter[previousEncounterKey] = 0;
+        }
+
+        document.querySelectorAll('.cell').forEach((c) => c.classList.remove('selected'));
+        cell.classList.add('selected');
+        currentEncounterCell = cell;
+        previousEncounterKey = ek;
+
+        halfSuccesses = {};
+
+        updatePreview(ek);
+
+        if (pawn) pawn.remove();
+        pawn = document.createElement('div');
+        pawn.className = 'pawn';
+        pawn.textContent = '♙';
+        cell.appendChild(pawn);
+        saveGameState();
+    });
+
+    grid.appendChild(cell);
+}
+
+applyEncounterKeysToDOM(INITIAL_ENCOUNTER_KEYS);
 
 // Display initial reagent cards (Earth and Air)
 startingElements.forEach(id => {
@@ -2196,6 +3138,12 @@ if (!loadGameState()) {
     // Initialize combinations list
     updateCombinationsList();
     initializeDefeatedEncounters();
+    const finFromGrid =
+        INITIAL_ENCOUNTER_KEYS?.length === 25 ? INITIAL_ENCOUNTER_KEYS[24] : null;
+    activeFinaleKey =
+        finFromGrid && FINAL_ENCOUNTER_KEYS.has(finFromGrid) ? finFromGrid : 'AZ';
+    activeChallengeN = CHALLENGE_NUM_BY_FINALE[activeFinaleKey] ?? 1;
+    updateChallengeButtonHighlight();
     saveGameState();
 }
 
@@ -2287,44 +3235,95 @@ combinationsWrap.addEventListener('mouseleave', () => {
 });
 
 document.addEventListener('DOMContentLoaded', (event) => {
-    // Now it is safe to look for the button element
     const closeButton = document.getElementById('win-close-button');
-    
-    if (closeButton) {
-        // Attach the listener now that the button exists
-        closeButton.addEventListener('click', hideWinScreen);
-    }
+    if (closeButton) closeButton.addEventListener('click', hideWinScreen);
+
+    const nicelyOverlay = document.getElementById('nicely-done-overlay');
+    const nicelyDialog = nicelyOverlay?.querySelector('.nicely-done-dialog');
+    const nicelyBtn = document.getElementById('nicely-done-close');
+    nicelyOverlay?.addEventListener('click', (e) => {
+        if (e.target === nicelyOverlay) hideNicelyDoneOverlay();
+    });
+    nicelyDialog?.addEventListener('click', (e) => e.stopPropagation());
+    nicelyBtn?.addEventListener('click', () => hideNicelyDoneOverlay());
 });
 
-// Rules column toggle (close with X, reopen with floating Rules button)
+// Rules column toggle — dock Rules button opens / hides and pulses when closing so it’s obvious where the panel went
 const rulesOpenBtn = document.getElementById('rulesOpenBtn');
 const rulesCloseBtn = document.getElementById('rulesCloseBtn');
-const resetGameBtn = document.getElementById('resetGameBtn');
+
+function pulseRulesDockButton() {
+    const btn = document.getElementById('rulesOpenBtn');
+    if (!btn?.animate) return;
+    try {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    } catch (e) {
+        /* ignore */
+    }
+    btn.animate(
+        [
+            { transform: 'scale(1)', filter: 'brightness(1)' },
+            {
+                transform: 'scale(1.09)',
+                filter: 'brightness(1.15)',
+            },
+            { transform: 'scale(1)', filter: 'brightness(1)' },
+        ],
+        { duration: 520, easing: 'cubic-bezier(0.34, 1.35, 0.64, 1)' }
+    );
+}
+
+function syncRulesToggleChrome(closed) {
+    if (!rulesOpenBtn) return;
+    rulesOpenBtn.setAttribute('aria-expanded', closed ? 'false' : 'true');
+    rulesOpenBtn.textContent = closed ? 'Rules' : 'Hide';
+    rulesOpenBtn.setAttribute('aria-label', closed ? 'Open rules panel' : 'Hide rules panel');
+    rulesOpenBtn.classList.toggle('rules-toggle-active', !closed);
+}
+
 function setRulesClosed(closed) {
     document.body.classList.toggle('rules-closed', !!closed);
+    syncRulesToggleChrome(!!closed);
     try {
         localStorage.setItem('alxRulesClosed', closed ? '1' : '0');
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+        /* ignore */
+    }
 }
 // Start OPEN by default (regardless of prior localStorage state).
 setRulesClosed(false);
-if (rulesOpenBtn) rulesOpenBtn.addEventListener('click', () => setRulesClosed(false));
-if (rulesCloseBtn) rulesCloseBtn.addEventListener('click', () => setRulesClosed(true));
-function resetSavedGame() {
-        if (!confirm('Reset the game and erase saved progress?')) return;
-        try {
-            localStorage.removeItem(SAVE_KEY);
-        } catch (e) { /* ignore */ }
-        window.location.reload();
-}
-if (resetGameBtn) resetGameBtn.addEventListener('click', resetSavedGame);
+if (rulesOpenBtn)
+    rulesOpenBtn.addEventListener('click', () => {
+        const hiding = !document.body.classList.contains('rules-closed');
+        setRulesClosed(hiding);
+        if (hiding) pulseRulesDockButton();
+    });
+if (rulesCloseBtn)
+    rulesCloseBtn.addEventListener('click', () => {
+        setRulesClosed(true);
+        pulseRulesDockButton();
+    });
+document.querySelectorAll('.js-start-challenge[data-finale-key]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        randomEncounterMapResetWithForcedFinal(btn.dataset.finaleKey || '', btn.dataset.challengeN || '');
+    });
+});
 
 </script>
 
-<div id="win-modal" class="win-modal-overlay">
+<div id="nicely-done-overlay" class="nicely-done-overlay" aria-hidden="true">
+    <div class="nicely-done-dialog" role="dialog" aria-modal="true" aria-labelledby="nicely-done-title">
+        <button type="button" id="nicely-done-close" class="nicely-done-close" aria-label="Close">&times;</button>
+        <h2 id="nicely-done-title" class="nicely-done-title">Nicely done!</h2>
+        <img id="nicely-done-art" class="nicely-done-art" src="" alt="" />
+    </div>
+</div>
+<div id="win-modal" class="win-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="win-title" aria-hidden="true">
     <div class="win-modal-content">
-        <h1 class="win-title">🎉 YOU WIN! 🎉</h1>
-        <p class="win-message">Congratulations!</p>
+        <h1 id="win-title" class="win-title">🎉 YOU WIN! 🎉</h1>
+        <p id="win-flavor-message" class="win-message">Congratulations!</p>
+        <img id="win-finale-art" class="win-finale-art" hidden src="" alt="" />
+        <p id="win-challenge-display" class="win-challenge"></p>
         <p id="win-moves-display" class="win-moves"></p>
         <button id="win-close-button" class="win-close-button">Continue</button>
     </div>
