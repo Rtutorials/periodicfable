@@ -517,8 +517,7 @@ body.rules-closed .main{
 /* Existing preview styles */
 .preview{
   width:var(--preview-w);
-  min-height: 400px;
-  height: auto;
+  box-sizing: border-box;
   border-radius:var(--radius);
   border:1px solid rgba(255,255,255,0.04);
   background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(255,255,255,0.005));
@@ -526,9 +525,20 @@ body.rules-closed .main{
   align-items:center;
   justify-content:flex-start;
   gap: 4px;
-  padding: 10px; /* Add some padding */
-  overflow: hidden; /* Keep every child visually contained */
-  contain: layout;
+  padding: 10px;
+  overflow: hidden;
+}
+/* Locked height while an encounter is selected — stops fuse row / cards from jumping */
+.preview.preview--encounter {
+    height: 532px;
+    min-height: 532px;
+    max-height: 532px;
+}
+/* Pawn-at-centre idle state — intentionally shorter than encounter pane */
+.preview.preview--pawn {
+    height: 200px;
+    min-height: 200px;
+    max-height: 200px;
 }
 .preview-title {
     font-size: 1.2rem;
@@ -537,12 +547,18 @@ body.rules-closed .main{
     margin-bottom: 0;
     line-height: 1.25;
     min-height: calc(1.25em * 3);
-    display: flex;
-    align-items: center;
+    max-height: calc(1.25em * 6);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+    overflow: hidden;
+    align-items: flex-start;
     justify-content: center;
+    word-break: break-word;
     font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
     font-weight: 700;
     letter-spacing: 0.2px;
+    flex-shrink: 0;
 }
 .selected-encounter-hint{
     font-size: 8px;
@@ -619,7 +635,9 @@ body.rules-closed .main{
 /* NEW: Encounter Message Box Styling - in normal flow so messages are never clipped (Safari/Main overflow) */
 .encounter-message-box {
     width: 100%;
-    min-height: 58px; /* Stable slot — messages overlay here so fading does not reflow preview */
+    height: 64px;
+    min-height: 64px;
+    max-height: 64px;
     position: relative;
     left: auto;
     bottom: auto;
@@ -637,7 +655,10 @@ body.rules-closed .main{
 /* Hint Box for persistent hints - Updated for Second Hint line break */
 .hint-box {
     width: 100%;
-    flex: 0 0 auto;
+    flex: 0 0 180px;
+    height: 180px;
+    min-height: 180px;
+    max-height: 180px;
     font-size: 12px;
     color: var(--muted);
     text-align: center;
@@ -645,10 +666,16 @@ body.rules-closed .main{
     padding: 5px 0;
     margin-top: 4px;
     margin-bottom: 0;
-    min-height: 128px;
-    max-height: 180px;
     overflow-y: auto;
     overscroll-behavior: contain;
+    box-sizing: border-box;
+}
+.preview.preview--pawn .hint-box {
+    flex: 0 0 40px;
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
+    margin-top: 0;
 }
 .hint-box span {
     display: block; /* Force the span (Second Hint) onto a new line */
@@ -703,14 +730,47 @@ body.rules-closed .main{
     margin-bottom: 0;
     text-align: center;
     line-height: 1.2;
-    min-height: calc(1.2em + 4px);
+    min-height: calc(1.2em + 6px);
+    max-height: calc(1.2em * 3);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
     width: 100%;
+    flex-shrink: 0;
 }
 
 @keyframes fadeout {
     0% { opacity: 1; }
     /* FADE GRADUALLY FROM 0% */
     100% { opacity: 0; }
+}
+
+/* Blocking splash while encounter art is pulled into HTTP + decode caches */
+.gameplay-asset-boot {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    display: grid;
+    place-items: center;
+    background: rgba(8, 5, 12, 0.82);
+    color: rgba(239, 233, 242, 0.92);
+    font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    transition: opacity 0.25s ease;
+}
+.gameplay-asset-boot--hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+.gameplay-asset-boot-inner {
+    padding: 20px 28px;
+    border-radius: 12px;
+    border: 1px solid rgba(201, 168, 74, 0.28);
+    background: rgba(20, 12, 28, 0.95);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
+    text-align: center;
 }
 /* END: Encounter Message Box Styling */
 
@@ -1132,9 +1192,15 @@ body.rules-closed .main{
     max-height: 160px;
     contain-intrinsic-size: 280px 160px;
   }
-  .preview {
-    min-height: 392px;
-    height: auto;
+  .preview.preview--encounter {
+    height: 498px;
+    min-height: 498px;
+    max-height: 498px;
+  }
+  .preview.preview--pawn {
+    height: 188px;
+    min-height: 188px;
+    max-height: 188px;
   }
 }
 
@@ -1202,7 +1268,7 @@ body.rules-closed .main{
     </div>
 
     <div class="preview-and-message-wrap">
-        <div class="preview">
+        <div class="preview preview--pawn" id="previewPane">
             <div class="selected-encounter-hint" id="selectedEncounterHint"></div>
             <div class="preview-title" id="previewTitle"></div>
             <div class="preview-art-track preview-art-track--hidden" id="previewArtTrack" aria-hidden="true">
@@ -2165,21 +2231,72 @@ const nicelyDoneArtByEncounterVerb = Object.freeze({
     'CL|68B': 'alchemyart/nihilistx.png',
 });
 
-/** Prime browser cache so encounter preview (and overlays) reuse PNGs without per-click latency */
-function primeGameplayImagePrefetch() {
-    const urls = new Set([
-        ...Object.values(encounterArtMap),
-        ...Object.values(FINALE_WIN_ART_BY_KEY),
-        ...Object.values(nicelyDoneArtByEncounterVerb),
-    ]);
-    for (const href of urls) {
-        if (!href) continue;
-        const probe = new Image();
-        probe.onload = () => probe.decode?.().catch(() => {});
-        probe.src = href;
-    }
+/** Paths that must hit cache before we wire the board so first encounter swaps stay instant */
+function collectGameplayAssetHrefsForCache() {
+    return [
+        ...new Set([
+            ...Object.values(encounterArtMap),
+            ...Object.values(FINALE_WIN_ART_BY_KEY),
+            ...Object.values(nicelyDoneArtByEncounterVerb),
+            'fuse_example.gif',
+        ]),
+    ].filter(Boolean);
 }
-primeGameplayImagePrefetch();
+
+function preloadImageDecoded(href) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        let settled = false;
+        const finish = () => {
+            if (settled) return;
+            settled = true;
+            const d =
+                typeof img.decode === 'function' ? img.decode().catch(() => {}) : Promise.resolve();
+            Promise.resolve(d).then(() => resolve());
+        };
+        img.onload = finish;
+        img.onerror = () => resolve(); // never hard-block on broken/missing sprite
+        img.src = href;
+        if (img.complete && img.naturalWidth > 0) finish();
+    });
+}
+
+async function warmAllGameplayImageCaches(timeoutMs = 22000) {
+    const urls = collectGameplayAssetHrefsForCache();
+    const warmup = Promise.all(urls.map((href) => preloadImageDecoded(href)));
+    await Promise.race([warmup, new Promise((r) => setTimeout(r, timeoutMs))]);
+}
+
+function mountGameplayBootSplash() {
+    if (document.getElementById('gameplay-asset-boot')) return;
+    const el = document.createElement('div');
+    el.id = 'gameplay-asset-boot';
+    el.className = 'gameplay-asset-boot';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.innerHTML =
+        '<div class="gameplay-asset-boot-inner"><p>Loading alchemical art…</p>' +
+        '<p style="font-size:12px;opacity:.72;margin-top:8px;margin-bottom:0">Warming vignettes so encounters open without delay.</p></div>';
+    document.body.insertBefore(el, document.body.firstChild);
+}
+
+function setGameplayBootSplashVisible(show) {
+    mountGameplayBootSplash();
+    const el = document.getElementById('gameplay-asset-boot');
+    if (!el) return;
+    el.classList.toggle('gameplay-asset-boot--hidden', !show);
+    el.setAttribute('aria-hidden', show ? 'false' : 'true');
+    if (show) document.body.style.overflow = 'hidden';
+    else document.body.style.removeProperty('overflow');
+}
+
+let previewPaneRoot = null;
+function setPreviewPaneMode(isEncounter) {
+    if (!previewPaneRoot) previewPaneRoot = document.getElementById('previewPane');
+    if (!previewPaneRoot) return;
+    previewPaneRoot.classList.toggle('preview--encounter', !!isEncounter);
+    previewPaneRoot.classList.toggle('preview--pawn', !isEncounter);
+}
 
 function nicelyDoneLookup(encounterKey, verbKey) {
     return nicelyDoneArtByEncounterVerb[`${encounterKey}|${verbKey}`] || null;
@@ -2951,6 +3068,7 @@ function setPreviewEncounterImage(artPath, altText) {
 
 function updatePreview(encounterKey) {
     if (!encounterKey) {
+        setPreviewPaneMode(false);
         preview.textContent = '♙';
         previewTitle.textContent = '';
         selectedEncounterHint.textContent = '';
@@ -2967,6 +3085,8 @@ function updatePreview(encounterKey) {
         updateHintBox(null);
         return;
     }
+
+    setPreviewPaneMode(true);
 
     if (previewArtTrack) {
         previewArtTrack.classList.remove('preview-art-track--hidden');
@@ -3299,7 +3419,19 @@ if (BOOT_STORED.layout && BOOT_STORED.layout.length === BOARD_TOTAL_CELL_COUNT) 
     }
 }
 
-for (let idx = 0; idx < BOARD_TOTAL_CELL_COUNT; idx++) {
+void (async function bootGameplayAndWireUi() {
+    setGameplayBootSplashVisible(true);
+    try {
+        await warmAllGameplayImageCaches();
+    } catch (e) {
+        console.warn(e);
+    } finally {
+        setGameplayBootSplashVisible(false);
+    }
+
+    previewPaneRoot = document.getElementById('previewPane');
+
+    for (let idx = 0; idx < BOARD_TOTAL_CELL_COUNT; idx++) {
     const cell = document.createElement('div');
     cell.className = 'cell';
 
@@ -3453,6 +3585,8 @@ combinationsWrap.addEventListener('mouseenter', () => {
 combinationsWrap.addEventListener('mouseleave', () => {
     combinationsList.style.display = 'none';
 });
+
+})();
 
 document.addEventListener('DOMContentLoaded', (event) => {
     const closeButton = document.getElementById('win-close-button');
