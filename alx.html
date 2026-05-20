@@ -707,33 +707,6 @@ body.rules-closed .main{
     /* FADE GRADUALLY FROM 0% */
     100% { opacity: 0; }
 }
-
-/* Blocking splash while encounter art is pulled into HTTP + decode caches */
-.gameplay-asset-boot {
-    position: fixed;
-    inset: 0;
-    z-index: 2147483000;
-    display: grid;
-    place-items: center;
-    background: rgba(8, 5, 12, 0.82);
-    color: rgba(239, 233, 242, 0.92);
-    font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
-    font-size: 15px;
-    letter-spacing: 0.04em;
-    transition: opacity 0.25s ease;
-}
-.gameplay-asset-boot--hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-.gameplay-asset-boot-inner {
-    padding: 20px 28px;
-    border-radius: 12px;
-    border: 1px solid rgba(201, 168, 74, 0.28);
-    background: rgba(20, 12, 28, 0.95);
-    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
-    text-align: center;
-}
 /* END: Encounter Message Box Styling */
 
 /* CONTAINER FOR CARDS */
@@ -1501,7 +1474,7 @@ const encounterEffects = {
     'CB': { name: 'Dust- Riddle Two', difficultyLevel: 4, hint1: 'I have a large diet, I will eat anything.', hint2: 'I will slay kings and mountains alike. I stop for no one.', effects: ['35A', '35C'] },
     'CC': { name: 'Death- The Excuse', difficultyLevel: 4, hint1: "A doctor doesn't believe you when you say that you are sick enough to miss school.", hint2: "To get a doctor's note, you must demonstrate that you are medically unwell.", effects: ['53A', '45A', '45B', '79A', '65C', '37A', '99A', '-51A', '10B', '14B', '28A', '-32A', '-36A', '55A'] },
     'CD': { name: 'Intelligence- The Prank', difficultyLevel: 4, hint1: 'Your neighbor is at home, it is time to get revenge.', hint2: 'You must bother him back for what he did to you.', effects: ['73A', '45A', '67A', '113A', '103A', '106A', '109A', '51A', '-12A', '-3A', '-34A', '-16A'] },
-    'CE': { name: 'Metal- The Vandalism', difficultyLevel: 5, hint1: 'You want to decrease the tax value of your home by defacing it somehow.', hint2: 'Find a way to temporarily spoil the desirability of living there.', effects: ['-4A', '-3A', '-28B', '34A', '42A', '-78A', '67A', '45A', '-113A', '-15A', '-102A', '109A', '-7B'] },
+    'CE': { name: 'Metal- The Vandalism', difficultyLevel: 5, hint1: 'You want to decrease the tax value of your home by defacing it somehow.', hint2: 'Find a way to temporarily spoil the desirability of living there.', effects: ['-28B', '34A', '42A', '-78A', '67A', '45A', '-113A', '-15A', '-102A', '109A', '-7B'] },
     'CF': { name: 'Life- The Diet', difficultyLevel: 4, hint1: 'You are brainstorming ways to lose weight and be healthier.', hint2: 'Perhaps some healthy food would help.', effects: ['56B', '73B', '19A', '113B', '101A', '58B', '-55B', '-57B', '-33A'] },
     'CG': { name: 'Oil- The Checkpoint', difficultyLevel: 4, hint1: 'You are trying to get some contraband resources past a security checkpoint.', hint2: 'The guards may be more corrupt than they seem.', effects: ['79A', '37A', '38A', '65C', '80A', '49A', '46A', '64A', '-51B', '-74B', '-77A', '-36A', '-41A', '-32A', '-20A', '-10B'] },
     'CH': { name: 'Ice- The Stream', difficultyLevel: 5, hint1: 'You are very thirsty, but the water in the stream might not be clean.', hint2: 'You must find a way to get rid of bacteria.', effects: ['6B', '51A', '-28B', '-10A', '-71A', '-72A', '-38A'] },
@@ -2182,64 +2155,22 @@ const nicelyDoneArtByEncounterVerb = Object.freeze({
     'CL|68B': 'alchemyart/nihilistx.png',
 });
 
-/** Paths that must hit cache before we wire the board so first encounter swaps stay instant */
-function collectGameplayAssetHrefsForCache() {
-    return [
-        ...new Set([
-            ...Object.values(encounterArtMap),
-            ...Object.values(FINALE_WIN_ART_BY_KEY),
-            ...Object.values(nicelyDoneArtByEncounterVerb),
-            'fuse_example.gif',
-        ]),
-    ].filter(Boolean);
+/** Optional background warm of art (no splash — does not block gameplay) */
+function primeGameplayImagePrefetch() {
+    const urls = new Set([
+        ...Object.values(encounterArtMap),
+        ...Object.values(FINALE_WIN_ART_BY_KEY),
+        ...Object.values(nicelyDoneArtByEncounterVerb),
+        'fuse_example.gif',
+    ]);
+    for (const href of urls) {
+        if (!href) continue;
+        const probe = new Image();
+        probe.onload = () => probe.decode?.().catch(() => {});
+        probe.src = href;
+    }
 }
-
-function preloadImageDecoded(href) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        let settled = false;
-        const finish = () => {
-            if (settled) return;
-            settled = true;
-            const d =
-                typeof img.decode === 'function' ? img.decode().catch(() => {}) : Promise.resolve();
-            Promise.resolve(d).then(() => resolve());
-        };
-        img.onload = finish;
-        img.onerror = () => resolve(); // never hard-block on broken/missing sprite
-        img.src = href;
-        if (img.complete && img.naturalWidth > 0) finish();
-    });
-}
-
-async function warmAllGameplayImageCaches(timeoutMs = 22000) {
-    const urls = collectGameplayAssetHrefsForCache();
-    const warmup = Promise.all(urls.map((href) => preloadImageDecoded(href)));
-    await Promise.race([warmup, new Promise((r) => setTimeout(r, timeoutMs))]);
-}
-
-function mountGameplayBootSplash() {
-    if (document.getElementById('gameplay-asset-boot')) return;
-    const el = document.createElement('div');
-    el.id = 'gameplay-asset-boot';
-    el.className = 'gameplay-asset-boot';
-    el.setAttribute('role', 'status');
-    el.setAttribute('aria-live', 'polite');
-    el.innerHTML =
-        '<div class="gameplay-asset-boot-inner"><p>Loading alchemical art…</p>' +
-        '<p style="font-size:12px;opacity:.72;margin-top:8px;margin-bottom:0">Warming vignettes so encounters open without delay.</p></div>';
-    document.body.insertBefore(el, document.body.firstChild);
-}
-
-function setGameplayBootSplashVisible(show) {
-    mountGameplayBootSplash();
-    const el = document.getElementById('gameplay-asset-boot');
-    if (!el) return;
-    el.classList.toggle('gameplay-asset-boot--hidden', !show);
-    el.setAttribute('aria-hidden', show ? 'false' : 'true');
-    if (show) document.body.style.overflow = 'hidden';
-    else document.body.style.removeProperty('overflow');
-}
+primeGameplayImagePrefetch();
 
 function nicelyDoneLookup(encounterKey, verbKey) {
     return nicelyDoneArtByEncounterVerb[`${encounterKey}|${verbKey}`] || null;
@@ -3359,17 +3290,7 @@ if (BOOT_STORED.layout && BOOT_STORED.layout.length === BOARD_TOTAL_CELL_COUNT) 
     }
 }
 
-void (async function bootGameplayAndWireUi() {
-    setGameplayBootSplashVisible(true);
-    try {
-        await warmAllGameplayImageCaches();
-    } catch (e) {
-        console.warn(e);
-    } finally {
-        setGameplayBootSplashVisible(false);
-    }
-
-    for (let idx = 0; idx < BOARD_TOTAL_CELL_COUNT; idx++) {
+for (let idx = 0; idx < BOARD_TOTAL_CELL_COUNT; idx++) {
     const cell = document.createElement('div');
     cell.className = 'cell';
 
@@ -3523,8 +3444,6 @@ combinationsWrap.addEventListener('mouseenter', () => {
 combinationsWrap.addEventListener('mouseleave', () => {
     combinationsList.style.display = 'none';
 });
-
-})();
 
 document.addEventListener('DOMContentLoaded', (event) => {
     const closeButton = document.getElementById('win-close-button');
