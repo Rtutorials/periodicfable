@@ -390,7 +390,7 @@ body.rules-closed .main{
   }
   .preview{
     width: 100%;
-    min-height: 320px;
+    min-height: 0;
   }
   .cards,
   .control-panel{
@@ -514,7 +514,7 @@ body.rules-closed .main{
     position: relative;
     overflow: visible;
 }
-/* Existing preview styles */
+/* Existing preview styles — height follows content; hints scroll if long */
 .preview{
   width:var(--preview-w);
   box-sizing: border-box;
@@ -525,40 +525,24 @@ body.rules-closed .main{
   align-items:center;
   justify-content:flex-start;
   gap: 4px;
-  padding: 10px;
+  padding: 8px;
   overflow: hidden;
-}
-/* Locked height while an encounter is selected — stops fuse row / cards from jumping */
-.preview.preview--encounter {
-    height: 532px;
-    min-height: 532px;
-    max-height: 532px;
-}
-/* Pawn-at-centre idle state — intentionally shorter than encounter pane */
-.preview.preview--pawn {
-    height: 200px;
-    min-height: 200px;
-    max-height: 200px;
 }
 .preview-title {
     font-size: 1.2rem;
     color: var(--accent);
     text-align: center;
     margin-bottom: 0;
-    line-height: 1.25;
-    min-height: calc(1.25em * 3);
-    max-height: calc(1.25em * 6);
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 6;
-    overflow: hidden;
-    align-items: flex-start;
-    justify-content: center;
-    word-break: break-word;
+    line-height: 1.2;
     font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
     font-weight: 700;
     letter-spacing: 0.2px;
-    flex-shrink: 0;
+    max-height: calc(1.2em * 4);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    word-break: break-word;
 }
 .selected-encounter-hint{
     font-size: 8px;
@@ -566,22 +550,20 @@ body.rules-closed .main{
     letter-spacing: 0.5px;
     text-transform: uppercase;
     margin-bottom: 2px;
-    min-height: 10px;
     width: 100%;
-    flex: 0 0 auto;
     text-align: center;
 }
 
-/* Stable slot — art column never collapses mid-encounter; pawn mode hides wrapper */
+/* Art slot: fixed row height avoids sideways layout shift; kept modest to save vertical space */
 .preview-art-track {
     width: 100%;
-    flex: 0 0 185px;
-    min-height: 185px;
-    max-height: 185px;
+    flex: 0 0 150px;
+    min-height: 150px;
+    max-height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 .preview-art-track.preview-art-track--hidden {
     display: none;
@@ -591,14 +573,13 @@ body.rules-closed .main{
     width: 100%;
     max-width: 100%;
     height: auto;
-    max-height: 185px;
+    max-height: 150px;
     object-fit: contain;
     object-position: center;
     border-radius: 0;
     border: none;
     background: transparent;
     display: block;
-    contain-intrinsic-size: 280px 185px;
 }
 .preview-art.preview-art--empty {
     visibility: hidden;
@@ -635,9 +616,7 @@ body.rules-closed .main{
 /* NEW: Encounter Message Box Styling - in normal flow so messages are never clipped (Safari/Main overflow) */
 .encounter-message-box {
     width: 100%;
-    height: 64px;
-    min-height: 64px;
-    max-height: 64px;
+    min-height: 52px;
     position: relative;
     left: auto;
     bottom: auto;
@@ -652,37 +631,27 @@ body.rules-closed .main{
     pointer-events: none;
     z-index: 20;
 }
-/* Hint Box for persistent hints - Updated for Second Hint line break */
+/* Hint Box — cap height, scroll inside; no tall empty reserve */
 .hint-box {
     width: 100%;
-    flex: 0 0 180px;
-    height: 180px;
-    min-height: 180px;
-    max-height: 180px;
+    flex: 0 1 auto;
     font-size: 12px;
     color: var(--muted);
     text-align: center;
     line-height: 1.3;
-    padding: 5px 0;
-    margin-top: 4px;
+    padding: 4px 0;
+    margin-top: 2px;
     margin-bottom: 0;
+    max-height: 92px;
+    min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     box-sizing: border-box;
 }
-.preview.preview--pawn .hint-box {
-    flex: 0 0 40px;
-    height: 40px;
-    min-height: 40px;
-    max-height: 40px;
-    margin-top: 0;
-}
 .hint-box span {
     display: block; /* Force the span (Second Hint) onto a new line */
-    margin-top: 5px;
+    margin-top: 4px;
 }
-
-/* The actual message item that appears and fades */
 .message-item {
     width: calc(100% - 8px);
     max-width: 100%;
@@ -729,15 +698,8 @@ body.rules-closed .main{
 
     margin-bottom: 0;
     text-align: center;
-    line-height: 1.2;
-    min-height: calc(1.2em + 6px);
-    max-height: calc(1.2em * 3);
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
+    line-height: 1;
     width: 100%;
-    flex-shrink: 0;
 }
 
 @keyframes fadeout {
@@ -1184,23 +1146,12 @@ body.rules-closed .main{
     min-width: 580px; /* Preserve composition and avoid hidden/cut content */
   }
   .preview-art-track {
-    flex-basis: 160px;
-    min-height: 160px;
-    max-height: 160px;
+    flex-basis: 130px;
+    min-height: 130px;
+    max-height: 130px;
   }
   .preview-art {
-    max-height: 160px;
-    contain-intrinsic-size: 280px 160px;
-  }
-  .preview.preview--encounter {
-    height: 498px;
-    min-height: 498px;
-    max-height: 498px;
-  }
-  .preview.preview--pawn {
-    height: 188px;
-    min-height: 188px;
-    max-height: 188px;
+    max-height: 130px;
   }
 }
 
@@ -1268,7 +1219,7 @@ body.rules-closed .main{
     </div>
 
     <div class="preview-and-message-wrap">
-        <div class="preview preview--pawn" id="previewPane">
+        <div class="preview">
             <div class="selected-encounter-hint" id="selectedEncounterHint"></div>
             <div class="preview-title" id="previewTitle"></div>
             <div class="preview-art-track preview-art-track--hidden" id="previewArtTrack" aria-hidden="true">
@@ -2290,14 +2241,6 @@ function setGameplayBootSplashVisible(show) {
     else document.body.style.removeProperty('overflow');
 }
 
-let previewPaneRoot = null;
-function setPreviewPaneMode(isEncounter) {
-    if (!previewPaneRoot) previewPaneRoot = document.getElementById('previewPane');
-    if (!previewPaneRoot) return;
-    previewPaneRoot.classList.toggle('preview--encounter', !!isEncounter);
-    previewPaneRoot.classList.toggle('preview--pawn', !isEncounter);
-}
-
 function nicelyDoneLookup(encounterKey, verbKey) {
     return nicelyDoneArtByEncounterVerb[`${encounterKey}|${verbKey}`] || null;
 }
@@ -3068,7 +3011,6 @@ function setPreviewEncounterImage(artPath, altText) {
 
 function updatePreview(encounterKey) {
     if (!encounterKey) {
-        setPreviewPaneMode(false);
         preview.textContent = '♙';
         previewTitle.textContent = '';
         selectedEncounterHint.textContent = '';
@@ -3085,8 +3027,6 @@ function updatePreview(encounterKey) {
         updateHintBox(null);
         return;
     }
-
-    setPreviewPaneMode(true);
 
     if (previewArtTrack) {
         previewArtTrack.classList.remove('preview-art-track--hidden');
@@ -3428,8 +3368,6 @@ void (async function bootGameplayAndWireUi() {
     } finally {
         setGameplayBootSplashVisible(false);
     }
-
-    previewPaneRoot = document.getElementById('previewPane');
 
     for (let idx = 0; idx < BOARD_TOTAL_CELL_COUNT; idx++) {
     const cell = document.createElement('div');
