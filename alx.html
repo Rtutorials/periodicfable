@@ -1822,8 +1822,8 @@ function getRandomMiddleEncounterPoolKeys() {
     });
 }
 
-/** Challenge 6 (FZ): no middle-board encounters whose theme prefix is Man or Animal */
-const CHALLENGE_6_FORBIDDEN_THEME_SLUGS = new Set(['Man', 'Animal']);
+/** Challenge 6 (FZ): no middle-board encounters whose theme prefix is Man (still enough distinct slug count if only one theme family is barred). */
+const CHALLENGE_6_FORBIDDEN_THEME_SLUGS = new Set(['Man']);
 
 /** Story riddles shown on encounter art as riddle1–riddle6; at most one may appear per board (see injection below). */
 const RIDDLE_ENCOUNTER_KEYS = new Set(['AV', 'CB', 'BU', 'BV', 'BW', 'BX']);
