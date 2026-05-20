@@ -2123,6 +2123,21 @@ const nicelyDoneArtByEncounterVerb = Object.freeze({
     'CL|68B': 'alchemyart/nihilistx.png',
 });
 
+/** Prime browser cache so encounter preview (and overlays) reuse PNGs without per-click latency */
+function primeGameplayImagePrefetch() {
+    const urls = new Set([
+        ...Object.values(encounterArtMap),
+        ...Object.values(FINALE_WIN_ART_BY_KEY),
+        ...Object.values(nicelyDoneArtByEncounterVerb),
+    ]);
+    for (const href of urls) {
+        if (!href) continue;
+        const probe = new Image();
+        probe.src = href;
+    }
+}
+primeGameplayImagePrefetch();
+
 function nicelyDoneLookup(encounterKey, verbKey) {
     return nicelyDoneArtByEncounterVerb[`${encounterKey}|${verbKey}`] || null;
 }
