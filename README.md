@@ -1,4 +1,4 @@
-Welcome to Periodic Fable (name subject to change), a solo alchemy puzzle game. In this game you are trying to use elements to clear encounters, gain rewards, and fuse together elements to make new ones. In the same style of games such as Little Alchemy and Doodle God, you can combine two elements to make a new one, for example Fire + Earth would give you Rock.
+Welcome to Periodic Fable (name subject to change), a solo alchemy puzzle game. In this game you are trying to use elements to clear encounters, gain rewards, and fuse together elements to make new ones: For example Fire + Earth would give you Rock.
 
 Encounters
 
