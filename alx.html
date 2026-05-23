@@ -784,7 +784,8 @@ body.rules-closed .main{
 
 .card-slot{
   flex: 0 0 var(--card-w);
-  min-height: var(--card-h);
+  align-self: flex-start;
+  min-height: 96px;
   height: auto;
   max-height: none;
   background:var(--card);
@@ -799,6 +800,22 @@ body.rules-closed .main{
   position:relative;
   transition:border .15s, box-shadow .15s, transform .2s, opacity .3s;
   overflow: visible;
+}
+.card-slot[data-verb-count="2"] {
+  min-height: 114px;
+}
+.card-slot[data-verb-count="3"] {
+  min-height: 132px;
+}
+@media (max-height: 860px) {
+  .card-slot[data-verb-count="2"] { min-height: 108px; }
+  .card-slot[data-verb-count="3"] { min-height: 124px; }
+}
+@media (max-height: 720px) {
+  .card-slot { min-height: 88px; }
+  .card-slot[data-verb-count="2"] { min-height: 102px; }
+  .card-slot[data-verb-count="3"] { min-height: 118px; }
+  .card-slot[data-verb-count="3"] .emoji { font-size: 1.15rem; }
 }
 
 .terminal-dot {
@@ -924,17 +941,18 @@ body.rules-closed .main{
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 1px;
     padding: 2px 0 1px;
     border-top: 1px dashed rgba(255,255,255,0.1);
     margin-top: auto;
+    flex: 0 0 auto;
     flex-shrink: 0;
     overflow: visible;
 }
 .card-slot .action-btn {
     font-size: 0.72em;
-    padding: 1px 3px;
+    padding: 2px 3px;
     width: 100%;
     text-align: left;
     background: #333;
@@ -942,11 +960,11 @@ body.rules-closed .main{
     color: var(--muted);
     cursor: pointer;
     transition: background 0.1s;
-    line-height: 1.25;
+    line-height: 1.2;
+    flex: 0 0 auto;
     flex-shrink: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
 }
 .card-slot .action-btn:hover {
     background: var(--accent);
@@ -3023,6 +3041,7 @@ function loadGameState() {
         placeInitialPawnOnCenterCellIfNeeded();
     }
     updateChallengeButtonHighlight();
+    refreshAllCardVerbLayouts();
     saveGameState();
     return true;
 }
@@ -3130,6 +3149,7 @@ function addCardToRow(elementId, rowElement, isNewCreation = false) {
     // Append to the end of the row
     rowElement.appendChild(card);
     setupCardClickListener(card, elementId);
+    applyCardVerbLayout(card, elementId);
     return true;
 }
 
@@ -3137,6 +3157,28 @@ function addCardToRow(elementId, rowElement, isNewCreation = false) {
 // Function to get the correct CSS color variable for an element
 function getElementColor(elementId) {
     return elementColorMap[elementId] || 'var(--color-default)';
+}
+
+function cardMinHeightPx(verbCount) {
+    const perVerb = 20;
+    const base = 56;
+    const floors = { 1: 96, 2: 114, 3: 132 };
+    return Math.max(floors[verbCount] || base + verbCount * perVerb, base + verbCount * perVerb);
+}
+
+function applyCardVerbLayout(card, elementId) {
+    if (!card) return;
+    const data = elementData[elementId];
+    if (!data) return;
+    const verbCount = Math.min(data.verbs?.length ?? 0, verbLetters.length);
+    card.dataset.verbCount = String(Math.max(1, verbCount));
+    card.style.minHeight = `${cardMinHeightPx(Math.max(1, verbCount))}px`;
+}
+
+function refreshAllCardVerbLayouts() {
+    document.querySelectorAll('.card-slot[data-element-id]').forEach((card) => {
+        applyCardVerbLayout(card, card.dataset.elementId);
+    });
 }
 
 // Function to create a card element with verbs
@@ -3217,10 +3259,7 @@ function createCard(elementId) {
     }
     card.appendChild(actionsDiv);
 
-    const verbCount = Math.min(data.verbs?.length ?? 0, verbLetters.length);
-    /* Tall enough for emoji + label + every verb row (fixes Chrome clipping on short viewports). */
-    const cardBodyMin = 56 + verbCount * 17;
-    card.style.minHeight = `max(var(--card-h), ${cardBodyMin}px)`;
+    applyCardVerbLayout(card, elementId);
 
     return card;
 }
@@ -3755,6 +3794,7 @@ if (!loadGameState()) {
     updateChallengeButtonHighlight();
     saveGameState();
 }
+refreshAllCardVerbLayouts();
 
 // Event listeners for buttons
 fuseButton.addEventListener('click', () => {
