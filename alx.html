@@ -33,13 +33,50 @@
   --color-orange: #FFA500; /* Orange */
   --color-purple: #800080; /* Purple */
   --color-cyan: #00FFFF;   /* Cyan */
-  --map-w: clamp(280px, 30vw, 350px);
-  --preview-w: clamp(300px, 30vw, 360px);
-  --sidebar-w: clamp(280px, 26vw, 360px);
-  /* Second grid column: rules panel width, or 0 when hidden (keeps column 1 width math stable) */
-  --rules-track: minmax(260px, var(--sidebar-w));
-  --floating-dock-pad-bottom: clamp(116px, 22vw, 155px);
+  --map-w: clamp(240px, 28vw, 320px);
+  --preview-w: clamp(260px, 28vw, 340px);
+  --sidebar-w: clamp(260px, 24vw, 340px);
+  --card-h: clamp(92px, 11vh, 120px);
+  --card-w: clamp(76px, 8.5vw, 90px);
+  --preview-art-h: clamp(108px, 13vh, 150px);
+  --floating-dock-pad-bottom: clamp(84px, 14vh, 132px);
   --floating-dock-offset-right: calc(var(--sidebar-w) + 42px); /* sidebar + gap + breathing room */
+  /* Second grid column: rules panel width, or 0 when hidden (keeps column 1 width math stable) */
+  --rules-track: minmax(240px, var(--sidebar-w));
+}
+/* Shorter viewports: tighten vertical rhythm so map + cards fit with less scroll */
+@media (max-height: 860px) {
+  :root {
+    --map-w: clamp(210px, 24vw, 280px);
+    --preview-w: clamp(230px, 24vw, 300px);
+    --card-h: clamp(84px, 10vh, 100px);
+    --card-w: clamp(72px, 8vw, 84px);
+    --preview-art-h: clamp(92px, 11vh, 118px);
+    --floating-dock-pad-bottom: clamp(72px, 12vh, 96px);
+  }
+  body { padding-top: 10px; padding-bottom: 10px; gap: 10px; }
+  .main { gap: 6px; padding-top: 4px; }
+  .cards { margin-top: 4px; gap: 4px; }
+  .map-and-preview-container { gap: 16px; margin-bottom: 2px; }
+  .row { min-height: 0; padding: 2px 0; }
+  .grid-title { font-size: 15px; margin-bottom: 2px; }
+  .cell { font-size: 22px; }
+  .preview { padding: 6px; gap: 2px; }
+  .preview-title { font-size: 1.05rem; }
+  .encounter-message-box { min-height: 44px; font-size: 11px; }
+}
+@media (max-height: 720px) {
+  :root {
+    --map-w: clamp(190px, 22vw, 250px);
+    --preview-w: clamp(210px, 22vw, 270px);
+    --card-h: 80px;
+    --card-w: 68px;
+    --preview-art-h: 84px;
+    --floating-dock-pad-bottom: 68px;
+  }
+  .card-slot .emoji { font-size: 1.35rem; }
+  .card-slot .label { font-size: 0.62rem; }
+  .card-slot .action-btn { font-size: 0.68em; padding: 2px 3px; }
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -557,9 +594,9 @@ body.rules-closed .main{
 /* Art slot: fixed row height avoids sideways layout shift; kept modest to save vertical space */
 .preview-art-track {
     width: 100%;
-    flex: 0 0 150px;
-    min-height: 150px;
-    max-height: 150px;
+    flex: 0 0 var(--preview-art-h);
+    min-height: var(--preview-art-h);
+    max-height: var(--preview-art-h);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -573,7 +610,7 @@ body.rules-closed .main{
     width: 100%;
     max-width: 100%;
     height: auto;
-    max-height: 150px;
+    max-height: var(--preview-art-h);
     object-fit: contain;
     object-position: center;
     border-radius: 0;
@@ -739,16 +776,16 @@ body.rules-closed .main{
     gap: 4px;
     padding: 5px 0;
     overflow: visible;
-    min-height: 130px;
+    min-height: calc(var(--card-h) + 8px);
     justify-content: flex-start;
     align-items: flex-start;
 }
 
 .card-slot{
-  flex: 0 0 90px;
-  height: 120px; /* Reduced height */
-  min-height: 120px;
-  max-height: 120px;
+  flex: 0 0 var(--card-w);
+  height: var(--card-h);
+  min-height: var(--card-h);
+  max-height: var(--card-h);
   background:var(--card);
   border-radius:8px;
   border:1px solid rgba(255,255,255,0.05);
@@ -1125,12 +1162,12 @@ body.rules-closed .main{
     min-width: 580px; /* Preserve composition and avoid hidden/cut content */
   }
   .preview-art-track {
-    flex-basis: 130px;
-    min-height: 130px;
-    max-height: 130px;
+    flex-basis: var(--preview-art-h);
+    min-height: var(--preview-art-h);
+    max-height: var(--preview-art-h);
   }
   .preview-art {
-    max-height: 130px;
+    max-height: var(--preview-art-h);
   }
 }
 
@@ -1168,7 +1205,7 @@ body.rules-closed .main{
     </p>
     <br>
     <p>
-        If you choose a verb that wins the encounter, a “SUCCESS” message will appear, you receive that element as a permanent reward, and the encounter is removed from the map. You will receive a hint on the third failure. If you fail four times in a row, you must leave and try another encounter before you are allowed to try again. It is also possible to get a “half-success” for verbs that are partially effective. 
+        If you choose a verb that wins the encounter, a “SUCCESS” message will appear, you receive that element as a permanent reward, and the encounter is removed from the map. You will receive a hint on the third failure. If you fail five times in a row, you must leave and try another encounter before you are allowed to try again. It is also possible to get a “half-success” for verbs that are partially effective. 
     <br>
     <strong>Fusing Elements</strong>
     <br>
@@ -1399,10 +1436,10 @@ const elementData = {
 
 const fuseList = [
     '1 + 2 = 5', '1 + 3 = 10', '1 + 4 = 9', '1 + 5 = 27', '1 + 6 = 46', '1 + 7 = 10', '1 + 8 = 11', '1 + 9 = 18', '1 + 10 = 46', '1 + 11 = 70', '1 + 26 = 59', '1 + 27 = 14', '1 + 28 = 53', '1 + 29 = 50', '1 + 31 = 50', '1 + 34 = 71', '1 + 38 = 53', '1 + 39 = 46', '1 + 46 = 39', '1 + 50 = 39', '1 + 62 = 94',
-    '2 + 3 = 7', '2 + 4 = 6', '2 + 5 = 105', '2 + 8 = 55', '2 + 9 = 4', '2 + 10 = 26', '2 + 11 = 10', '2 + 12 = 78', '2 + 13 = 12', '2 + 17 = 5', '2 + 26 = 65', '2 + 28 = 5', '2 + 29 = 51', '2 + 30 = 42', '2 + 31 = 12', '2 + 32 = 38', '2 + 33 = 37', '2 + 34 = 43', '2 + 35 = 10', '2 + 43 = 38', '2 + 47 = 42', '2 + 51 = 12', '2 + 52 = 57', '2 + 62 = 30', '2 + 66 = 10', '2 + 67 = 10', '2 + 74 = 10',
+    '2 + 3 = 7', '2 + 4 = 6', '2 + 5 = 105', '2 + 8 = 55', '2 + 9 = 4', '2 + 10 = 26', '2 + 11 = 10', '2 + 12 = 78', '2 + 13 = 12', '2 + 17 = 5', '2 + 26 = 21', '2 + 28 = 5', '2 + 29 = 51', '2 + 30 = 42', '2 + 31 = 12', '2 + 32 = 38', '2 + 33 = 37', '2 + 34 = 43', '2 + 35 = 10', '2 + 43 = 38', '2 + 47 = 42', '2 + 51 = 12', '2 + 52 = 57', '2 + 62 = 30', '2 + 66 = 10', '2 + 67 = 10', '2 + 74 = 10',
     '3 + 4 = 8', '3 + 5 = 29', '3 + 7 = 29', '3 + 8 = 30', '3 + 9 = 18', '3 + 10 = 35', '3 + 11 = 70', '3 + 13 = 90', '3 + 26 = 65', '3 + 27 = 65', '3 + 28 = 33', '3 + 29 = 7', '3 + 30 = 7', '3 + 31 = 13', '3 + 33 = 32', '3 + 34 = 90', '3 + 36 = 81', '3 + 50 = 29', '3 + 51 = 29', '3 + 66 = 81', '4 + 10 = 46',
-    '4 + 5 = 27', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 8 = 17', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 36 = 113', '4 + 38 = 45', '4 + 39 = 46', '4 + 46 = 39', '4 + 50 = 3', '4 + 51 = 31', '4 + 52 = 22', '4 + 62 = 74',
-    '5 + 6 = 27', '5 + 8 = 23', '5 + 13 = 34', '5 + 17 = 2', '5 + 27 = 14', '5 + 28 = 42', '5 + 30 = 42', '5 + 32 = 36', '5 + 33 = 36', '5 + 34 = 43', '5 + 35 = 33', '5 + 37 = 33', '5 + 38 = 43', '5 + 39 = 14', '5 + 47 = 42', '5 + 50 = 29', '5 + 51 = 12', '6 + 8 = 56', '6 + 13 = 5', '6 + 27 = 5', '6 + 29 = 5', '6 + 34 = 5', '6 + 39 = 46', '6 + 52 = 57', '6 + 62 = 5', '7 + 8 = 30', '7 + 9 = 26', '7 + 11 = 70', '7 + 26 = 65', '7 + 29 = 14', '7 + 32 = 77', '7 + 33 = 73', '7 + 35 = 10', '7 + 49 = 77', '7 + 50 = 29', '7 + 51 = 29', '8 + 9 = 58', '8 + 12 = 17', '8 + 13 = 41', '8 + 27 = 30', '8 + 28 = 15', '8 + 30 = 56', '8 + 31 = 15', '8 + 33 = 52', '8 + 37 = 64', '8 + 38 = 15', '8 + 51 = 17', '9 + 13 = 71', '9 + 27 = 4', '9 + 29 = 4', '9 + 30 = 20', '9 + 34 = 71', '9 + 51 = 4', '10 + 12 = 31', '10 + 27 = 26', '10 + 28 = 53', '10 + 29 = 46', '10 + 31 = 50', '10 + 34 = 24', '10 + 35 = 7', '10 + 38 = 53', '10 + 39 = 46', '10 + 50 = 3', '10 + 52 = 53', '11 + 13 = 40', '11 + 17 = 70', '11 + 34 = 70', '11 + 35 = 10', '11 + 29 = 92', '11 + 36 = 84', '11 + 37 = 84', '11 + 49 = 84', '11 + 63 = 84', '11 + 52 = 67', '12 + 13 = 54', '12 + 17 = 76', '12 + 26 = 54', '12 + 31 = 37', '12 + 39 = 51', '12 + 46 = 39', '12 + 50 = 51', '12 + 51 = 5', '13 + 14 = 60', '13 + 26 = 54', '13 + 29 = 92', '13 + 30 = 72', '13 + 33 = 44', '13 + 36 = 34', '13 + 38 = 41', '14 + 26 = 59', '14 + 32 = 49', '14 + 36 = 49', '17 + 27 = 8', '17 + 31 = 38', '17 + 35 = 76', '17 + 36 = 66', '17 + 51 = 76', '26 + 27 = 65', '26 + 31 = 75', '26 + 32 = 36', '26 + 34 = 69', '26 + 49 = 77', '26 + 51 = 75', '26 + 62 = 26', '27 + 29 = 1', '27 + 30 = 65', '27 + 34 = 13', '27 + 35 = 65', '27 + 47 = 42', '27 + 51 = 12', '27 + 62 = 13', '28 + 30 = 2', '28 + 33 = 53', '28 + 35 = 33', '28 + 38 = 53', '28 + 47 = 42', '28 + 50 = 3', '28 + 52 = 38', '28 + 62 = 30', '29 + 31 = 50', '29 + 50 = 35', '29 + 52 = 38', '30 + 34 = 62', '30 + 47 = 42', '30 + 52 = 57', '30 + 62 = 5', '30 + 73 = 82', '31 + 32 = 47', '31 + 33 = 38', '31 + 39 = 50', '31 + 51 = 50', '31 + 52 = 67', '31 + 67 = 38', '32 + 33 = 45', '32 + 34 = 44', '32 + 35 = 36', '32 + 36 = 66', '32 + 37 = 33', '32 + 38 = 47', '32 + 43 = 80', '32 + 47 = 38', '32 + 53 = 38', '32 + 67 = 89', '33 + 34 = 44', '33 + 35 = 38', '33 + 36 = 52', '33 + 37 = 73', '33 + 50 = 3', '33 + 52 = 73', '34 + 35 = 69', '34 + 36 = 48', '34 + 38 = 43', '35 + 36 = 66', '35 + 38 = 10', '35 + 50 = 29', '35 + 51 = 31', '35 + 52 = 38', '35 + 62 = 13', '35 + 67 = 11', '35 + 73 = 52', '36 + 37 = 63', '36 + 52 = 68', '36 + 27 = 85', '36 + 66 = 81', '37 + 52 = 33', '37 + 63 = 61', '38 + 43 = 47', '38 + 46 = 53', '38 + 47 = 42', '38 + 51 = 31', '38 + 52 = 67', '39 + 46 = 31', '39 + 62 = 26', '43 + 47 = 38', '43 + 52 = 38', '46 + 51 = 31', '47 + 52 = 38', '47 + 67 = 38', '50 + 51 = 29', '51 + 62 = 26', '52 + 53 = 38', '52 + 73 = 33', '53 + 67 = 38', '66 + 74 = 81',
+    '4 + 5 = 27', '4 + 6 = 46', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 8 = 17', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 36 = 113', '4 + 38 = 45', '4 + 39 = 46', '4 + 46 = 39', '4 + 50 = 3', '4 + 51 = 31', '4 + 52 = 22', '4 + 62 = 74',
+    '5 + 6 = 27', '5 + 7 = 30', '5 + 8 = 23', '5 + 13 = 34', '5 + 17 = 2', '5 + 27 = 14', '5 + 28 = 42', '5 + 30 = 42', '5 + 32 = 36', '5 + 33 = 36', '5 + 34 = 43', '5 + 35 = 33', '5 + 37 = 33', '5 + 38 = 43', '5 + 39 = 14', '5 + 47 = 42', '5 + 50 = 29', '5 + 51 = 12', '6 + 8 = 56', '6 + 13 = 5', '6 + 27 = 5', '6 + 28 = 5', '6 + 29 = 5', '6 + 30 = 62', '6 + 34 = 5', '6 + 39 = 46', '6 + 52 = 57', '6 + 62 = 5', '7 + 8 = 30', '7 + 9 = 26', '7 + 11 = 70', '7 + 26 = 65', '7 + 29 = 14', '7 + 32 = 77', '7 + 33 = 73', '7 + 35 = 10', '7 + 49 = 77', '7 + 50 = 29', '7 + 51 = 29', '8 + 9 = 58', '8 + 12 = 17', '8 + 13 = 41', '8 + 27 = 30', '8 + 28 = 15', '8 + 30 = 56', '8 + 31 = 15', '8 + 33 = 52', '8 + 37 = 64', '8 + 38 = 15', '8 + 51 = 17', '9 + 13 = 71', '9 + 27 = 4', '9 + 29 = 4', '9 + 30 = 20', '9 + 34 = 71', '9 + 51 = 4', '10 + 12 = 31', '10 + 27 = 26', '10 + 28 = 53', '10 + 29 = 46', '10 + 31 = 50', '10 + 34 = 24', '10 + 35 = 7', '10 + 38 = 53', '10 + 39 = 46', '10 + 50 = 3', '10 + 52 = 53', '11 + 13 = 40', '11 + 17 = 70', '11 + 34 = 70', '11 + 35 = 10', '11 + 29 = 92', '11 + 36 = 84', '11 + 37 = 84', '11 + 49 = 84', '11 + 63 = 84', '11 + 52 = 67', '12 + 13 = 54', '12 + 17 = 76', '12 + 26 = 54', '12 + 31 = 37', '12 + 39 = 51', '12 + 46 = 39', '12 + 50 = 51', '12 + 51 = 5', '13 + 14 = 60', '13 + 26 = 54', '13 + 29 = 92', '13 + 30 = 72', '13 + 33 = 44', '13 + 36 = 34', '13 + 38 = 41', '14 + 26 = 59', '14 + 32 = 49', '14 + 36 = 49', '17 + 27 = 8', '17 + 31 = 38', '17 + 35 = 76', '17 + 36 = 66', '17 + 51 = 76', '26 + 27 = 65', '26 + 31 = 75', '26 + 32 = 36', '26 + 34 = 69', '26 + 49 = 77', '26 + 51 = 75', '26 + 62 = 26', '27 + 29 = 1', '27 + 30 = 65', '27 + 34 = 13', '27 + 35 = 65', '27 + 47 = 42', '27 + 51 = 12', '27 + 62 = 13', '28 + 30 = 2', '28 + 33 = 53', '28 + 35 = 33', '28 + 38 = 53', '28 + 47 = 42', '28 + 50 = 3', '28 + 52 = 38', '28 + 62 = 30', '29 + 31 = 50', '29 + 50 = 35', '29 + 52 = 38', '30 + 34 = 62', '30 + 47 = 42', '30 + 52 = 57', '30 + 62 = 5', '30 + 73 = 82', '31 + 32 = 47', '31 + 33 = 38', '31 + 39 = 50', '31 + 51 = 50', '31 + 52 = 67', '31 + 67 = 38', '32 + 33 = 45', '32 + 34 = 44', '32 + 35 = 36', '32 + 36 = 66', '32 + 37 = 33', '32 + 38 = 47', '32 + 43 = 80', '32 + 47 = 38', '32 + 53 = 38', '32 + 67 = 89', '33 + 34 = 44', '33 + 35 = 38', '33 + 36 = 52', '33 + 37 = 73', '33 + 50 = 3', '33 + 52 = 73', '34 + 35 = 69', '34 + 36 = 48', '34 + 38 = 43', '35 + 36 = 66', '35 + 38 = 10', '35 + 50 = 29', '35 + 51 = 31', '35 + 52 = 38', '35 + 62 = 13', '35 + 67 = 11', '35 + 73 = 52', '36 + 37 = 63', '36 + 52 = 68', '36 + 27 = 85', '36 + 66 = 81', '37 + 52 = 33', '37 + 63 = 61', '38 + 43 = 47', '38 + 46 = 53', '38 + 47 = 42', '38 + 51 = 31', '38 + 52 = 67', '39 + 46 = 31', '39 + 62 = 26', '43 + 47 = 38', '43 + 52 = 38', '46 + 51 = 31', '47 + 52 = 38', '47 + 67 = 38', '50 + 51 = 29', '51 + 62 = 26', '52 + 53 = 38', '52 + 73 = 33', '53 + 67 = 38', '66 + 74 = 81',
     '2 + 39 = 51', '4 + 8 = 17', '13 + 51 = 79', '1 + 62 = 94','1 + 74 = 94','1 + 73 = 102','2 + 32 = 106','2 + 73 = 101','3 + 7 = 115','3 + 27 = 115','3 + 35 = 115','4 + 32 = 99','4 + 52 = 113','5 + 52 = 93','6 + 7 = 97','6 + 32 = 97','6 + 34 = 97','6 + 35 = 97','6 + 73 = 101','7 + 27 = 65','7 + 37 = 65','8 + 52 = 93','9 + 52 = 114','10 + 13 = 24','10 + 34 = 24','11 + 17 = 96','12 + 13 = 105','12 + 30 = 105','12 + 34 = 105','12 + 36 = 105','14 + 52 = 103','14 + 66 = 95','14 + 73 = 100','17 + 32 = 96','17 + 34 = 96','17 + 52 = 93','26 + 37 = 65','26 + 73 = 100','27 + 66 = 85', '27 + 73 = 101','29 + 32 = 107','29 + 34 = 92','29 + 36 = 107','29 + 73 = 102','30 + 51 = 98','31 + 52 = 103','32 + 34 = 44','32 + 39 = 99','32 + 51 = 99','32 + 66 = 95','32 + 67 = 89','32 + 103 = 104','34 + 62 = 91','34 + 66 = 95','34 + 73 = 100','35 + 52 = 73','39 + 52 = 111','46 + 52 = 111','50 + 74 = 108','51 + 52 = 110','51 + 73 = 102','52 + 3 = 112','52 + 7 = 112','52 + 8 = 112','52 + 9 = 114','52 + 17 = 109',    '52 + 27 = 112',
     '62 + 66 = 95','77 + 115 = 116',
     '4 + 74 = 83','13 + 74 = 83','26 + 74 = 83','27 + 74 = 83','29 + 74 = 83','31 + 74 = 83','34 + 74 = 83','36 + 74 = 83','43 + 74 = 83','47 + 74 = 83',
@@ -1457,12 +1494,13 @@ const encounterEffects = {
     'AO': { name: 'Man- The Explorer', difficultyLevel: 4, hint1: 'A navigator tells you he is lost.', hint2: 'He will need to find his way to the treasure.', effects: ['81A', '85A', '-68B', '-79A', '-65C', '-32A', '48A', '-39A', '-90A'] },
     'AP': { name: 'Sound- The Critics', difficultyLevel: 4, hint1: 'Two old men are complaining to you that nothing is original or creative anymore.', hint2: 'They want to see something entertaining and avant-garde.', effects: ['59A', '78A', '49A', '-73A', '-32A', '-67A', '45A', '-14B', '16A'] },
     'AQ': { name: 'Death- The Wound', difficultyLevel: 4, hint1: 'A boxer tells you that he has been hurt in a fight.', hint2: 'You will need to help with the pain of the injury.', effects: ['33A', '35A', '35B', '-27A', '-30B', '-11B', '-58B', '-15B', '-56B'] },
-    'AR': { name: 'Pressure- The Experiment', difficultyLevel: 3, hint1: "There is a science contest where the winner's egg must survive a fall.", hint2: 'Find a way to prevent your egg from cracking when dropped.', effects: ['-13A', '27A', '-9B', '-35B', '6B', '29B', '46B', '39A', '72A', '85A'] },
+    'AR': { name: 'Pressure- The Experiment', difficultyLevel: 4, hint1: "There is a science contest where the winner's egg must survive a fall.", hint2: 'Find a way to prevent your egg from cracking when dropped.', effects: ['-13A', '27A', '-9B', '-35B', '6B', '29B', '46B', '39A', '72A', '85A'] },
     'AS': { name: 'Gravity- The Carnival', difficultyLevel: 2, hint1: 'If you can knock over a stack of milk containers, you can win a prize.', hint2: 'You could throw something at it.', effects: ['29A', '-1A', '-3A', '-34A', '-28B', '-7C', '73A', '56A', '57A', '63A', '40A', '43A', '-7B'] },
     'AT': { name: 'Plant- The Maze', difficultyLevel: 3, hint1: 'You need to find the exit of a large hedge maze.', hint2: 'There has to be a way to more easily see where the exit is.', effects: ['-2A', '36A', '39A', '29B', '81A', '-11A', '35B', '62A', '-90A', '-85A'] },
     'AU': { name: 'Chemical- The Stain', difficultyLevel: 4, hint1: 'Something has spilled onto the carpet and will not come out.', hint2: 'Remove the material somehow to make the floor clean.', effects: ['-30B', '24A', '28B', '106A', '-4A', '35B', '-6B', '84A'] },
+    'AW': { name: 'Cloud- The Sign', difficultyLevel: 4, hint1: 'A woman prays for a sign that the heavens have heard her prayers.', hint2: 'Some kind of miracle would convince her that something divine is watching over her.', effects: ['12A', '6A', '105A', '111B', '-29B', '-3A', '-39A', '-60A', '-92A', '-97A'] },
     'AV': { name: 'Darkness- Riddle One', difficultyLevel: 2, hint1: 'I am always hungry, I must always be fed, the finger I lick will soon turn red.', hint2: 'You must find the element that answers the riddle — something that can harm you that needs to consume to survive.', effects: ['2A'] },
-    'AZ': { name: "FINAL ROOM: The Alchemist's Lunch", difficultyLevel: 6, hint1: 'A famed alchemist is eating his lunch and complains that his sandwich is too dry.', hint2: 'He needs a famed white alchemical substance which contains oil.', hint3: 'Egg itself comes from Life, Animal, Rock and Time.', hint4: 'Clear the bottom row to reveal more of this recipe, one clue per encounter.', hint5: 'Mayonnaise is the classic oily spread for bread.', unlocksHints: ['U', 'W', 'K', 'X'], effects: ['82A'] },
+    'AZ': { name: "FINAL ROOM: The Alchemist's Lunch", difficultyLevel: 6, hint1: 'A famed alchemist is eating his lunch and complains that his sandwich is too dry.', hint2: 'He needs a famed white alchemical substance which contains oil.', hint3: 'Egg itself comes from some combination of Life, Animal, Rock and Time.', hint4: 'Clear the bottom row to reveal more of this recipe, one clue per encounter.', hint5: 'Mayonnaise is the classic oily spread for bread.', unlocksHints: ['U', 'W', 'K', 'X'], effects: ['82A'] },
     'BB': { name: 'Machine- The Report', difficultyLevel: 5, hint1: 'Someone has just had their vehicle stolen.', hint2: 'They ask you to call the police.', effects: ['80B', '62A', '-32A', '35B', '-37A', '89A', '104B'] },
     'BC': { name: 'Time- The Slumber', difficultyLevel: 2, hint1: 'A cat has fallen deeply asleep in a field of flowers.', hint2: 'You will need to wake it up somehow.', effects: ['35A', '35B', '26B', '12A', '-7C', '-51A', '-2A', '-3A', '-14B', '55A', '68A', '60A', '78A', '57B', '16A'] },
     'BD': { name: 'Intelligence- The Swap', difficultyLevel: 5, hint1: 'You are partaking in a gift exchange game.', hint2: 'After all the shuffling is complete, you want to have ended up with more than you spent.', effects: ['-7C', '55B', '56B', '-57B', '73B', '-61A', '58B', '-63B', '-66A', '72B', '82A', '19A', '23A', '103A', '93A', '67B'] },
@@ -1472,7 +1510,7 @@ const encounterEffects = {
     'BH': { name: 'Rope- The Knot', difficultyLevel: 2, hint1: 'A confusing knot is giving you trouble.', hint2: 'You must find a way to untie it.', effects: ['41A', '28B', '34A', '36A', '52A', '-2A', '-5A', '30B', '35B'] },
     'BI': { name: 'Glass- The Unseen', difficultyLevel: 4, hint1: 'An invisible rodent runs rampant.', hint2: "You need to catch it somehow, it can't be seen.", effects: ['-11B', '-12A', '-27A', '68A', '-4A', '-2A', '53A', '24A'] },
     'BJ': { name: 'Animal- The Rotting Meat', difficultyLevel: 3, hint1: 'A perfect cut of ribeye is sitting out in the open, about to go bad.', hint2: 'Someone really ought to put it in the fridge.', effects: ['18A', '-9B', '72A', '-31A', '-13A', '-15A'] },
-    'BK': { name: 'Darkness- The Nuisance', difficultyLevel: 3, hint1: 'A customer is being a jerk to everyone.', hint2: 'You must get them to leave without harming them.', effects: ['80A', '51A', '-14B', '73A', '67A', '-3A', '35A', '32A', '-36A', '-5A', '55A', '56A', '56B', '57B', '58B', '-60A', '45A', '45B', '106A', '-7B'] },
+    'BK': { name: 'Darkness- The Nuisance', difficultyLevel: 4, hint1: 'A customer is being a jerk to everyone.', hint2: 'You must get them to leave without harming them.', effects: ['80A', '51A', '-14B', '73A', '67A', '-3A', '35A', '32A', '-36A', '-5A', '55A', '56A', '56B', '57B', '58B', '-60A', '45A', '45B', '106A', '-7B'] },
     'BL': { name: 'Light- The Signal', difficultyLevel: 3, hint1: 'You are stranded on an island and an airplane is flying overhead.', hint2: 'You must make some kind of signal to be rescued.', effects: ['-2A', '12A', '-39A', '-32A', '-94A', '-54A', '78A', '42A', '-6A'] },
     'BM': { name: 'Love- The Break-Up', difficultyLevel: 5, hint1: 'A man tells you he misses someone dearly.', hint2: 'He wants to feel better and get over it.', effects: ['35A', '33A', '-36A', '-37A', '-68B', '-64A', '15B', '-20A', '-44A'] },
     'BN': { name: 'Man- The Fraternity', difficultyLevel: 5, hint1: 'You must signal your status to gain entry into a society of elites.', hint2: 'The members are impressed by style and class.', effects: ['15A', '79A', '65C', '-32A', '-36A', '-37A', '74B', '-49A', '-59A', '-57B', '75A'] },
@@ -1488,8 +1526,8 @@ const encounterEffects = {
     'BX': { name: 'Death- Riddle Five', difficultyLevel: 4, hint1: 'I am often on the ground but I can never get dirty, I am in both empty holes and in troubled hearts.', hint2: 'The closer you are to me, the less you see me.', effects: ['31A'] },
     'BY': { name: 'Metal- The Mine', difficultyLevel: 4, hint1: 'There is valuable ore in the ground beneath where you stand.', hint2: 'You will need to extract it from the ground using some kind of tool.', effects: ['90A', '42A', '92A', '-78A', '-28B'] },
     'BZ': { name: "FINAL ROOM: The Alchemist's Hero", difficultyLevel: 6, hint1: 'A news journalist demands to see a mysterious vigilante who has been fighting crime in the city.', hint2: 'They say he slings webs and swings from building to building.', hint3: 'You are looking for a superhero who is part man part arachnid.', hint4: 'Each encounter you clear in the row above this room adds another clue.', hint5: 'Think of a friendly neighborhood hero spun from silk.', unlocksHints: ['U', 'W', 'K', 'X'], effects: ['89A'] },
-    'CA': { name: 'Animal- The Companion', difficultyLevel: 3, hint1: 'A girl is lonely and wants a pet.', hint2: 'An animal might be a good pet for her.', effects: ['110A', '-111C', '112B', '-113B', '114A', '-103A', '-109A', '68B', '-52A'] },
-    'CB': { name: 'Dust- Riddle Two', difficultyLevel: 4, hint1: 'I have a large diet, I will eat anything.', hint2: 'I will slay kings and mountains alike. I stop for no one.', effects: ['35A', '35C'] },
+    'CA': { name: 'Animal- The Companion', difficultyLevel: 4, hint1: 'A girl is lonely and wants a pet.', hint2: 'An animal might be a good pet for her.', effects: ['110A', '-111C', '112B', '-113B', '114A', '-103A', '-109A', '68B', '-52A'] },
+    'CB': { name: 'Dust- Riddle Two', difficultyLevel: 4, hint1: 'I have a large diet, I will eat anything. I will slay kings and mountains alike.', hint2: 'I stop for no one.', effects: ['35A', '35C'] },
     'CC': { name: 'Death- The Excuse', difficultyLevel: 4, hint1: "A doctor doesn't believe you when you say that you are sick enough to miss school.", hint2: "To get a doctor's note, you must demonstrate that you are medically unwell.", effects: ['53A', '45A', '45B', '79A', '65C', '37A', '99A', '-51A', '10B', '14B', '28A', '-32A', '-36A', '55A'] },
     'CD': { name: 'Intelligence- The Prank', difficultyLevel: 4, hint1: 'Your neighbor is at home, it is time to get revenge.', hint2: 'You must bother him back for what he did to you.', effects: ['73A', '45A', '67A', '113A', '103A', '106A', '109A', '51A', '-12A', '-3A', '-34A', '-16A'] },
     'CE': { name: 'Metal- The Vandalism', difficultyLevel: 5, hint1: 'You want to decrease the tax value of your home by defacing it somehow.', hint2: 'Find a way to temporarily spoil the desirability of living there.', effects: ['-28B', '34A', '42A', '-78A', '67A', '45A', '-113A', '-15A', '-102A', '109A', '-7B'] },
@@ -1574,6 +1612,7 @@ const ENCOUNTER_THEME_TO_ELEMENT_ID = {
     Love: '37',
     Death: '38',
     Art: '49',
+    Cloud: '46',
 };
 
 /** Legacy finals were ZD/ZE before rename to DZ/EZ — migrate saved games and payloads */
@@ -1766,54 +1805,179 @@ function getRandomMiddleEncounterPoolKeys() {
 /** Challenge 6 (FZ): no middle-board encounters whose theme prefix is Man (still enough distinct slug count if only one theme family is barred). */
 const CHALLENGE_6_FORBIDDEN_THEME_SLUGS = new Set(['Man']);
 
-/** Story riddles shown on encounter art as riddle1–riddle6; at most one may appear per board (see injection below). */
+/** Story riddles shown on encounter art as riddle1–riddle6; exactly one assigned per numbered challenge (seeded before random fill). */
 const RIDDLE_ENCOUNTER_KEYS = new Set(['AV', 'CB', 'BU', 'BV', 'BW', 'BX']);
-/** Challenge 1 (Sandwich / finale AZ): only “Riddle One” (AV) may be injected; other challenges never use AV */
-const CHALLENGE_1_ONLY_RIDDLE_KEY = 'AV';
+/** Finale key → that challenge’s sole riddle encounter (Riddle One … Six). */
+const CHALLENGE_RIDDLE_BY_FINALE = Object.freeze({
+    AZ: 'AV',
+    Z: 'CB',
+    EZ: 'BV',
+    BZ: 'BW',
+    DZ: 'BX',
+    FZ: 'BU',
+});
+function assignedChallengeRiddleKey(forcedFinalKey) {
+    return forcedFinalKey != null ? CHALLENGE_RIDDLE_BY_FINALE[forcedFinalKey] ?? null : null;
+}
 /** Challenge 1: Oil slot is Mosquito (AG), not The Swamp (O); plus butcher (AB) and pinned story beats (AV stripped from no-riddle pool but seeded). */
 const CHALLENGE_1_PINNED_MIDDLE_AFTER_AB = ['AG', 'AV', 'G', 'AT', 'AM', 'T', 'AS'];
 /** Sandwich challenge: never draft Intelligence·The Swap (BD) in the random middle band */
 const CHALLENGE_1_FORBIDDEN_ENCOUNTER_KEYS = new Set(['BD']);
+/** Story pins for challenges 3–5 (seeded after assigned riddle, before difficulty/tier fill). */
+const CHALLENGE_PINNED_MIDDLE_BY_FINALE = Object.freeze({
+    EZ: ['O', 'K', 'BE'],
+    BZ: ['J'],
+    DZ: ['AF', 'J'],
+});
+/** Sigil & Weather: soft‑weighted in random fill (never blocked). Low on CH2–5; normal on CH6. */
+const OPTIONAL_ENCOUNTER_KEYS = new Set(['CJ', 'AL']);
+const OPTIONAL_ENCOUNTER_WEIGHT_DEFAULT = 0.08;
+const OPTIONAL_ENCOUNTER_WEIGHT_BY_FINALE = Object.freeze({ FZ: 1 });
+/** Cloud theme (The Sign): lower theme lottery weight on CH2–5; normal on CH6 (FZ). */
+const OPTIONAL_THEME_SLUGS = new Set(['Cloud']);
+const OPTIONAL_THEME_WEIGHT_DEFAULT = 0.011;
+const OPTIONAL_THEME_WEIGHT_BY_FINALE = Object.freeze({ FZ: 1 });
+/** Minimum difficulty‑4 encounters on the middle band (no maximum — remainder may add more). */
+const MIN_DIFF4_ENCOUNTER_COUNT = 5;
+/** Consecutive failures at one encounter before it blocks further attempts. */
+const LOCATION_FAILURE_STREAK_BLOCK = 4;
+/** Consecutive failures before player must leave that hex (when blocking is active). */
+const LOCATION_FAILURE_STREAK_FORCE_MOVE = 5;
+/** Consecutive failures before hint 2 unlocks (independent of block threshold). */
+const LOCATION_FAILURE_HINT2_STREAK = 3;
+/** Soft weight for Diet (Life d4 singleton — still eligible, just less lottery pressure). */
+const DEPRIORITIZED_ENCOUNTER_KEYS = new Set(['CF']);
+const DEPRIORITIZED_ENCOUNTER_WEIGHT = 0.25;
+/** Pull down over‑represented picks (tier‑5 keys capped individually — uniform tier‑5 multiplier does nothing). */
+const SPREAD_CAP_ENCOUNTER_KEYS = new Set([
+    'S', 'F', 'AA', 'U', 'CA', 'BK', 'AH', 'AD', 'P', 'G',
+    'BD', 'BT', 'BB', 'H', 'X', 'N', 'BS', 'CH', 'BN', 'BM', 'CO',
+    'M', 'E', 'BC', 'AN', 'BJ', 'R', 'CE', 'BG', 'BL', 'AB',
+]);
+const SPREAD_CAP_WEIGHT = 0.38;
+const SPREAD_BOOST_ENCOUNTER_KEYS = new Set([
+    'BO', 'I', 'AG', 'AT', 'BR', 'BY', 'BP', 'AU', 'AO', 'Q', 'AE', 'V',
+    'CK', 'BH', 'AI', 'CD', 'AP', 'BF', 'CN', 'CQ', 'BI',
+]);
+const SPREAD_BOOST_WEIGHT = 2.0;
+const SPREAD_STRONG_BOOST_ENCOUNTER_KEYS = new Set(['BO', 'I']);
+const SPREAD_STRONG_BOOST_WEIGHT = 3.5;
+/** Under‑picked diff‑4 encounters pushed toward the middle of the pool. */
+const SPREAD_PRIORITY_BOOST_ENCOUNTER_KEYS = new Set(['BY', 'W', 'CL']);
+const SPREAD_PRIORITY_BOOST_WEIGHT = 9.0;
+/** Tier‑5 staples that stay hot even with the general cap. */
+const SPREAD_EXTRA_CAP_ENCOUNTER_KEYS = new Set(['BD', 'H', 'BB', 'AD', 'X', 'N', 'BS', 'CH', 'BN', 'AB', 'AN', 'BM', 'CE']);
+const SPREAD_EXTRA_CAP_WEIGHT = 0.28;
 
-/**
- * Replaces one non-forced encounter with one permitted riddle (if any placement works).
- * Keeps corner + inner themes distinct — usedThemes stays in sync with picks + corners.
- */
-function tryInjectSingleRiddleIfPossible(picks, usedThemes, forcedFinalKey, immutableEncounterKeys) {
-    if (!picks?.length || RIDDLE_ENCOUNTER_KEYS.size === 0) return;
-    if (forcedFinalKey === 'AZ' && picks.includes(CHALLENGE_1_ONLY_RIDDLE_KEY)) return;
-    let riddleCandidates =
-        forcedFinalKey === 'AZ'
-            ? [CHALLENGE_1_ONLY_RIDDLE_KEY]
-            : Array.from(RIDDLE_ENCOUNTER_KEYS).filter((k) => k !== CHALLENGE_1_ONLY_RIDDLE_KEY);
-    if (forcedFinalKey === 'FZ') {
-        riddleCandidates = riddleCandidates.filter(
-            (k) => !CHALLENGE_6_FORBIDDEN_THEME_SLUGS.has(getEncounterThemeDedupSlug(k))
-        );
-    }
-    shuffleArrayInPlace(riddleCandidates);
-    for (const rKey of riddleCandidates) {
-        const sr = getEncounterThemeDedupSlug(rKey);
-        const swapIdxs = [];
-        for (let i = 0; i < picks.length; i++) {
-            const p = picks[i];
-            if (immutableEncounterKeys?.has?.(p)) continue;
-            const sp = getEncounterThemeDedupSlug(p);
-            const themesWithoutPick = new Set(usedThemes);
-            themesWithoutPick.delete(sp);
-            if (!themesWithoutPick.has(sr)) swapIdxs.push(i);
+function optionalThemePickMultiplier(themeSlug, forcedFinalKey) {
+    if (!OPTIONAL_THEME_SLUGS.has(themeSlug)) return 1;
+    return OPTIONAL_THEME_WEIGHT_BY_FINALE[forcedFinalKey ?? ''] ?? OPTIONAL_THEME_WEIGHT_DEFAULT;
+}
+
+function encounterPickWeight(key, forcedFinalKey, picks = []) {
+    let w = 1;
+    if (OPTIONAL_ENCOUNTER_KEYS.has(key)) {
+        w = OPTIONAL_ENCOUNTER_WEIGHT_BY_FINALE[forcedFinalKey ?? ''] ?? OPTIONAL_ENCOUNTER_WEIGHT_DEFAULT;
+        if (
+            forcedFinalKey !== 'FZ' &&
+            picks.some((p) => OPTIONAL_ENCOUNTER_KEYS.has(p))
+        ) {
+            return 0;
         }
-        if (!swapIdxs.length) continue;
-        const sh = [...swapIdxs];
-        shuffleArrayInPlace(sh);
-        const idx = sh[0];
-        const removed = picks[idx];
-        const spRm = getEncounterThemeDedupSlug(removed);
-        picks[idx] = rKey;
-        usedThemes.delete(spRm);
-        usedThemes.add(sr);
-        break;
     }
+    if (DEPRIORITIZED_ENCOUNTER_KEYS.has(key)) w *= DEPRIORITIZED_ENCOUNTER_WEIGHT;
+    if (SPREAD_CAP_ENCOUNTER_KEYS.has(key)) w *= SPREAD_CAP_WEIGHT;
+    if (SPREAD_EXTRA_CAP_ENCOUNTER_KEYS.has(key)) w *= SPREAD_EXTRA_CAP_WEIGHT;
+    if (SPREAD_BOOST_ENCOUNTER_KEYS.has(key)) w *= SPREAD_BOOST_WEIGHT;
+    if (SPREAD_STRONG_BOOST_ENCOUNTER_KEYS.has(key)) w *= SPREAD_STRONG_BOOST_WEIGHT;
+    if (SPREAD_PRIORITY_BOOST_ENCOUNTER_KEYS.has(key)) w *= SPREAD_PRIORITY_BOOST_WEIGHT;
+    return w;
+}
+
+function encounterRestPickWeight(key, forcedFinalKey, picks = []) {
+    return encounterPickWeight(key, forcedFinalKey, picks);
+}
+
+function pickWeightedRandomKey(keys, weightForKey) {
+    if (!keys?.length) return null;
+    const shuffled = shuffleArrayInPlace([...keys]);
+    let total = 0;
+    const weights = shuffled.map((k) => {
+        const w = weightForKey(k);
+        total += w;
+        return w;
+    });
+    let roll = Math.random() * total;
+    for (let i = 0; i < shuffled.length; i++) {
+        roll -= weights[i];
+        if (roll <= 0) return shuffled[i];
+    }
+    return shuffled[shuffled.length - 1];
+}
+
+function pickThemeBalancedEncounter(eligibleKeys, forcedFinalKey, weightForKey) {
+    if (!eligibleKeys?.length) return null;
+    const byTheme = new Map();
+    for (const key of eligibleKeys) {
+        const slug = getEncounterThemeDedupSlug(key);
+        if (!byTheme.has(slug)) byTheme.set(slug, []);
+        byTheme.get(slug).push(key);
+    }
+    const themes = [...byTheme.keys()];
+    const theme = pickWeightedRandomKey(themes, (t) => {
+        const themeKeys = byTheme.get(t);
+        let sum = 0;
+        for (const k of themeKeys) sum += weightForKey(k);
+        return (sum / themeKeys.length) * optionalThemePickMultiplier(t, forcedFinalKey);
+    });
+    return pickWeightedRandomKey(byTheme.get(theme), weightForKey);
+}
+
+function validateMandatoryMiddleEncounters(mandatoryKeys, forcedFinalKey, cornerThemeSlugs, baseMiddlePoolNoRiddle) {
+    for (const rk of mandatoryKeys) {
+        const ev = encounterEffects[rk];
+        if (!ev || typeof ev.difficultyLevel !== 'number') {
+            throw new Error(
+                `Challenge (${forcedFinalKey}) mandates encounter key ${rk}, but it is not a valid numbered encounter.`
+            );
+        }
+        const rkSlug = getEncounterThemeDedupSlug(rk);
+        if (cornerThemeSlugs.has(rkSlug)) {
+            throw new Error(
+                `Challenge encounter ${rk} shares a theme slug with an active classical corner — cannot draft this board corner set.`
+            );
+        }
+        if (!RIDDLE_ENCOUNTER_KEYS.has(rk) && !baseMiddlePoolNoRiddle.includes(rk)) {
+            throw new Error(
+                `Challenge (${forcedFinalKey}) mandates ${rk}; it must appear in the random middle pool (distinct from classical themes).`
+            );
+        }
+    }
+}
+
+/** Seed one encounter per missing difficulty 1–5 before tier quotas (returns false if any tier cannot be covered). */
+function seedAtLeastOnePerDifficultyIfNeeded(picks, usedEncounterKeys, usedThemes, canonByDiff, forcedFinalKey) {
+    const covered = new Set(
+        picks.map((k) => encounterEffects[k]?.difficultyLevel).filter((d) => typeof d === 'number')
+    );
+    const seedWeight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
+    for (let d = 1; d <= 5; d++) {
+        if (covered.has(d)) continue;
+        const eligibleBase = (canonByDiff[d] || []).filter(
+            (key) =>
+                !usedEncounterKeys.has(key) && !usedThemes.has(getEncounterThemeDedupSlug(key))
+        );
+        let eligible = eligibleBase;
+        const nonWeather = eligibleBase.filter((key) => key !== 'AL');
+        if (nonWeather.length) eligible = nonWeather;
+        const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, seedWeight);
+        if (!chosen) return false;
+        picks.push(chosen);
+        usedEncounterKeys.add(chosen);
+        usedThemes.add(getEncounterThemeDedupSlug(chosen));
+        covered.add(d);
+    }
+    return true;
 }
 
 function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElementIds) {
@@ -1861,11 +2025,11 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
     if (
         canonByDiff[5].length < 4 ||
         slugUniqCount(canonByDiff[5]) < 4 ||
-        canonByDiff[4].length < 8 ||
-        slugUniqCount(canonByDiff[4]) < 8
+        canonByDiff[4].length < MIN_DIFF4_ENCOUNTER_COUNT ||
+        slugUniqCount(canonByDiff[4]) < MIN_DIFF4_ENCOUNTER_COUNT
     ) {
         throw new Error(
-            'Random middle band needs ≥4 themed difficulty‑5 encounters and ≥8 themed difficulty‑4 encounters (distinct encounter themes vs corners). Expand the catalog or relax filters.'
+            `Random middle band needs ≥4 themed difficulty‑5 encounters and ≥${MIN_DIFF4_ENCOUNTER_COUNT} themed difficulty‑4 encounters (distinct encounter themes vs corners). Expand the catalog or relax filters.`
         );
     }
     for (let d = 1; d <= 5; d++) {
@@ -1875,24 +2039,44 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
     }
 
     if (forcedFinalKey === 'AZ') {
-        const ch1Mandatory = ['AB', ...CHALLENGE_1_PINNED_MIDDLE_AFTER_AB];
-        for (const rk of ch1Mandatory) {
-            const ev = encounterEffects[rk];
-            if (!ev || typeof ev.difficultyLevel !== 'number') {
-                throw new Error(`Challenge 1 mandates encounter key ${rk}, but it is not a valid numbered encounter.`);
-            }
-            const rkSlug = getEncounterThemeDedupSlug(rk);
-            if (CORNER_THEME_SLUGS.has(rkSlug)) {
-                throw new Error(
-                    `Challenge 1 encounter ${rk} shares a theme slug with an active classical corner — cannot draft this board corner set.`
-                );
-            }
-            /* AV lives in riddles tier; stripped from pool but still seeded for Challenge 1. */
-            if (rk !== CHALLENGE_1_ONLY_RIDDLE_KEY && !baseMiddlePoolNoRiddle.includes(rk)) {
-                throw new Error(
-                    `Challenge 1 (Sandwich finale) mandates ${rk}; it must appear in the random middle pool (distinct from classical themes).`
-                );
-            }
+        validateMandatoryMiddleEncounters(
+            ['AB', ...CHALLENGE_1_PINNED_MIDDLE_AFTER_AB],
+            forcedFinalKey,
+            CORNER_THEME_SLUGS,
+            baseMiddlePoolNoRiddle
+        );
+    }
+    const challengeStoryPins = forcedFinalKey ? CHALLENGE_PINNED_MIDDLE_BY_FINALE[forcedFinalKey] : null;
+    if (challengeStoryPins?.length) {
+        validateMandatoryMiddleEncounters(
+            challengeStoryPins,
+            forcedFinalKey,
+            CORNER_THEME_SLUGS,
+            baseMiddlePoolNoRiddle
+        );
+    }
+
+    const assignedRiddleKey = assignedChallengeRiddleKey(forcedFinalKey);
+    if (assignedRiddleKey && forcedFinalKey !== 'AZ') {
+        const ev = encounterEffects[assignedRiddleKey];
+        if (!ev || typeof ev.difficultyLevel !== 'number') {
+            throw new Error(
+                `Challenge (${forcedFinalKey}) mandates riddle ${assignedRiddleKey}, but it is not a valid numbered encounter.`
+            );
+        }
+        const rkSlug = getEncounterThemeDedupSlug(assignedRiddleKey);
+        if (CORNER_THEME_SLUGS.has(rkSlug)) {
+            throw new Error(
+                `Challenge riddle ${assignedRiddleKey} shares a theme slug with an active classical corner — cannot draft this board corner set.`
+            );
+        }
+        if (
+            forcedFinalKey === 'FZ' &&
+            CHALLENGE_6_FORBIDDEN_THEME_SLUGS.has(rkSlug)
+        ) {
+            throw new Error(
+                `Challenge 6 riddle ${assignedRiddleKey} uses forbidden theme “${rkSlug}” on the Accident finale map.`
+            );
         }
     }
 
@@ -1903,7 +2087,12 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
         const picks = [];
         const usedEncounterKeys = new Set(activeClassicalCornerKeys);
         const usedThemes = new Set(activeClassicalCornerKeys.map((k) => getEncounterThemeDedupSlug(k)));
-        const immutableEncounterKeys = new Set();
+
+        if (assignedRiddleKey && forcedFinalKey !== 'AZ') {
+            picks.push(assignedRiddleKey);
+            usedEncounterKeys.add(assignedRiddleKey);
+            usedThemes.add(getEncounterThemeDedupSlug(assignedRiddleKey));
+        }
 
         if (forcedFinalKey === 'AZ') {
             picks.push('AB');
@@ -1915,89 +2104,83 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
                 usedEncounterKeys.add(pinKey);
                 usedThemes.add(getEncounterThemeDedupSlug(pinKey));
             }
-            picks.forEach((k) => immutableEncounterKeys.add(k));
         }
 
-        if (forcedFinalKey === 'Z') {
-            if (!baseMiddlePoolNoRiddle.includes('AL')) {
-                throw new Error(
-                    'Challenge 2 (Endgame finale) requires Dust·The Weather (AL); it is missing from the random encounter pool.'
-                );
+        if (challengeStoryPins?.length) {
+            for (const pinKey of challengeStoryPins) {
+                picks.push(pinKey);
+                usedEncounterKeys.add(pinKey);
+                usedThemes.add(getEncounterThemeDedupSlug(pinKey));
             }
-            picks.push('AL');
-            usedEncounterKeys.add('AL');
-            usedThemes.add(getEncounterThemeDedupSlug('AL'));
-            immutableEncounterKeys.add('AL');
         }
 
-        const prefilledDiff5 =
-            forcedFinalKey === 'AZ'
-                ? picks.reduce((acc, k) => acc + (encounterEffects[k]?.difficultyLevel === 5 ? 1 : 0), 0)
-                : 0;
-        const prefilledDiff4 =
-            forcedFinalKey === 'AZ'
-                ? picks.reduce((acc, k) => acc + (encounterEffects[k]?.difficultyLevel === 4 ? 1 : 0), 0)
-                : 0;
-        const needTier5 = forcedFinalKey === 'AZ' ? Math.max(0, 4 - prefilledDiff5) : 4;
-        const needTier4 = forcedFinalKey === 'AZ' ? Math.max(0, 8 - prefilledDiff4) : 8;
+        if (!seedAtLeastOnePerDifficultyIfNeeded(picks, usedEncounterKeys, usedThemes, canonByDiff, forcedFinalKey)) {
+            continue;
+        }
+
+        const tier5Weight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
+        const tier4Weight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
+
+        const prefilledDiff5 = picks.reduce(
+            (acc, k) => acc + (encounterEffects[k]?.difficultyLevel === 5 ? 1 : 0),
+            0
+        );
+        const prefilledDiff4 = picks.reduce(
+            (acc, k) => acc + (encounterEffects[k]?.difficultyLevel === 4 ? 1 : 0),
+            0
+        );
+        const needTier5 = Math.max(0, 4 - prefilledDiff5);
+        const needTier4 = Math.max(0, MIN_DIFF4_ENCOUNTER_COUNT - prefilledDiff4);
 
         let stratFail = false;
         for (let i = 0; i < needTier5 && !stratFail; i++) {
-            const candidates = shuffleArrayInPlace(
-                canonByDiff[5].filter(
-                    (key) =>
-                        !usedEncounterKeys.has(key) && !usedThemes.has(getEncounterThemeDedupSlug(key))
-                )
+            const eligible = canonByDiff[5].filter(
+                (key) =>
+                    !usedEncounterKeys.has(key) && !usedThemes.has(getEncounterThemeDedupSlug(key))
             );
-            if (!candidates.length) {
+            const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, tier5Weight);
+            if (!chosen) {
                 stratFail = true;
                 break;
             }
-            const chosen = candidates[0];
             picks.push(chosen);
             usedEncounterKeys.add(chosen);
             usedThemes.add(getEncounterThemeDedupSlug(chosen));
         }
         for (let i = 0; i < needTier4 && !stratFail; i++) {
-            const candidates = shuffleArrayInPlace(
-                canonByDiff[4].filter(
-                    (key) =>
-                        !usedEncounterKeys.has(key) && !usedThemes.has(getEncounterThemeDedupSlug(key))
-                )
+            const eligible = canonByDiff[4].filter(
+                (key) =>
+                    !usedEncounterKeys.has(key) &&
+                    !usedThemes.has(getEncounterThemeDedupSlug(key))
             );
-            if (!candidates.length) {
+            const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, tier4Weight);
+            if (!chosen) {
                 stratFail = true;
                 break;
             }
-            const chosen = candidates[0];
             picks.push(chosen);
             usedEncounterKeys.add(chosen);
             usedThemes.add(getEncounterThemeDedupSlug(chosen));
         }
         if (stratFail) continue;
 
-        const restPool = shuffleArrayInPlace(
-            poolKeys.filter(
+        while (picks.length < INNER_TARGET) {
+            const eligible = poolKeys.filter(
                 (key) =>
                     !usedEncounterKeys.has(key) &&
                     !usedThemes.has(getEncounterThemeDedupSlug(key)) &&
                     encounterEffects[key].difficultyLevel !== 5
-            )
-        );
-
-        while (picks.length < INNER_TARGET && restPool.length) {
-            const next = restPool.pop();
-            if (!next || usedEncounterKeys.has(next)) continue;
-            const slug = getEncounterThemeDedupSlug(next);
-            if (usedThemes.has(slug)) continue;
-            picks.push(next);
-            usedEncounterKeys.add(next);
-            usedThemes.add(slug);
+            );
+            const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, (k) =>
+                encounterRestPickWeight(k, forcedFinalKey, picks)
+            );
+            if (!chosen) break;
+            picks.push(chosen);
+            usedEncounterKeys.add(chosen);
+            usedThemes.add(getEncounterThemeDedupSlug(chosen));
         }
 
         if (picks.length !== INNER_TARGET) continue;
-
-        tryInjectSingleRiddleIfPossible(picks, usedThemes, forcedFinalKey, immutableEncounterKeys);
 
         picks.sort((a, b) => {
             const da = encounterEffects[a].difficultyLevel;
@@ -2022,7 +2205,7 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
     }
 
     throw new Error(
-        'Could not assemble a random map: need a full draft middle band (distinct themed encounters — exactly four difficulty‑5, at least eight difficulty‑4, remainder difficulty ≤4) after applying starting-element classical omissions.'
+        'Could not assemble a random map: need a full draft middle band (distinct themed encounters — at least one each of difficulty 1–5, exactly four difficulty‑5, at least five difficulty‑4, remainder difficulty ≤4) after applying starting-element classical omissions.'
     );
 }
 
@@ -2118,6 +2301,7 @@ const encounterArtMap = {
     AS: 'alchemyart/carnival.png',
     AT: 'alchemyart/maze.png',
     AU: 'alchemyart/stain.png',
+    AW: 'alchemyart/sign.png',
     AV: 'alchemyart/riddle1.png',
     AZ: 'alchemyart/sandwich.png',
     BB: 'alchemyart/report.png',
@@ -2997,7 +3181,7 @@ function createCard(elementId) {
             if (currentEncounterCell) {
                 // Check if the current encounter is locked out from too many failures
                 const encounterKey = currentEncounterCell.dataset.encounterKey;
-                if (!bottomRowEncounterKeys.has(encounterKey) && locationFailureCounter[encounterKey] >= 3 && countIncompleteEncounters() > 2) {
+                if (!bottomRowEncounterKeys.has(encounterKey) && locationFailureCounter[encounterKey] >= LOCATION_FAILURE_STREAK_BLOCK && countIncompleteEncounters() > 2) {
                     displayMessage('BLOCKED! Choose a different location first.', 'default');
                     return; // Prevent handleEncounter from running
                 }
@@ -3105,7 +3289,7 @@ function handleFailure(encounterKey) {
 
     // Permanently record the highest hint level unlocked
     const currentHintLevel = persistentHints[encounterKey] || 0;
-    if (locationFailureCounter[encounterKey] >= 3) {
+    if (locationFailureCounter[encounterKey] >= LOCATION_FAILURE_HINT2_STREAK) {
         persistentHints[encounterKey] = 2; // Unlock level 2
     } else if (locationFailureCounter[encounterKey] >= 1 && currentHintLevel < 1) {
         persistentHints[encounterKey] = 1; // Unlock level 1
@@ -3506,8 +3690,8 @@ for (let idx = 0; idx < BOARD_TOTAL_CELL_COUNT; idx++) {
         const isBlockingActive = remainingEncounters > 2 && !bottomRowEncounterKeys.has(ek);
 
         if (isBlockingActive) {
-            if (locationFailureCounter[ek] >= 4 && currentEncounterCell && currentEncounterCell.dataset.encounterKey === ek) {
-                displayMessage('Fourth failure in a row, must try another encounter!', 'default');
+            if (locationFailureCounter[ek] >= LOCATION_FAILURE_STREAK_FORCE_MOVE && currentEncounterCell && currentEncounterCell.dataset.encounterKey === ek) {
+                displayMessage('Fifth failure in a row, must try another encounter!', 'default');
                 return;
             }
         }
