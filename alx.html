@@ -730,6 +730,24 @@ body.rules-closed .main{
     color: yellow;
     font-size: 18px;
 }
+.message-item.blocked {
+    background: linear-gradient(180deg, rgba(24, 42, 78, 0.97) 0%, rgba(16, 28, 52, 0.97) 100%);
+    border: 3px dashed #6eb5ff;
+    color: #cfe8ff;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    box-shadow:
+        0 0 0 2px rgba(110, 181, 255, 0.2),
+        0 0 22px rgba(80, 160, 255, 0.35);
+    animation: blockedPulse 2.2s ease-in-out infinite, fadeout 4.5s forwards;
+}
+
+@keyframes blockedPulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(110, 181, 255, 0.2), 0 0 18px rgba(80, 160, 255, 0.28); }
+    50% { box-shadow: 0 0 0 3px rgba(110, 181, 255, 0.35), 0 0 26px rgba(80, 160, 255, 0.45); }
+}
 
 .element-name-subtitle {
     font-size: 0.9rem;
@@ -854,7 +872,7 @@ body.rules-closed .main{
     opacity: 0;
 }
 /* 1. DEFAULT HOVER (ONLY WHEN NOT SELECTED OR TAPPED) */
-.card-slot:hover:not(.selected-reagent):not(.tapped){
+.card-slot:hover:not(.selected-reagent):not(.tapped):not(.fusion-partner){
     transform:translateY(-2px);
     border:1px solid var(--accent);
 }
@@ -874,6 +892,13 @@ body.rules-closed .main{
 .card-slot.selected-reagent.unfusable{
     border:2px solid #F44336; /* Red border */
     box-shadow:0 0 12px rgba(244, 67, 54, 0.6);
+}
+/* Single selection: other elements that can fuse with the picked card */
+.card-slot.fusion-partner:not(.selected-reagent) {
+    filter: drop-shadow(0 0 7px rgba(201, 168, 74, 0.72)) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45));
+}
+.card-slot.fusion-partner:not(.selected-reagent):hover {
+    filter: drop-shadow(0 0 10px rgba(201, 168, 74, 0.85)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
 }
 
 /* 5. TAPPED STATE - NO HIGHLIGHTS & NO INTERACTION */
@@ -1397,7 +1422,7 @@ const elementData = {
     '49': { name: 'Art', emoji: '🖼️', verbs: ['Gift'], terminal: false },
     '50': { name: 'Space', emoji: '🌌', verbs: [], terminal: false },
     '51': { name: 'Sun', emoji: '☀️', verbs: ['Heat', 'Daze'], terminal: false },
-    '52': { name: 'Animal', emoji: '🐾', verbs: ['Claw'], terminal: false },
+    '52': { name: 'Animal', emoji: '🐻', verbs: ['Claw'], terminal: false },
     '53': { name: 'Disease', emoji: '🦠', verbs: ['Infect'], terminal: true },
     '54': { name: 'Mirror', emoji: '🪞', verbs: ['Reflect', 'Gift'], terminal: true },
     '55': { name: 'Pepper', emoji: '🌶️', verbs: ['Irritate', 'Gift'], terminal: true },
@@ -1465,11 +1490,11 @@ const fuseList = [
     '1 + 2 = 5', '1 + 3 = 10', '1 + 4 = 9', '1 + 5 = 27', '1 + 6 = 46', '1 + 7 = 10', '1 + 8 = 11', '1 + 9 = 18', '1 + 10 = 46', '1 + 11 = 70', '1 + 26 = 59', '1 + 27 = 14', '1 + 28 = 53', '1 + 29 = 50', '1 + 31 = 50', '1 + 34 = 71', '1 + 38 = 53', '1 + 39 = 46', '1 + 46 = 39', '1 + 50 = 39', '1 + 62 = 94',
     '2 + 3 = 7', '2 + 4 = 6', '2 + 5 = 105', '2 + 8 = 55', '2 + 9 = 4', '2 + 10 = 26', '2 + 11 = 10', '2 + 12 = 78', '2 + 13 = 12', '2 + 17 = 5', '2 + 26 = 21', '2 + 28 = 5', '2 + 29 = 51', '2 + 30 = 42', '2 + 31 = 12', '2 + 32 = 38', '2 + 33 = 37', '2 + 34 = 43', '2 + 35 = 10', '2 + 43 = 38', '2 + 47 = 42', '2 + 51 = 12', '2 + 52 = 57', '2 + 62 = 30', '2 + 66 = 10', '2 + 67 = 10', '2 + 74 = 10',
     '3 + 4 = 8', '3 + 5 = 29', '3 + 7 = 29', '3 + 8 = 30', '3 + 9 = 18', '3 + 10 = 35', '3 + 11 = 70', '3 + 13 = 90', '3 + 26 = 65', '3 + 27 = 65', '3 + 28 = 33', '3 + 29 = 7', '3 + 30 = 7', '3 + 31 = 13', '3 + 33 = 32', '3 + 34 = 90', '3 + 36 = 81', '3 + 50 = 29', '3 + 51 = 29', '3 + 66 = 81', '4 + 10 = 46',
-    '4 + 5 = 27', '4 + 6 = 46', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 8 = 17', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 36 = 113', '4 + 38 = 45', '4 + 39 = 46', '4 + 46 = 39', '4 + 50 = 3', '4 + 51 = 31', '4 + 52 = 22', '4 + 62 = 74',
+    '4 + 5 = 27', '4 + 6 = 46', '4 + 7 = 28', '4 + 9 = 18', '4 + 11 = 70', '4 + 13 = 74', '4 + 17 = 76', '4 + 8 = 17', '4 + 26 = 22', '4 + 27 = 5', '4 + 28 = 33', '4 + 29 = 46', '4 + 30 = 19', '4 + 31 = 30', '4 + 32 = 45', '4 + 33 = 32', '4 + 34 = 74', '4 + 36 = 113', '4 + 38 = 45', '4 + 39 = 46', '4 + 46 = 39', '4 + 50 = 3', '4 + 51 = 6', '4 + 52 = 22', '4 + 62 = 74',
     '5 + 6 = 27', '5 + 7 = 30', '5 + 8 = 23', '5 + 13 = 34', '5 + 17 = 2', '5 + 27 = 14', '5 + 28 = 42', '5 + 30 = 42', '5 + 32 = 36', '5 + 33 = 36', '5 + 34 = 43', '5 + 35 = 33', '5 + 37 = 33', '5 + 38 = 43', '5 + 39 = 14', '5 + 47 = 42', '5 + 50 = 29', '5 + 51 = 12', '6 + 8 = 56', '6 + 13 = 5', '6 + 27 = 5', '6 + 28 = 5', '6 + 29 = 5', '6 + 30 = 62', '6 + 34 = 5', '6 + 39 = 46', '6 + 52 = 57', '6 + 62 = 5', '7 + 8 = 30', '7 + 9 = 26', '7 + 11 = 70', '7 + 26 = 65', '7 + 29 = 14', '7 + 32 = 77', '7 + 33 = 73', '7 + 35 = 10', '7 + 49 = 77', '7 + 50 = 29', '7 + 51 = 29', '8 + 9 = 58', '8 + 12 = 17', '8 + 13 = 41', '8 + 27 = 30', '8 + 28 = 15', '8 + 30 = 56', '8 + 31 = 15', '8 + 33 = 52', '8 + 37 = 64', '8 + 38 = 15', '8 + 51 = 17', '9 + 13 = 71', '9 + 27 = 4', '9 + 29 = 4', '9 + 30 = 20', '9 + 34 = 71', '9 + 51 = 4', '10 + 12 = 31', '10 + 27 = 26', '10 + 28 = 53', '10 + 29 = 46', '10 + 31 = 50', '10 + 34 = 24', '10 + 35 = 7', '10 + 38 = 53', '10 + 39 = 46', '10 + 50 = 3', '10 + 52 = 53', '11 + 13 = 40', '11 + 17 = 70', '11 + 34 = 70', '11 + 35 = 10', '11 + 29 = 92', '11 + 36 = 84', '11 + 37 = 84', '11 + 49 = 84', '11 + 63 = 84', '11 + 52 = 67', '12 + 13 = 54', '12 + 17 = 76', '12 + 26 = 54', '12 + 31 = 37', '12 + 39 = 51', '12 + 46 = 39', '12 + 50 = 51', '12 + 51 = 5', '13 + 14 = 60', '13 + 26 = 54', '13 + 29 = 92', '13 + 30 = 72', '13 + 33 = 44', '13 + 36 = 34', '13 + 38 = 41', '14 + 26 = 59', '14 + 32 = 49', '14 + 36 = 49', '17 + 27 = 8', '17 + 31 = 38', '17 + 35 = 76', '17 + 36 = 66', '17 + 51 = 76', '26 + 27 = 65', '26 + 31 = 75', '26 + 32 = 36', '26 + 34 = 69', '26 + 49 = 77', '26 + 51 = 75', '26 + 62 = 26', '27 + 29 = 1', '27 + 30 = 65', '27 + 34 = 13', '27 + 35 = 65', '27 + 47 = 42', '27 + 51 = 12', '27 + 62 = 13', '28 + 30 = 2', '28 + 33 = 53', '28 + 35 = 33', '28 + 38 = 53', '28 + 47 = 42', '28 + 50 = 3', '28 + 52 = 38', '28 + 62 = 30', '29 + 31 = 50', '29 + 50 = 35', '29 + 52 = 38', '30 + 34 = 62', '30 + 47 = 42', '30 + 52 = 57', '30 + 62 = 5', '30 + 73 = 82', '31 + 32 = 47', '31 + 33 = 38', '31 + 39 = 50', '31 + 51 = 50', '31 + 52 = 67', '31 + 67 = 38', '32 + 33 = 45', '32 + 34 = 44', '32 + 35 = 36', '32 + 36 = 66', '32 + 37 = 33', '32 + 38 = 47', '32 + 43 = 80', '32 + 47 = 38', '32 + 53 = 38', '32 + 67 = 89', '33 + 34 = 44', '33 + 35 = 38', '33 + 36 = 52', '33 + 37 = 73', '33 + 50 = 3', '33 + 52 = 73', '34 + 35 = 69', '34 + 36 = 48', '34 + 38 = 43', '35 + 36 = 66', '35 + 38 = 10', '35 + 50 = 29', '35 + 51 = 31', '35 + 52 = 38', '35 + 62 = 13', '35 + 67 = 11', '35 + 73 = 52', '36 + 37 = 63', '36 + 52 = 68', '36 + 27 = 85', '36 + 66 = 81', '37 + 52 = 33', '37 + 63 = 61', '38 + 43 = 47', '38 + 46 = 53', '38 + 47 = 42', '38 + 51 = 31', '38 + 52 = 67', '39 + 46 = 31', '39 + 62 = 26', '43 + 47 = 38', '43 + 52 = 38', '46 + 51 = 31', '47 + 52 = 38', '47 + 67 = 38', '50 + 51 = 29', '51 + 62 = 26', '52 + 53 = 38', '52 + 73 = 33', '53 + 67 = 38', '66 + 74 = 81',
-    '2 + 39 = 51', '4 + 8 = 17', '13 + 51 = 79', '1 + 62 = 94','1 + 74 = 94','1 + 73 = 102','2 + 32 = 106','2 + 73 = 101','3 + 7 = 115','3 + 27 = 115','3 + 35 = 115','4 + 32 = 99','4 + 52 = 113','5 + 52 = 93','6 + 7 = 97','6 + 32 = 97','6 + 34 = 97','6 + 35 = 97','6 + 73 = 101','7 + 27 = 65','7 + 37 = 65','8 + 52 = 93','9 + 52 = 114','10 + 13 = 24','10 + 34 = 24','11 + 17 = 96','12 + 13 = 105','12 + 30 = 105','12 + 34 = 105','12 + 36 = 105','14 + 52 = 103','14 + 66 = 95','14 + 73 = 100','17 + 32 = 96','17 + 34 = 96','17 + 52 = 93','26 + 37 = 65','26 + 73 = 100','27 + 66 = 85', '27 + 73 = 101','29 + 32 = 107','29 + 34 = 92','29 + 36 = 107','29 + 73 = 102','30 + 51 = 98','31 + 52 = 103','32 + 34 = 44','32 + 39 = 99','32 + 51 = 99','32 + 66 = 95','32 + 67 = 89','32 + 103 = 104','34 + 62 = 91','34 + 66 = 95','34 + 73 = 100','35 + 52 = 73','39 + 52 = 111','46 + 52 = 111','50 + 74 = 108','51 + 52 = 110','51 + 73 = 102','52 + 3 = 112','52 + 7 = 112','52 + 8 = 112','52 + 9 = 114','52 + 17 = 109',    '52 + 27 = 112',
+    '2 + 39 = 51', '4 + 8 = 17', '13 + 51 = 79', '1 + 62 = 94','1 + 74 = 94','1 + 52 = 111','2 + 32 = 106','2 + 73 = 101','3 + 7 = 115','3 + 27 = 115','3 + 35 = 115','4 + 32 = 99','4 + 52 = 113','5 + 52 = 93','6 + 7 = 97','6 + 32 = 97','6 + 34 = 97','6 + 35 = 97','6 + 73 = 101','7 + 27 = 65','7 + 37 = 65','7 + 52 = 73','8 + 35 = 17','8 + 52 = 93','9 + 52 = 114','10 + 13 = 24','10 + 34 = 24','11 + 17 = 96','12 + 13 = 105','12 + 30 = 105','12 + 34 = 105','12 + 36 = 105','14 + 52 = 103','14 + 66 = 95','14 + 73 = 100','17 + 32 = 96','17 + 34 = 96','17 + 52 = 93','26 + 37 = 65','26 + 73 = 100','27 + 66 = 85', '27 + 73 = 101','29 + 32 = 107','29 + 34 = 92','29 + 36 = 107','30 + 51 = 98','31 + 52 = 103','32 + 30 = 99','32 + 34 = 44','32 + 39 = 99','32 + 51 = 99','32 + 66 = 95','32 + 67 = 89','32 + 73 = 102','32 + 103 = 104','34 + 62 = 91','34 + 66 = 95','34 + 73 = 100','35 + 52 = 73','39 + 52 = 111','46 + 52 = 111','50 + 74 = 108','51 + 52 = 110','52 + 3 = 112','52 + 7 = 73','52 + 8 = 112','52 + 9 = 114','52 + 17 = 109',    '52 + 27 = 112',
     '62 + 66 = 95','77 + 115 = 116',
-    '4 + 74 = 83','13 + 74 = 83','26 + 74 = 83','27 + 74 = 83','29 + 74 = 83','31 + 74 = 83','34 + 74 = 83','36 + 74 = 83','43 + 74 = 83','47 + 74 = 83',
+    '4 + 74 = 83','13 + 74 = 83','26 + 74 = 83','27 + 74 = 83','29 + 74 = 108','31 + 74 = 83','34 + 74 = 83','36 + 74 = 83','43 + 74 = 83','47 + 74 = 83',
     '1 + 14 = 16','1 + 49 = 16','14 + 49 = 16','2 + 7 = 21'
 ];
 
@@ -1483,18 +1508,18 @@ const encounterEffects = {
     'F': { name: 'Ice- Frozen Tower', difficultyLevel: 1, hint1: "This narrow siege tower is made of slippery ice", hint2: 'It seems easy to knock over', effects: ['-1A', '-2A', '3A', '26B', '-28B', '-30B', '-51A', '40A', '47A','-34A', '78A', '42A', '-43A', '104A', '97A'] },
     'G': { name: 'Rope- Mummy', difficultyLevel: 1, hint1: 'This creature seems to be wrapped in many strips.', hint2: 'The ropes and fabrics are its defences.', effects: ['2A', '-4A', '-1A', '-5A', '11A', '42A', '84A', '-30B', '-37A', '47A', '78A', '38A', '104A', '24A', '106A'] },
     'H': { name: 'Light- Gorgon', difficultyLevel: 5, hint1: 'The creature turns anyone it faces into stone.', hint2: 'The way it turns you to stone is by looking at you.', effects: ['-7A', '-29B', '-39A', '-40A', '-31A', '54A', '-37A', '-38A', '-10B', '51B', '-111A', '111B'] },
-    'I': { name: 'Metal- Automaton', difficultyLevel: 2, hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A', '102A'] },
+    'I': { name: 'Metal- Automaton', difficultyLevel: 2, hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A', '102A', '21A'] },
     'J': { name: 'Sound- Banshee', difficultyLevel: 3, hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '7A', '-13A', '-26A', '14A', '-40A', '-14A', '38A', '92A', '94A', '115A', '104A'] },
     'K': { name: 'Glass- Illusionist', difficultyLevel: 3, hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11A', '9B', '26B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A', '104A'] },
     'L': { name: 'Pressure- The Press', difficultyLevel: 2, hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B', '112A'] },
     'M': { name: 'Chemical- The Valley', difficultyLevel: 1, hint1: 'Something invisible is causing you to get sick.', hint2: 'You must deal with the cloud of chemicals.', effects: ['1A', '28B', '6A', '29B', '39A', '24A', '94A', '115A'] },
-    'N': { name: 'Gravity- The Abnormality', difficultyLevel: 5, hint1: 'The gravitational abnormality is slamming you against the ceiling, unable to move.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '29A', '39A', '-11A', '-13A', '62A', '102A'] },
-    'O': { name: 'Oil- The Swamp', difficultyLevel: 2, hint1: 'When you try to cross you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '11A', '-11B', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A', '94A', '92A'] },
-    'P': { name: 'Darkness- Alucard', difficultyLevel: 4, hint1: 'It is a man in a cape and bat wings.', hint2: 'He is a vampire who has never left the darkness of the indoors.', effects: ['12A', '-37A', '38A', '41A', '40A', '54A', '104A', '111B'] },
+    'N': { name: 'Gravity- The Abnormality', difficultyLevel: 5, hint1: 'The gravitational abnormality is slamming you against the ceiling.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '29A', '39A', '-11A', '-13A', '62A', '102A'] },
+    'O': { name: 'Oil- The Swamp', difficultyLevel: 2, hint1: 'You are trying to get to the other side of a swamp but you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '11A', '-11B', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A', '94A', '92A'] },
+    'P': { name: 'Darkness- Alucard', difficultyLevel: 4, hint1: 'You are facing off against a man in a cape and bat wings.', hint2: 'He is a vampire who has never left the darkness of the indoors.', effects: ['12A', '-37A', '38A', '41A', '40A', '54A', '104A', '111B'] },
     'Q': { name: 'Man- The Child', difficultyLevel: 4, hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['20A', '22A', '23A', '48A', '68B', '84A', '85A', '-19A', '-44A', '-52A', '-7C', '-59B', '-61A', '-49A', '-63B', '-66A', '-69A', '-74B', '-78B', '89A', '-91A', '96A', '100B', '104B', '108A', '114A'] },
     'R': { name: 'Energy- Terror of the Tides', difficultyLevel: 3, hint1: 'It takes the form of a deadly Eel.', hint2: 'It attacks using electricity.', effects: ['-4A', '-18A', '-10A', '-35A', '38A', '43A', '47A', '40A', '-37A', '104A', '106A', '111B', '114A'] },
-    'S': { name: 'Life- The Exchange', difficultyLevel: 2, hint1: 'The being tells you that you will need to provide life in order to proceed.', hint2: 'You must give it life itself, or something similar.', effects: ['-52A', '17A', '33B', '32B', '-68B', '-67B', '89A', '93A', '102B', '103A', '104B', '109A', '110A', '111A', '25A', '112B', '113A', '114A'] },
-    'T': { name: 'Machine- Geared Dragon', difficultyLevel: 2, hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from the air.', effects: ['-28A', '35A', '35B', '5A', '40A', '-34A', '-39A', '-29B', '-11B', '65A', '24A', '92A', '94A', '111B', '115A', '-7B'] },
+    'S': { name: 'Life- The Exchange', difficultyLevel: 2, hint1: 'The being tells you that only life can pay for life.', hint2: 'You must give it life itself, or something living.', effects: ['-52A', '17A', '33B', '32B', '-68B', '-67B', '89A', '93A', '102B', '103A', '104B', '109A', '110A', '111C', '25A', '112B', '113A', '114A'] },
+    'T': { name: 'Machine- Geared Dragon', difficultyLevel: 2, hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from up the air.', effects: ['-28A', '35A', '35B', '5A', '40A', '-34A', '-39A', '-29A', '-11B', '65A', '24A', '92A', '94A', '111B', '115A', '-7B'] },
     'U': { name: 'Time- Ritualists', difficultyLevel: 4, hint1: 'The magicians are about to complete their ritual, which will make it impossible to beat them.', hint2: 'They are putting together a large clock, you will need to disrupt them.', effects: ['-34A', '-31A', '10B', '35B', '51B', '14B', '38A', '43A', '40A', '-104A', '111B', '113A', '97A', '-60A'] },
     'V': { name: 'Intelligence- Doppelganger', difficultyLevel: 4, hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-51B', '-54A', '-39A', '-29B', '11A', '36A', '32A', '62A', '37A', '70A', '91A', '-9B', '-11A', '-11B'] },
     'W': { name: 'Love- The Gift', difficultyLevel: 4, hint1: 'A lover tells you she feels heartbroken, she was expecting to receive something special from her valentine.', hint2: 'She wants to receive a heartfelt present.', effects: ['49A', '32B', '-15B', '-37A', '64A', '79A', '65C', '54B', '95A', '101A', '114A', '-33A', '-16A'] },
@@ -1504,32 +1529,32 @@ const encounterEffects = {
     // Draft encounters reserved for random/scenario pools (middle band). Includes chemical sets AU & BR–BS,
     // B-set greenhouse BT (ex-CB); A* row AA–AU and B row BA–BT each aim for at most one encounter per theme.
     // Draft keys plus C‑set row (CA–CP; duplicate Stain key CQ merged into AU) stay out of the fixed A–Z starter grid.
-    'AA': { name: 'Life- The Fish', difficultyLevel: 3, hint1: 'You are a fisherman trying to catch as many trout as possible.', hint2: 'They are bunched up together in a river, there must be a way to get all of them at once.', effects: ['45A', '5A', '-10A', '-29B', '-6B', '-28A', '-40A', '-43A', '-42A', '57B', '-74A', '24A', '-85A'] },
+    'AA': { name: 'Life- The Fish', difficultyLevel: 3, hint1: 'You are a fisherman trying to catch as many trout as possible.', hint2: 'They are bunched up together in a river, there must be a way to get all of them at once.', effects: ['45A', '5A', '-10A', '-29B', '-6B', '-28A', '-40A', '-43A', '-42A', '57B', '-74A', '24A', '-85A', '-11B'] },
     'AB': { name: 'Animal- The Butcher', difficultyLevel: 4, hint1: 'A customer tells you she is quite hungry.', hint2: 'You will need to provide her with something tasty.', effects: ['-52A', '-68B', '73B', '82A', '56B', '57B', '-72B', '55B', '58B', '20A', '19A', '-23A'] },
     'AC': { name: 'Machine- The Repairman', difficultyLevel: 4, hint1: "Someone needs to fix an engine. It won't power up.", hint2: 'They need something that will fuel it.', effects: ['-5A', '30A', '35B', '-6B', '-30B', '-36A', '-85A'] },
     'AD': { name: 'Time- The Hour', difficultyLevel: 5, hint1: 'An old lady politely asks you what time is it.', hint2: 'You will need to provide her with a timepiece.', effects: ['69A'] },
     'AE': { name: 'Intelligence- The Citation', difficultyLevel: 4, hint1: 'You have been stopped by the sheriff for committing a serious traffic violation.', hint2: 'He is susceptible to bribes.', effects: ['79A', '65C', '-31A', '-11B', '-10B', '32A', '36A', '35B', '39A', '37A', '38A', '-57B', '-64A', '-77A', '-49A', '94A', '-75B', '-15B', '89A', '104B'] },
     'AF': { name: 'Metal- The Match', difficultyLevel: 3, hint1: 'An athlete challenges you to a game of Golf, you must find a way to give yourself the advantage.', hint2: 'No one ever said you had to play fair', effects: ['-3A', '7C', '-9B', '10B', '11B', '29A', '-31A', '-35B', '38A', '40A', '43A', '51B', '24A'] },
-    'AG': { name: 'Oil- The Mosquito', difficultyLevel: 2, hint1: 'A tiny bug is flying around the room.', hint2: 'It is very difficult to catch.', effects: ['5A', '-11B', '-29A', '-35A', '40A', '43A', '-7C', '-13A', '67B', '89A', '24A', '-7B'] },
+    'AG': { name: 'Oil- The Mosquito', difficultyLevel: 2, hint1: 'A tiny bug is flying around the room.', hint2: 'It is very difficult to catch.', effects: ['5A', '-11B', '-29A', '-35A', '40A', '43A', '-7C', '-13A', '67B', '89A', '24A', '-7B', '38A'] },
     'AH': { name: 'Energy- The Sheep', difficultyLevel: 2, hint1: 'A large sheep is blocking the gate and needs to be gently removed.', hint2: 'Sheep are known for being fearful animals.', effects: ['-78A', '-35A', '-31A', '-26B', '-12A', '-7B', '-5A', '-3A', '-18A', '14B', '38A', '40A', '42A', '43A', '45B', '47A', '55A', '60A', '67A', '67B', '68A', '68B', '103A', '111B', '113A', '-90A'] },
     'AI': { name: 'Rope- The Hill', difficultyLevel: 2, hint1: 'There is no other way to go but up the steep hill.', hint2: 'You will need to get to the top somehow.', effects: ['62A', '29B', '39A', '-11A', '-42A', '-70A', '-76A'] },
     'AJ': { name: 'Glass- The Pool', difficultyLevel: 2, hint1: 'You need to get across a large swimming pool.', hint2: 'It is made of glass and filled with water.', effects: ['9B', '10A', '2A', '24A', '41A', '7C', '11A', '70A', '74A'] },
     'AK': { name: 'Ice- The Melting Scoop', difficultyLevel: 3, hint1: 'A scoop of ice cream is melting in the sun.', hint2: 'You must keep it from melting somehow.', effects: ['-9B', '46A', '18A', '76A', '72A'] },
-    'AL': { name: 'Dust- The Weather', difficultyLevel: 3, hint1: 'A friendly old man is sitting on a park bench, he looks warm.', hint2: 'He tells you he would prefer to sit in the shade.', effects: ['-1A', '-31A', '-54A', '17A', '76A', '75B', '46A', '-9A'] },
-    'AM': { name: 'Light- Laserbug', difficultyLevel: 3, hint1: 'You are attacked by a large beetle with a light beam coming from his back.', hint2: 'You will need to stop the light somehow.', effects: ['54A', '-76A', '75B', '46A', '-31A', '38A', '-40A', '-43A'] },
+    'AL': { name: 'Dust- The Weather', difficultyLevel: 3, hint1: 'A friendly old man is sitting on a park bench, he looks warm.', hint2: 'He tells you he would prefer to sit in the shade.', effects: ['-1A', '-31A', '-54A', '17A', '76A', '75B', '46A', '-9A', '71A'] },
+    'AM': { name: 'Light- Laserbug', difficultyLevel: 3, hint1: 'You are attacked by a large beetle with a light beam coming from his back.', hint2: 'You will need to stop the light somehow.', effects: ['54A', '-76A', '75B', '46A', '31A', '38A', '-40A', '-43A'] },
     'AN': { name: 'Love- The Proposal', difficultyLevel: 5, hint1: 'The time has come to pop the question to the love of your life.', hint2: 'It is customary to provide a particular gemstone.', effects: ['65C', '79A'] },
-    'AO': { name: 'Man- The Explorer', difficultyLevel: 4, hint1: 'A navigator tells you he is lost.', hint2: 'He will need to find his way to the treasure.', effects: ['81A', '85A', '-68B', '-79A', '-65C', '-32A', '48A', '-39A', '-90A'] },
+    'AO': { name: 'Man- The Explorer', difficultyLevel: 5, hint1: 'A navigator tells you he is lost.', hint2: 'He will need to find his way to the treasure.', effects: ['81A', '85A', '-68B', '-79A', '-65C', '-32A', '48A', '-39A', '-90A', '-62A'] },
     'AP': { name: 'Sound- The Critics', difficultyLevel: 4, hint1: 'Two old men are complaining to you that nothing is original or creative anymore.', hint2: 'They want to see something entertaining and avant-garde.', effects: ['59A', '78A', '49A', '-73A', '-32A', '-67A', '45A', '-14B', '16A'] },
     'AQ': { name: 'Death- The Wound', difficultyLevel: 4, hint1: 'A boxer tells you that he has been hurt in a fight.', hint2: 'You will need to help with the pain of the injury.', effects: ['33A', '35A', '35B', '-27A', '-30B', '-11B', '-58B', '-15B', '-56B'] },
     'AR': { name: 'Pressure- The Experiment', difficultyLevel: 4, hint1: "There is a science contest where the winner's egg must survive a fall.", hint2: 'Find a way to prevent your egg from cracking when dropped.', effects: ['-13A', '27A', '-9B', '-35B', '6B', '29B', '46B', '39A', '72A', '85A'] },
-    'AS': { name: 'Gravity- The Carnival', difficultyLevel: 2, hint1: 'If you can knock over a stack of milk containers, you can win a prize.', hint2: 'You could throw something at it.', effects: ['29A', '-1A', '-3A', '-34A', '-28B', '-7C', '73A', '56A', '57A', '63A', '40A', '43A', '-7B'] },
-    'AT': { name: 'Plant- The Maze', difficultyLevel: 3, hint1: 'You need to find the exit of a large hedge maze.', hint2: 'There has to be a way to more easily see where the exit is.', effects: ['-2A', '36A', '39A', '29B', '81A', '-11A', '35B', '62A', '-90A', '-85A'] },
+    'AS': { name: 'Gravity- The Carnival', difficultyLevel: 2, hint1: 'If you can knock over a stack of milk containers, you can win a prize.', hint2: 'You could throw something at it.', effects: ['29A', '-1A', '-3A', '-34A', '-28B', '-7C', '73A', '56A', '57A', '63A', '40A', '43A', '-7B', '-42A', '65A'] },
+    'AT': { name: 'Plant- The Maze', difficultyLevel: 3, hint1: 'You need to find the exit of a large hedge maze.', hint2: 'There has to be a way to more easily see where the exit is.', effects: ['-2A', '36A', '39A', '29B', '81A', '111A', '-11A', '35B', '62A', '-90A', '-85A'] },
     'AU': { name: 'Chemical- The Stain', difficultyLevel: 4, hint1: 'Something has spilled onto the carpet and will not come out.', hint2: 'Remove the material somehow to make the floor clean.', effects: ['-30B', '24A', '28B', '106A', '-4A', '35B', '-6B', '84A'] },
-    'AW': { name: 'Cloud- The Sign', difficultyLevel: 4, hint1: 'A woman prays for a sign that the heavens have heard her prayers.', hint2: 'Some kind of miracle would convince her that something divine is watching over her.', effects: ['12A', '6A', '105A', '111B', '-29B', '-3A', '-39A', '-60A', '-92A', '-97A'] },
+    'AW': { name: 'Cloud- The Sign', difficultyLevel: 4, hint1: 'A woman prays for a sign that the heavens have heard her prayers.', hint2: 'Some kind of miracle would convince her that something divine is watching over her.', effects: ['12A', '6A', '105A', '111A', '-29B', '-3A', '-39A', '-60A', '-92A', '-97A'] },
     'AV': { name: 'Darkness- Riddle One', difficultyLevel: 2, hint1: 'I am always hungry, I must always be fed, the finger I lick will soon turn red.', hint2: 'You must find the element that answers the riddle — something that can harm you that needs to consume to survive.', effects: ['2A'] },
     'AZ': { name: "FINAL ROOM: The Alchemist's Lunch", difficultyLevel: 6, hint1: 'A famed alchemist is eating his lunch and complains that his sandwich is too dry.', hint2: 'He needs a famed white alchemical substance which contains oil.', hint3: 'Egg itself comes from some combination of Life, Animal, Rock and Time.', hint4: 'Clear the bottom row to reveal more of this recipe, one clue per encounter.', hint5: 'Mayonnaise is the classic oily spread for bread.', unlocksHints: ['U', 'W', 'K', 'X'], effects: ['82A'] },
     'BB': { name: 'Machine- The Report', difficultyLevel: 5, hint1: 'Someone has just had their vehicle stolen.', hint2: 'They ask you to call the police.', effects: ['80B', '62A', '-32A', '35B', '-37A', '89A', '104B'] },
-    'BC': { name: 'Time- The Slumber', difficultyLevel: 2, hint1: 'A cat has fallen deeply asleep in a field of flowers.', hint2: 'You will need to wake it up somehow.', effects: ['35A', '35B', '26B', '12A', '-7C', '-51A', '-2A', '-3A', '-14B', '55A', '68A', '60A', '78A', '57B', '16A'] },
+    'BC': { name: 'Time- The Slumber', difficultyLevel: 2, hint1: 'A cat has fallen deeply asleep in a field of flowers.', hint2: 'You will need to wake it up gently.', effects: ['35A', '35B', '26B', '12A', '-7C', '-51A', '-2A', '-3A', '-14B', '55A', '68A', '60A', '78A', '57B', '16A'] },
     'BD': { name: 'Intelligence- The Swap', difficultyLevel: 5, hint1: 'You are partaking in a gift exchange game.', hint2: 'After all the shuffling is complete, you want to have ended up with more than you spent.', effects: ['-7C', '55B', '56B', '-57B', '73B', '-61A', '58B', '-63B', '-66A', '72B', '82A', '19A', '23A', '103A', '93A', '67B'] },
     'BE': { name: 'Metal- The Distraction', difficultyLevel: 3, hint1: 'You are trying to steal precious metal and get away in the chaos.', hint2: 'You will need to create a distraction to slip away unnoticed.', effects: ['31A', '-12A', '-3A', '-42A', '-10B', '-39A', '-60A', '-65A', '-73A', '-67A', '-78A', '-104A', '-89A', '-57B', '-93A', '-103A', '-52A', '16A'] },
     'BF': { name: 'Oil- The Mariner', difficultyLevel: 4, hint1: 'An old sailor tells you he used to work on a rig.', hint2: 'He misses the sea and wants to be reminded of it.', effects: ['74B', '74A', '22A', '25A', '81A', '15B', '83A', '-83A', '-70B'] },
@@ -1544,8 +1569,8 @@ const encounterEffects = {
     'BO': { name: 'Sound- The Performance', difficultyLevel: 3, hint1: 'The man singing to the crowd is an old enemy from your past.', hint2: 'You will need to humiliate him.', effects: ['-14A', '-14B', '-34A', '52A', '45B', '55A', '56B', '57B', '68B', '73A', '67A', '-7C', '-29A'] },
     'BP': { name: 'Pressure- The Hammer', difficultyLevel: 3, hint1: 'A carnival offers a prize to whoever can hit the hammer and make the bell ring at the top.', hint2: 'You just need to make the bell ring in order to win.', effects: ['-27A', '40A', '43A', '60A', '34A', '35B', '7B', '7C'] },
     'BQ': { name: 'Gravity- The Demolition', difficultyLevel: 3, hint1: 'An old building needs to be removed safely.', hint2: 'You must find a safe and practical way to knock it down.', effects: ['29A', '-1A', '-3A', '34A', '-28B', '-27A', '-42A', '-90A'] },
-    'BR': { name: 'Chemical- The Odor', difficultyLevel: 4, hint1: 'For whatever reason, you are trying to create the most unpleasant stench possible.', hint2: 'You will need to do something that makes the air smell bad.', effects: ['99A', '113A', '113B', '-101A', '15A', '73A', '73B', '-28A', '-28B', '-53A', '-24A'] },
-    'BS': { name: 'Chemical- The Potion', difficultyLevel: 5, hint1: 'A witch is brewing something that requires magical essences.', hint2: 'You need to provide unique and potent ingredients that will give the elixir strong effects.', effects: ['-52A', '-45B', '-79A', '-65C', '-55B', '-57B', '-56B', '-58B', '-103A', '-93A', '-99A', '-68B', '-73B', '-82A', '-67B', '-15B', '-109A', '-112B', '-110A', '-111C', '-114A', '-113B'] },
+    'BR': { name: 'Chemical- The Odor', difficultyLevel: 5, hint1: 'For whatever reason, you are trying to create the most unpleasant stench possible.', hint2: 'You will need to do something that makes the air smell bad.', effects: ['99A', '113A', '113B', '-101A', '15A', '-73A', '73B', '-28A', '-28B', '-53A', '-24A'] },
+    'BS': { name: 'Chemical- The Potion', difficultyLevel: 5, hint1: 'A witch is brewing something but needs ingredients', hint2: 'You need to provide unique and potent ingredients that will give the elixir strong effects.', effects: ['-52A', '-45B', '-79A', '-65C', '-55B', '-57B', '-56B', '-58B', '-103A', '-93A', '-99A', '-68B', '-73B', '-82A', '-67B', '-15B', '-109A', '-112B', '-110A', '-111C', '-114A', '-113B'] },
     'BT': { name: 'Plant- The Greenhouse', difficultyLevel: 4, hint1: 'The plants are not growing well in the greenhouse.', hint2: 'They need something to improve crop health.', effects: ['-12A', '-4A', '106A', '51A', '-26A', '-65B', '33A', '-90A'] },
     'BU': { name: 'Plant- Riddle Six', difficultyLevel: 4, hint1: 'All have it, but none have two.', hint2: 'You can steal it but it will not be yours. It has no weight, yet once taken it will weigh you down.', effects: ['33A', '33B'] },
     'BV': { name: 'Man- Riddle Three', difficultyLevel: 4, hint1: 'I can be given freely without having lost it, I am usually wanted yet I can make men suffer.', hint2: 'You can fall into me, but you never hit the ground.', effects: ['37A'] },
@@ -1553,18 +1578,18 @@ const encounterEffects = {
     'BX': { name: 'Death- Riddle Five', difficultyLevel: 4, hint1: 'I am often on the ground but I can never get dirty, I am in both empty holes and in troubled hearts.', hint2: 'The closer you are to me, the less you see me.', effects: ['31A'] },
     'BY': { name: 'Metal- The Mine', difficultyLevel: 4, hint1: 'There is valuable ore in the ground beneath where you stand.', hint2: 'You will need to extract it from the ground using some kind of tool.', effects: ['90A', '42A', '92A', '-78A', '-28B'] },
     'BZ': { name: "FINAL ROOM: The Alchemist's Hero", difficultyLevel: 6, hint1: 'A news journalist demands to see a mysterious vigilante who has been fighting crime in the city.', hint2: 'They say he slings webs and swings from building to building.', hint3: 'You are looking for a superhero who is part man part arachnid.', hint4: 'Each encounter you clear in the row above this room adds another clue.', hint5: 'Think of a friendly neighborhood hero spun from silk.', unlocksHints: ['U', 'W', 'K', 'X'], effects: ['89A'] },
-    'CA': { name: 'Animal- The Companion', difficultyLevel: 4, hint1: 'A girl is lonely and wants a pet.', hint2: 'An animal might be a good pet for her.', effects: ['110A', '-111C', '112B', '-113B', '114A', '-103A', '-109A', '68B', '-52A'] },
+    'CA': { name: 'Animal- The Companion', difficultyLevel: 4, hint1: 'A girl is lonely and wants a pet.', hint2: 'An animal might be a good pet for her.', effects: ['110A', '111C', '112B', '-113B', '114A', '-103A', '-109A', '68B', '-52A'] },
     'CB': { name: 'Dust- Riddle Two', difficultyLevel: 4, hint1: 'I have a large diet, I will eat anything. I will slay kings and mountains alike.', hint2: 'I stop for no one.', effects: ['35A', '35C'] },
     'CC': { name: 'Death- The Excuse', difficultyLevel: 4, hint1: "A doctor doesn't believe you when you say that you are sick enough to miss school.", hint2: "To get a doctor's note, you must demonstrate that you are medically unwell.", effects: ['53A', '45A', '45B', '79A', '65C', '37A', '99A', '-51A', '10B', '14B', '28A', '-32A', '-36A', '55A'] },
-    'CD': { name: 'Intelligence- The Prank', difficultyLevel: 4, hint1: 'Your neighbor is at home, it is time to get revenge.', hint2: 'You must bother him back for what he did to you.', effects: ['73A', '45A', '67A', '113A', '103A', '106A', '109A', '51A', '-12A', '-3A', '-34A', '-16A'] },
-    'CE': { name: 'Metal- The Vandalism', difficultyLevel: 5, hint1: 'You want to decrease the tax value of your home by defacing it somehow.', hint2: 'Find a way to temporarily spoil the desirability of living there.', effects: ['-28B', '34A', '42A', '-78A', '67A', '45A', '-113A', '-15A', '-102A', '109A', '-7B'] },
+    'CD': { name: 'Intelligence- The Prank', difficultyLevel: 4, hint1: 'Your neighbor is at home, it is time to get revenge.', hint2: 'You must bother him back for what he did to you.', effects: ['73A', '45A', '67A', '113A', '103A', '106A', '109A', '51A', '-12A', '-3A', '-34A', '-16A', '-60A', '-51A', '-46A', '-26B', '-18A', '-14B', '-7B'] },
+    'CE': { name: 'Metal- The Vandalism', difficultyLevel: 5, hint1: 'You want to decrease the tax value of your home by defacing it somehow.', hint2: 'Find a way to temporarily spoil the desirability of living there.', effects: ['-28B', '34A', '42A', '-78A', '67A', '45A', '-113A', '-15A', '-102A', '109A', '-7B', '73A', '-4A'] },
     'CF': { name: 'Life- The Diet', difficultyLevel: 4, hint1: 'You are brainstorming ways to lose weight and be healthier.', hint2: 'Perhaps some healthy food would help.', effects: ['56B', '73B', '19A', '113B', '101A', '58B', '-55B', '-57B', '-33A'] },
     'CG': { name: 'Oil- The Checkpoint', difficultyLevel: 4, hint1: 'You are trying to get some contraband resources past a security checkpoint.', hint2: 'The guards may be more corrupt than they seem.', effects: ['79A', '37A', '38A', '65C', '80A', '49A', '46A', '64A', '-51B', '-74B', '-77A', '-36A', '-41A', '-32A', '-20A', '-10B'] },
-    'CH': { name: 'Ice- The Stream', difficultyLevel: 5, hint1: 'You are very thirsty, but the water in the stream might not be clean.', hint2: 'You must find a way to get rid of bacteria.', effects: ['6B', '51A', '-28B', '-10A', '-71A', '-72A', '-38A'] },
-    'CI': { name: 'Glass- The Pawnshop', difficultyLevel: 4, hint1: 'You are at an old antiques shop that purchases valuables.', hint2: 'Perhaps you could provide them some item of worth.', effects: ['22A', '15B', '69A', '74B', '41B', '75B', '-24A', '-36A', '-44A', '-59A', '-60A', '-61A', '-64A', '-66A', '-71B', '-114A', '-40B', '-108A'] },
-    'CJ': { name: 'Art- The Sigil', difficultyLevel: 4, hint1: 'A sigil maker is looking for inspiration for emblems to engrave.', hint2: 'You could provide something that would look artistic on a shield.', effects: ['77A', '65C', '64A', '41A', '40A', '17A', '103A', '-74B', '-79A', '-60B', '-49A'] },
+    'CH': { name: 'Ice- The Stream', difficultyLevel: 5, hint1: 'You are very thirsty, but the water in the stream might not be clean.', hint2: 'You must find a way to get rid of bacteria.', effects: ['6B', '51A', '-28B', '-10A', '-71A', '-72A', '-38A', '-19A'] },
+    'CI': { name: 'Glass- The Pawnshop', difficultyLevel: 4, hint1: 'You are at an old antiques shop that purchases valuables.', hint2: 'Perhaps you could provide them some item of worth.', effects: ['22A', '15B', '69A', '74B', '41B', '75B', '48A', '65C', '-24A', '-36A', '-44A', '-59A', '-60A', '-61A', '-64A', '-66A', '-71B', '-114A', '-40B', '-108A', '-100A', '-63A', '-63B'] },
+    'CJ': { name: 'Art- The Sigil', difficultyLevel: 4, hint1: 'A sigil maker is looking for inspiration for emblems to engrave.', hint2: 'You could provide something that would look artistic on a shield.', effects: ['77A', '65C', '64A', '41A', '40A', '17A', '103A', '-74B', '-79A', '-60B', '49A'] },
     'CK': { name: 'Rope- The Hunter', difficultyLevel: 3, hint1: 'A hunter has tracked down his prey, but is unprepared.', hint2: 'They could urgently use a weapon.', effects: ['41B', '40B', '43B', '42A', '47A', '68A', '-11B', '-52A', '-38A', '-7B'] },
-    'CL': { name: 'Love- The Nihilist', difficultyLevel: 4, hint1: 'A despondent philosopher complains that everything feels meaningless.', hint2: 'They could use something that would make them feel alive again.', effects: ['37A', '33A', '33B', '51B', '12A', '64A', '68B', '-38A', '-31A', '-47A', '-85A'] },
+    'CL': { name: 'Love- The Nihilist', difficultyLevel: 4, hint1: 'A despondent philosopher complains that everything feels meaningless.', hint2: 'They could use something that would make them feel alive again.', effects: ['37A', '33A', '33B', '51B', '12A', '64A', '68B', '-38A', '-31A', '-47A', '-85A', '-36A'] },
     'CM': { name: 'Machine- The Nerd', difficultyLevel: 4, hint1: 'It is time to get your geeky friend a birthday present.', hint2: 'You know they like useful gear.', effects: ['48A', '44A', '69A', '104B', '108A', '95A', '107A', '114A', '112B', '41B', '40B', '59A', '-36A', '-20A', '-37A', '-49A', '-56B', '-60B', '-71B', '-77A', '-81A', '-96A', '-103A', '-110A', '-24A'] },
     'CN': { name: 'Sound- The Celebration', difficultyLevel: 4, hint1: 'You are at a New Year’s bash and want something that will get people to celebrate.', hint2: 'Maybe something grand and loud that gets people’s attention.', effects: ['78A', '60A', '100A', '16A', '-57B', '-39A', '-42A', '-26B', '-14B', '-12A', '-59A'] },
     'CO': { name: 'Darkness- The Cave', difficultyLevel: 3, hint1: 'You are trying to navigate through a dark cave.', hint2: 'It would be useful if you could see better.', effects: ['78A', '12A', '105A', '68A', '81A', '-111A', '-2A', '-36A', '-62A', '-11A'] },
@@ -1846,10 +1871,13 @@ const CHALLENGE_RIDDLE_BY_FINALE = Object.freeze({
 function assignedChallengeRiddleKey(forcedFinalKey) {
     return forcedFinalKey != null ? CHALLENGE_RIDDLE_BY_FINALE[forcedFinalKey] ?? null : null;
 }
-/** Challenge 1: Oil slot is Mosquito (AG), not The Swamp (O); plus butcher (AB) and pinned story beats (AV stripped from no-riddle pool but seeded). */
-const CHALLENGE_1_PINNED_MIDDLE_AFTER_AB = ['AG', 'AV', 'G', 'AT', 'AM', 'T', 'AS'];
-/** Sandwich challenge: never draft Intelligence·The Swap (BD) in the random middle band */
-const CHALLENGE_1_FORBIDDEN_ENCOUNTER_KEYS = new Set(['BD']);
+/** Challenge 1 mandatory middle encounters: Butcher, Mosquito, Riddle One, Knot, Maze. */
+const CHALLENGE_1_MANDATORY_MIDDLE_KEYS = ['AB', 'AG', 'AV', 'BH', 'AT'];
+/** Sandwich challenge: never draft The Swap (BD), The Hour (AD), Riddle Two (CB), Cloud (AW), Sigil (CJ), or Performance (BO). */
+const CHALLENGE_1_FORBIDDEN_ENCOUNTER_KEYS = new Set(['BD', 'AD', 'CB', 'AW', 'CJ', 'BO']);
+const CHALLENGE_1_FORBIDDEN_THEME_SLUGS = new Set(['Cloud', 'Art']);
+/** Endgame challenge: never draft Time·The Hour (AD) in the random middle band */
+const CHALLENGE_2_FORBIDDEN_ENCOUNTER_KEYS = new Set(['AD']);
 /** Story pins for challenges 3–5 (seeded after assigned riddle, before difficulty/tier fill). */
 const CHALLENGE_PINNED_MIDDLE_BY_FINALE = Object.freeze({
     EZ: ['O', 'K', 'BE'],
@@ -1859,13 +1887,22 @@ const CHALLENGE_PINNED_MIDDLE_BY_FINALE = Object.freeze({
 /** Sigil & Weather: soft‑weighted in random fill (never blocked). Low on CH2–5; normal on CH6. */
 const OPTIONAL_ENCOUNTER_KEYS = new Set(['CJ', 'AL']);
 const OPTIONAL_ENCOUNTER_WEIGHT_DEFAULT = 0.08;
-const OPTIONAL_ENCOUNTER_WEIGHT_BY_FINALE = Object.freeze({ FZ: 1 });
+const OPTIONAL_ENCOUNTER_WEIGHT_BY_FINALE = Object.freeze({ FZ: 1, AZ: 1 });
 /** Cloud theme (The Sign): lower theme lottery weight on CH2–5; normal on CH6 (FZ). */
 const OPTIONAL_THEME_SLUGS = new Set(['Cloud']);
 const OPTIONAL_THEME_WEIGHT_DEFAULT = 0.011;
 const OPTIONAL_THEME_WEIGHT_BY_FINALE = Object.freeze({ FZ: 1 });
 /** Minimum difficulty‑4 encounters on the middle band (no maximum — remainder may add more). */
 const MIN_DIFF4_ENCOUNTER_COUNT = 5;
+/** Challenge 1 (Sandwich): no difficulty‑5 middle encounters; exactly four difficulty‑4; diff 1–3 uncapped. */
+const CHALLENGE_1_TIER4_COUNT = 4;
+/** Challenge 1: these encounters show hint 2 immediately (no failures required). */
+const CHALLENGE_1_HINT2_VISIBLE_KEYS = new Set([
+    'C', 'G', 'I', 'Q', 'R', 'T', 'U', 'V', 'AA', 'AC', 'AF', 'AG', 'AJ', 'AK', 'AL', 'AM',
+    'AP', 'AR', 'AU', 'AW', 'BE', 'BF', 'BJ', 'BK', 'BO', 'BY', 'CG', 'CI', 'CK', 'CL', 'CN',
+]);
+/** Toggle failure-streak lockout on encounters (off until re-enabled). */
+const LOCATION_FAILURE_BLOCKING_ENABLED = false;
 /** Consecutive failures at one encounter before it blocks further attempts. */
 const LOCATION_FAILURE_STREAK_BLOCK = 4;
 /** Consecutive failures before player must leave that hex (when blocking is active). */
@@ -1903,10 +1940,18 @@ function optionalThemePickMultiplier(themeSlug, forcedFinalKey) {
 
 function encounterPickWeight(key, forcedFinalKey, picks = []) {
     let w = 1;
+    if (forcedFinalKey === 'AZ' && CHALLENGE_1_FORBIDDEN_ENCOUNTER_KEYS.has(key)) return 0;
+    if (
+        forcedFinalKey === 'AZ' &&
+        CHALLENGE_1_FORBIDDEN_THEME_SLUGS.has(getEncounterThemeDedupSlug(key))
+    ) {
+        return 0;
+    }
     if (OPTIONAL_ENCOUNTER_KEYS.has(key)) {
         w = OPTIONAL_ENCOUNTER_WEIGHT_BY_FINALE[forcedFinalKey ?? ''] ?? OPTIONAL_ENCOUNTER_WEIGHT_DEFAULT;
         if (
             forcedFinalKey !== 'FZ' &&
+            forcedFinalKey !== 'AZ' &&
             picks.some((p) => OPTIONAL_ENCOUNTER_KEYS.has(p))
         ) {
             return 0;
@@ -1974,7 +2019,7 @@ function validateMandatoryMiddleEncounters(mandatoryKeys, forcedFinalKey, corner
                 `Challenge encounter ${rk} shares a theme slug with an active classical corner — cannot draft this board corner set.`
             );
         }
-        if (!RIDDLE_ENCOUNTER_KEYS.has(rk) && !baseMiddlePoolNoRiddle.includes(rk)) {
+        if (!RIDDLE_ENCOUNTER_KEYS.has(rk) && !BOARD_CLASSICAL_CORNER_KEYS.includes(rk) && !baseMiddlePoolNoRiddle.includes(rk)) {
             throw new Error(
                 `Challenge (${forcedFinalKey}) mandates ${rk}; it must appear in the random middle pool (distinct from classical themes).`
             );
@@ -1988,7 +2033,9 @@ function seedAtLeastOnePerDifficultyIfNeeded(picks, usedEncounterKeys, usedTheme
         picks.map((k) => encounterEffects[k]?.difficultyLevel).filter((d) => typeof d === 'number')
     );
     const seedWeight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
-    for (let d = 1; d <= 5; d++) {
+    const maxDifficulty =
+        forcedFinalKey === 'AZ' ? 4 : 5;
+    for (let d = 1; d <= maxDifficulty; d++) {
         if (covered.has(d)) continue;
         const eligibleBase = (canonByDiff[d] || []).filter(
             (key) =>
@@ -2007,6 +2054,222 @@ function seedAtLeastOnePerDifficultyIfNeeded(picks, usedEncounterKeys, usedTheme
     return true;
 }
 
+/** Challenge 1 band order: starter classicals first (top row after corners), then difficulty 1–3 rise toward the finale; exactly four difficulty‑4 on the bottom row. */
+function sortChallenge1MiddleBand(picks, starterClassicalMiddleKeys = []) {
+    const starterOrder = starterClassicalMiddleKeys.filter((key) => picks.includes(key));
+    const starterSet = new Set(starterOrder);
+    const remainder = picks.filter((key) => !starterSet.has(key));
+
+    const byDiff = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    for (const key of remainder) {
+        const lev = encounterEffects[key]?.difficultyLevel;
+        if (byDiff[lev]) byDiff[lev].push(key);
+        else byDiff[2].push(key);
+    }
+    const diff4Bottom = byDiff[4].slice(0, CHALLENGE_1_TIER4_COUNT);
+    const diff4Overflow = byDiff[4].slice(CHALLENGE_1_TIER4_COUNT);
+    return [
+        ...starterOrder,
+        ...byDiff[1],
+        ...byDiff[2],
+        ...diff4Overflow,
+        ...byDiff[3],
+        ...byDiff[5],
+        ...diff4Bottom,
+    ];
+}
+
+function countPicksAtDifficulty(picks, difficulty) {
+    return picks.reduce(
+        (acc, key) => acc + (encounterEffects[key]?.difficultyLevel === difficulty ? 1 : 0),
+        0
+    );
+}
+
+function validateChallenge1StarterClassicalMiddleEncounters(starterClassicalKeys, forcedFinalKey, cornerThemeSlugs) {
+    for (const rk of starterClassicalKeys) {
+        const ev = encounterEffects[rk];
+        if (!ev || typeof ev.difficultyLevel !== 'number') {
+            throw new Error(
+                `Challenge (${forcedFinalKey}) mandates starter classical ${rk}, but it is not a valid encounter.`
+            );
+        }
+        if (!BOARD_CLASSICAL_CORNER_KEYS.includes(rk)) {
+            throw new Error(`Challenge starter classical ${rk} is not a board corner encounter.`);
+        }
+        const rkSlug = getEncounterThemeDedupSlug(rk);
+        if (cornerThemeSlugs.has(rkSlug)) {
+            throw new Error(
+                `Challenge starter classical ${rk} shares a theme slug with an active board corner — cannot draft this board corner set.`
+            );
+        }
+    }
+}
+
+function challenge1Tier4CountsAreValid(picks) {
+    return countPicksAtDifficulty(picks, 4) === CHALLENGE_1_TIER4_COUNT;
+}
+
+function challenge1RestEligibleKeys(picks, poolKeys, usedEncounterKeys, usedThemes) {
+    return poolKeys.filter((key) => {
+        if (usedEncounterKeys.has(key) || usedThemes.has(getEncounterThemeDedupSlug(key))) return false;
+        const diff = encounterEffects[key]?.difficultyLevel;
+        if (diff === 5) return false;
+        if (diff === 4 && countPicksAtDifficulty(picks, 4) >= CHALLENGE_1_TIER4_COUNT) return false;
+        return diff >= 1 && diff <= 3;
+    });
+}
+
+function challenge1MiddleIsValid(picks) {
+    const keys = new Set();
+    const themes = new Set();
+    for (const key of picks) {
+        if (keys.has(key)) return false;
+        keys.add(key);
+        const slug = getEncounterThemeDedupSlug(key);
+        if (themes.has(slug)) return false;
+        themes.add(slug);
+    }
+    return true;
+}
+
+/** Challenge 1: fill middle band — exactly four difficulty‑4, otherwise difficulty 1–3 (unique encounters & themes). */
+function fillChallenge1MiddleBand(picks, usedEncounterKeys, usedThemes, poolKeys, _canonByDiff, innerTarget) {
+    const slotsNeeded = innerTarget - picks.length;
+    const needD4 = Math.max(0, CHALLENGE_1_TIER4_COUNT - countPicksAtDifficulty(picks, 4));
+    if (slotsNeeded <= 0) {
+        return challenge1Tier4CountsAreValid(picks) && countPicksAtDifficulty(picks, 5) === 0;
+    }
+    if (needD4 > slotsNeeded) return false;
+
+    const themeToKeys = new Map();
+    for (const key of poolKeys) {
+        if (usedEncounterKeys.has(key)) continue;
+        const diff = encounterEffects[key]?.difficultyLevel;
+        if (diff === 5) continue;
+        const slug = getEncounterThemeDedupSlug(key);
+        if (usedThemes.has(slug)) continue;
+        if (!themeToKeys.has(slug)) themeToKeys.set(slug, []);
+        themeToKeys.get(slug).push(key);
+    }
+
+    const onlyD4 = [];
+    const flex = [];
+    const onlyLow = [];
+    for (const slug of themeToKeys.keys()) {
+        const keys = themeToKeys.get(slug);
+        const hasD4 = keys.some((key) => encounterEffects[key]?.difficultyLevel === 4);
+        const hasLow = keys.some((key) => {
+            const diff = encounterEffects[key]?.difficultyLevel;
+            return diff >= 1 && diff <= 3;
+        });
+        if (hasD4 && hasLow) flex.push(slug);
+        else if (hasD4) onlyD4.push(slug);
+        else onlyLow.push(slug);
+    }
+
+    const lowNeeded = slotsNeeded - needD4;
+    if (lowNeeded < 0) return false;
+
+    const pickKeyForTheme = (slug, mustBeD4) => {
+        const keys = shuffleArrayInPlace([...themeToKeys.get(slug)]);
+        const eligible = mustBeD4
+            ? keys.filter((key) => encounterEffects[key]?.difficultyLevel === 4)
+            : keys.filter((key) => {
+                  const diff = encounterEffects[key]?.difficultyLevel;
+                  return diff >= 1 && diff <= 3;
+              });
+        if (!eligible.length) return null;
+        return pickThemeBalancedEncounter(eligible, 'AZ', (k) =>
+            encounterEffects[k]?.difficultyLevel === 4
+                ? encounterPickWeight(k, 'AZ', picks)
+                : encounterRestPickWeight(k, 'AZ', picks)
+        );
+    };
+
+    for (let d4OnlyUsed = 0; d4OnlyUsed <= Math.min(needD4, onlyD4.length); d4OnlyUsed++) {
+        const d4FlexUsed = needD4 - d4OnlyUsed;
+        if (d4FlexUsed > flex.length || d4FlexUsed < 0) continue;
+        const flexLeft = flex.length - d4FlexUsed;
+        if (flexLeft + onlyLow.length < lowNeeded) continue;
+
+        for (let attempt = 0; attempt < 32; attempt++) {
+            const staged = [];
+            const undo = () => {
+                while (staged.length) {
+                    const { key, slug } = staged.pop();
+                    picks.pop();
+                    usedEncounterKeys.delete(key);
+                    usedThemes.delete(slug);
+                }
+            };
+
+            const d4OnlyPick = shuffleArrayInPlace([...onlyD4]).slice(0, d4OnlyUsed);
+            const flexD4Pick = shuffleArrayInPlace([...flex]).slice(0, d4FlexUsed);
+            const d4Slugs = new Set([...d4OnlyPick, ...flexD4Pick]);
+            const flexRemaining = flex.filter((slug) => !d4Slugs.has(slug));
+            const lowSlugs = shuffleArrayInPlace([...flexRemaining, ...onlyLow]).slice(0, lowNeeded);
+            if (lowSlugs.length !== lowNeeded) continue;
+
+            const ordered = [
+                ...shuffleArrayInPlace([...d4Slugs]),
+                ...shuffleArrayInPlace([...lowSlugs]),
+            ];
+            let planOk = true;
+            for (const slug of ordered) {
+                const mustBeD4 = d4Slugs.has(slug);
+                const chosen = pickKeyForTheme(slug, mustBeD4);
+                if (!chosen) {
+                    planOk = false;
+                    break;
+                }
+                picks.push(chosen);
+                usedEncounterKeys.add(chosen);
+                usedThemes.add(slug);
+                staged.push({ key: chosen, slug });
+            }
+            if (planOk) return true;
+            undo();
+        }
+    }
+
+    return false;
+}
+
+function assembleChallenge1Layout(activeClassicalCornerKeys, sortedMiddlePicks, finalPick, starterClassicalMiddleKeys) {
+    const starterSet = new Set(starterClassicalMiddleKeys);
+    const starters = starterClassicalMiddleKeys.filter((key) => sortedMiddlePicks.includes(key));
+    const restMiddle = sortedMiddlePicks.filter((key) => !starterSet.has(key));
+
+    const topRow = [...starters, ...activeClassicalCornerKeys];
+    while (topRow.length < BOARD_GRID_COLUMNS && restMiddle.length) {
+        topRow.push(restMiddle.shift());
+    }
+
+    const layout = [...topRow, ...restMiddle, finalPick];
+    if (layout.length !== BOARD_TOTAL_CELL_COUNT) {
+        throw new Error(
+            `Challenge 1 layout length ${layout.length} (want ${BOARD_TOTAL_CELL_COUNT}).`
+        );
+    }
+    return layout;
+}
+
+function applyChallenge1DefaultHint2Unlocks() {
+    if (activeFinaleKey !== 'AZ') return;
+    CHALLENGE_1_HINT2_VISIBLE_KEYS.forEach((key) => {
+        persistentHints[key] = Math.max(persistentHints[key] || 0, 2);
+    });
+}
+
+function encounterHintLevel(encounterKey) {
+    let level = persistentHints[encounterKey] || 0;
+    if (activeFinaleKey === 'AZ' && CHALLENGE_1_HINT2_VISIBLE_KEYS.has(encounterKey)) {
+        level = Math.max(level, 2);
+    }
+    return level;
+}
+
 function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElementIds) {
     if (forcedFinalKey != null && !FINAL_ENCOUNTER_KEYS.has(forcedFinalKey)) {
         throw new Error(`Invalid finale encounter key: ${forcedFinalKey}`);
@@ -2021,6 +2284,10 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
         startersSource.map((id) => elementIdToBoardClassicalCornerKey(id)).filter(Boolean)
     );
     const activeClassicalCornerKeys = BOARD_CLASSICAL_CORNER_KEYS.filter((k) => !excludedCornerKeys.has(k));
+    const challenge1StarterClassicalMiddleKeys =
+        forcedFinalKey === 'AZ'
+            ? BOARD_CLASSICAL_CORNER_KEYS.filter((k) => excludedCornerKeys.has(k))
+            : [];
     const INNER_TARGET = BOARD_TOTAL_CELL_COUNT - 1 - activeClassicalCornerKeys.length;
     const CORNER_THEME_SLUGS = new Set(activeClassicalCornerKeys.map((k) => getEncounterThemeDedupSlug(k)));
     let baseMiddlePool = getRandomMiddleEncounterPoolKeys().filter(
@@ -2034,6 +2301,12 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
     }
     if (forcedFinalKey === 'AZ') {
         baseMiddlePool = baseMiddlePool.filter((key) => !CHALLENGE_1_FORBIDDEN_ENCOUNTER_KEYS.has(key));
+        baseMiddlePool = baseMiddlePool.filter(
+            (key) => !CHALLENGE_1_FORBIDDEN_THEME_SLUGS.has(getEncounterThemeDedupSlug(key))
+        );
+    }
+    if (forcedFinalKey === 'Z') {
+        baseMiddlePool = baseMiddlePool.filter((key) => !CHALLENGE_2_FORBIDDEN_ENCOUNTER_KEYS.has(key));
     }
     const baseMiddlePoolNoRiddle = baseMiddlePool.filter((k) => !RIDDLE_ENCOUNTER_KEYS.has(k));
     const DISTINCT_THEMES = new Set(baseMiddlePoolNoRiddle.map((k) => getEncounterThemeDedupSlug(k)));
@@ -2067,11 +2340,18 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
 
     if (forcedFinalKey === 'AZ') {
         validateMandatoryMiddleEncounters(
-            ['AB', ...CHALLENGE_1_PINNED_MIDDLE_AFTER_AB],
+            CHALLENGE_1_MANDATORY_MIDDLE_KEYS,
             forcedFinalKey,
             CORNER_THEME_SLUGS,
             baseMiddlePoolNoRiddle
         );
+        if (challenge1StarterClassicalMiddleKeys.length) {
+            validateChallenge1StarterClassicalMiddleEncounters(
+                challenge1StarterClassicalMiddleKeys,
+                forcedFinalKey,
+                CORNER_THEME_SLUGS
+            );
+        }
     }
     const challengeStoryPins = forcedFinalKey ? CHALLENGE_PINNED_MIDDLE_BY_FINALE[forcedFinalKey] : null;
     if (challengeStoryPins?.length) {
@@ -2122,11 +2402,12 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
         }
 
         if (forcedFinalKey === 'AZ') {
-            picks.push('AB');
-            usedEncounterKeys.add('AB');
-            usedThemes.add(getEncounterThemeDedupSlug('AB'));
-
-            for (const pinKey of CHALLENGE_1_PINNED_MIDDLE_AFTER_AB) {
+            for (const pinKey of CHALLENGE_1_MANDATORY_MIDDLE_KEYS) {
+                picks.push(pinKey);
+                usedEncounterKeys.add(pinKey);
+                usedThemes.add(getEncounterThemeDedupSlug(pinKey));
+            }
+            for (const pinKey of challenge1StarterClassicalMiddleKeys) {
                 picks.push(pinKey);
                 usedEncounterKeys.add(pinKey);
                 usedThemes.add(getEncounterThemeDedupSlug(pinKey));
@@ -2141,80 +2422,154 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
             }
         }
 
-        if (!seedAtLeastOnePerDifficultyIfNeeded(picks, usedEncounterKeys, usedThemes, canonByDiff, forcedFinalKey)) {
-            continue;
-        }
-
-        const tier5Weight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
-        const tier4Weight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
-
-        const prefilledDiff5 = picks.reduce(
-            (acc, k) => acc + (encounterEffects[k]?.difficultyLevel === 5 ? 1 : 0),
-            0
-        );
-        const prefilledDiff4 = picks.reduce(
-            (acc, k) => acc + (encounterEffects[k]?.difficultyLevel === 4 ? 1 : 0),
-            0
-        );
-        const needTier5 = Math.max(0, 4 - prefilledDiff5);
-        const needTier4 = Math.max(0, MIN_DIFF4_ENCOUNTER_COUNT - prefilledDiff4);
-
-        let stratFail = false;
-        for (let i = 0; i < needTier5 && !stratFail; i++) {
-            const eligible = canonByDiff[5].filter(
-                (key) =>
-                    !usedEncounterKeys.has(key) && !usedThemes.has(getEncounterThemeDedupSlug(key))
-            );
-            const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, tier5Weight);
-            if (!chosen) {
-                stratFail = true;
-                break;
+        if (forcedFinalKey !== 'AZ') {
+            if (!seedAtLeastOnePerDifficultyIfNeeded(picks, usedEncounterKeys, usedThemes, canonByDiff, forcedFinalKey)) {
+                continue;
             }
-            picks.push(chosen);
-            usedEncounterKeys.add(chosen);
-            usedThemes.add(getEncounterThemeDedupSlug(chosen));
         }
-        for (let i = 0; i < needTier4 && !stratFail; i++) {
-            const eligible = canonByDiff[4].filter(
-                (key) =>
-                    !usedEncounterKeys.has(key) &&
-                    !usedThemes.has(getEncounterThemeDedupSlug(key))
-            );
-            const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, tier4Weight);
-            if (!chosen) {
-                stratFail = true;
-                break;
-            }
-            picks.push(chosen);
-            usedEncounterKeys.add(chosen);
-            usedThemes.add(getEncounterThemeDedupSlug(chosen));
-        }
-        if (stratFail) continue;
 
-        while (picks.length < INNER_TARGET) {
-            const eligible = poolKeys.filter(
-                (key) =>
-                    !usedEncounterKeys.has(key) &&
-                    !usedThemes.has(getEncounterThemeDedupSlug(key)) &&
-                    encounterEffects[key].difficultyLevel !== 5
+        if (forcedFinalKey === 'AZ') {
+            if (!fillChallenge1MiddleBand(picks, usedEncounterKeys, usedThemes, poolKeys, canonByDiff, INNER_TARGET)) {
+                continue;
+            }
+        } else {
+            const tier5Weight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
+            const tier4Weight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
+            const tier3Weight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
+            const tier2Weight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
+            const tier1Weight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
+
+            const prefilledDiff5 = picks.reduce(
+                (acc, k) => acc + (encounterEffects[k]?.difficultyLevel === 5 ? 1 : 0),
+                0
             );
-            const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, (k) =>
-                encounterRestPickWeight(k, forcedFinalKey, picks)
+            const prefilledDiff4 = picks.reduce(
+                (acc, k) => acc + (encounterEffects[k]?.difficultyLevel === 4 ? 1 : 0),
+                0
             );
-            if (!chosen) break;
-            picks.push(chosen);
-            usedEncounterKeys.add(chosen);
-            usedThemes.add(getEncounterThemeDedupSlug(chosen));
+            const needTier5 = Math.max(0, 4 - prefilledDiff5);
+            const needTier4 = Math.max(0, MIN_DIFF4_ENCOUNTER_COUNT - prefilledDiff4);
+            const needTier3 = 0;
+            const needTier2 = 0;
+            const needTier1 = 0;
+
+            let stratFail = false;
+            for (let i = 0; i < needTier5 && !stratFail; i++) {
+                const eligible = canonByDiff[5].filter(
+                    (key) =>
+                        !usedEncounterKeys.has(key) && !usedThemes.has(getEncounterThemeDedupSlug(key))
+                );
+                const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, tier5Weight);
+                if (!chosen) {
+                    stratFail = true;
+                    break;
+                }
+                picks.push(chosen);
+                usedEncounterKeys.add(chosen);
+                usedThemes.add(getEncounterThemeDedupSlug(chosen));
+            }
+            for (let i = 0; i < needTier4 && !stratFail; i++) {
+                const eligible = canonByDiff[4].filter(
+                    (key) =>
+                        !usedEncounterKeys.has(key) &&
+                        !usedThemes.has(getEncounterThemeDedupSlug(key))
+                );
+                const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, tier4Weight);
+                if (!chosen) {
+                    stratFail = true;
+                    break;
+                }
+                picks.push(chosen);
+                usedEncounterKeys.add(chosen);
+                usedThemes.add(getEncounterThemeDedupSlug(chosen));
+            }
+            for (let i = 0; i < needTier3 && !stratFail; i++) {
+                const eligible = canonByDiff[3].filter(
+                    (key) =>
+                        !usedEncounterKeys.has(key) &&
+                        !usedThemes.has(getEncounterThemeDedupSlug(key))
+                );
+                const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, tier3Weight);
+                if (!chosen) {
+                    stratFail = true;
+                    break;
+                }
+                picks.push(chosen);
+                usedEncounterKeys.add(chosen);
+                usedThemes.add(getEncounterThemeDedupSlug(chosen));
+            }
+            for (let i = 0; i < needTier2 && !stratFail; i++) {
+                const eligible = canonByDiff[2].filter(
+                    (key) =>
+                        !usedEncounterKeys.has(key) &&
+                        !usedThemes.has(getEncounterThemeDedupSlug(key))
+                );
+                const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, tier2Weight);
+                if (!chosen) {
+                    stratFail = true;
+                    break;
+                }
+                picks.push(chosen);
+                usedEncounterKeys.add(chosen);
+                usedThemes.add(getEncounterThemeDedupSlug(chosen));
+            }
+            for (let i = 0; i < needTier1 && !stratFail; i++) {
+                const eligible = canonByDiff[1].filter(
+                    (key) =>
+                        !usedEncounterKeys.has(key) &&
+                        !usedThemes.has(getEncounterThemeDedupSlug(key))
+                );
+                const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, tier1Weight);
+                if (!chosen) {
+                    stratFail = true;
+                    break;
+                }
+                picks.push(chosen);
+                usedEncounterKeys.add(chosen);
+                usedThemes.add(getEncounterThemeDedupSlug(chosen));
+            }
+            if (stratFail) continue;
+
+            while (picks.length < INNER_TARGET) {
+                const eligible = poolKeys.filter(
+                    (key) =>
+                        !usedEncounterKeys.has(key) &&
+                        !usedThemes.has(getEncounterThemeDedupSlug(key)) &&
+                        encounterEffects[key].difficultyLevel !== 5
+                );
+                const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, (k) =>
+                    encounterRestPickWeight(k, forcedFinalKey, picks)
+                );
+                if (!chosen) break;
+                picks.push(chosen);
+                usedEncounterKeys.add(chosen);
+                usedThemes.add(getEncounterThemeDedupSlug(chosen));
+            }
+
+            if (picks.length !== INNER_TARGET) continue;
         }
 
         if (picks.length !== INNER_TARGET) continue;
 
-        picks.sort((a, b) => {
-            const da = encounterEffects[a].difficultyLevel;
-            const db = encounterEffects[b].difficultyLevel;
-            if (da !== db) return da - db;
-            return String(a).localeCompare(String(b));
-        });
+        if (forcedFinalKey === 'AZ') {
+            const sorted = sortChallenge1MiddleBand(picks, challenge1StarterClassicalMiddleKeys);
+            if (sorted.length !== picks.length) continue;
+            picks.splice(0, picks.length, ...sorted);
+            if (
+                !challenge1Tier4CountsAreValid(picks) ||
+                countPicksAtDifficulty(picks, 5) !== 0 ||
+                !challenge1MiddleIsValid(picks)
+            ) {
+                continue;
+            }
+        } else {
+            picks.sort((a, b) => {
+                const da = encounterEffects[a].difficultyLevel;
+                const db = encounterEffects[b].difficultyLevel;
+                if (da !== db) return da - db;
+                return String(a).localeCompare(String(b));
+            });
+        }
 
         let finalPick;
         if (forcedFinalKey != null) {
@@ -2224,7 +2579,15 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
             finalPick = finals[0];
         }
 
-        const layout = [...activeClassicalCornerKeys, ...picks, finalPick];
+        const layout =
+            forcedFinalKey === 'AZ'
+                ? assembleChallenge1Layout(
+                      activeClassicalCornerKeys,
+                      picks,
+                      finalPick,
+                      challenge1StarterClassicalMiddleKeys
+                  )
+                : [...activeClassicalCornerKeys, ...picks, finalPick];
         if (layout.length !== BOARD_TOTAL_CELL_COUNT) {
             throw new Error(`Unexpected layout length ${layout.length} (want ${BOARD_TOTAL_CELL_COUNT}).`);
         }
@@ -2232,7 +2595,9 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
     }
 
     throw new Error(
-        'Could not assemble a random map: need a full draft middle band (distinct themed encounters — at least one each of difficulty 1–5, exactly four difficulty‑5, at least five difficulty‑4, remainder difficulty ≤4) after applying starting-element classical omissions.'
+        forcedFinalKey === 'AZ'
+            ? 'Could not assemble Challenge 1 map: need Butcher, Mosquito, Riddle One, Knot, Maze, starter classical encounters, exactly 4 difficulty‑4 encounters (no difficulty‑5), each with a unique theme.'
+            : 'Could not assemble a random map: need a full draft middle band (distinct themed encounters — at least one each of difficulty 1–5, exactly four difficulty‑5, at least five difficulty‑4, remainder difficulty ≤4) after applying starting-element classical omissions.'
     );
 }
 
@@ -2614,6 +2979,7 @@ function confirmAndApplyRandomEncounterMap(finKey, challengeNum) {
     initializeDefeatedEncounters();
     activeFinaleKey = finKey;
     activeChallengeN = CHALLENGE_NUM_BY_FINALE[finKey] ?? null;
+    applyChallenge1DefaultHint2Unlocks();
     updatePreview(null);
     updateChallengeButtonHighlight();
     saveGameState();
@@ -2656,9 +3022,12 @@ function displayMessage(text, type = 'default', holdMs) {
     msgItem.className = `message-item ${type}`;
     msgItem.textContent = text;
 
-    const totalMs = holdMs != null ? holdMs : (type === 'warning' ? 4200 : 3000);
+    const totalMs = holdMs != null ? holdMs : (type === 'blocked' ? 4500 : type === 'warning' ? 4200 : 3000);
     const fadeSec = Math.min(6, Math.max(2, totalMs / 1000));
-    msgItem.style.animation = `fadeout ${fadeSec}s forwards`;
+    msgItem.style.animation =
+        type === 'blocked'
+            ? `blockedPulse 2.2s ease-in-out infinite, fadeout ${fadeSec}s forwards`
+            : `fadeout ${fadeSec}s forwards`;
 
     msgItem.dataset.messageId = Date.now();
 
@@ -3004,6 +3373,7 @@ function loadGameState() {
             activeFinaleKey = null;
             activeChallengeN = null;
         }
+        applyChallenge1DefaultHint2Unlocks();
     } else {
         activeFinaleKey = null;
         activeChallengeN = null;
@@ -3088,26 +3458,52 @@ function checkFusion(id1, id2) {
     return fuseMap[sortedKey];
 }
 
+function getFusionPartnerIds(elementId) {
+    const partners = new Set();
+    const ownedIds = new Set();
+    document.querySelectorAll('.card-slot[data-element-id]:not(.tapped)').forEach((card) => {
+        if (card.dataset.elementId) ownedIds.add(card.dataset.elementId);
+    });
+    for (const pairKey of Object.keys(fuseMap)) {
+        const [a, b] = pairKey.split('+');
+        if (a === elementId && ownedIds.has(b)) partners.add(b);
+        if (b === elementId && ownedIds.has(a)) partners.add(a);
+    }
+    return partners;
+}
+
+function clearCardInlineHighlightStyles(card) {
+    if (!card) return;
+    card.style.removeProperty('border');
+    card.style.removeProperty('box-shadow');
+}
+
 // Function to update card highlighting based on selection
 function updateCardHighlights() {
-    // 1. Remove all fusion-related highlights from ALL cards
-    document.querySelectorAll('.card-slot').forEach(card => {
-        card.classList.remove('fusable', 'unfusable', 'newly-created');
+    document.querySelectorAll('.card-slot').forEach((card) => {
+        card.classList.remove('fusable', 'unfusable', 'fusion-partner');
+        card.style.removeProperty('filter');
     });
 
     if (selectedReagents.length === 2) {
         const product = checkFusion(selectedReagents[0], selectedReagents[1]);
         const highlightClass = product ? 'fusable' : 'unfusable';
 
-        // 2. Apply green/red highlight to both selected cards
-        document.querySelectorAll('.card-slot.selected-reagent').forEach(card => {
+        document.querySelectorAll('.card-slot.selected-reagent').forEach((card) => {
             card.classList.add(highlightClass);
-            // Also explicitly remove the single-selection style which relies on the yellow border
-            card.style.border = '';
+            clearCardInlineHighlightStyles(card);
         });
     } else if (selectedReagents.length === 1) {
-        // Only one card selected: ensure the yellow highlight is applied
-        document.querySelector('.card-slot.selected-reagent').style.border = '2px solid var(--accent)';
+        const partners = getFusionPartnerIds(selectedReagents[0]);
+        document.querySelectorAll('.card-slot[data-element-id]').forEach((card) => {
+            if (card.classList.contains('tapped')) return;
+            const id = card.dataset.elementId;
+            if (id === selectedReagents[0]) return;
+            if (partners.has(id)) {
+                card.classList.add('fusion-partner');
+                clearCardInlineHighlightStyles(card);
+            }
+        });
     }
 }
 
@@ -3131,7 +3527,7 @@ function addCardToRow(elementId, rowElement, isNewCreation = false) {
 
     if (existingCard) {
         // Element exists, untap it and ensure it's in the Reagent row (or its current row)
-        existingCard.classList.remove('tapped', 'selected-reagent', 'fusable', 'unfusable');
+        existingCard.classList.remove('tapped', 'selected-reagent', 'fusable', 'unfusable', 'fusion-partner');
         return true;
     }
 
@@ -3232,8 +3628,13 @@ function createCard(elementId) {
             if (currentEncounterCell) {
                 // Check if the current encounter is locked out from too many failures
                 const encounterKey = currentEncounterCell.dataset.encounterKey;
-                if (!bottomRowEncounterKeys.has(encounterKey) && locationFailureCounter[encounterKey] >= LOCATION_FAILURE_STREAK_BLOCK && countIncompleteEncounters() > 2) {
-                    displayMessage('BLOCKED! Choose a different location first.', 'default');
+                if (
+                    LOCATION_FAILURE_BLOCKING_ENABLED &&
+                    !bottomRowEncounterKeys.has(encounterKey) &&
+                    locationFailureCounter[encounterKey] >= LOCATION_FAILURE_STREAK_BLOCK &&
+                    countIncompleteEncounters() > 2
+                ) {
+                    displayMessage('⛔ Blocked — try a different encounter first.', 'blocked');
                     return; // Prevent handleEncounter from running
                 }
                 handleEncounter(card, actionButton.dataset.verbKey);
@@ -3274,7 +3675,7 @@ function setupCardClickListener(card, id) {
 
         if (isSelected) {
             // If the clicked card is already selected, deselect it.
-            card.classList.remove('selected-reagent', 'fusable', 'unfusable');
+            card.classList.remove('selected-reagent', 'fusable', 'unfusable', 'fusion-partner');
             card.style.border = '';
             card.style.boxShadow = '';
             selectedReagents = selectedReagents.filter(el => el !== id);
@@ -3290,7 +3691,7 @@ function setupCardClickListener(card, id) {
                 
                 // 3. Visually deselect it.
                 if (cardToDeselect) {
-                    cardToDeselect.classList.remove('selected-reagent', 'fusable', 'unfusable');
+                    cardToDeselect.classList.remove('selected-reagent', 'fusable', 'unfusable', 'fusion-partner');
                     cardToDeselect.style.border = '';
                     cardToDeselect.style.boxShadow = '';
                 }
@@ -3311,13 +3712,13 @@ function setupCardClickListener(card, id) {
 
     // Custom hover logic to manage border display with the selection logic
     card.addEventListener('mouseenter', () => {
-        if (!card.classList.contains('selected-reagent') && !card.classList.contains('tapped')) {
+        if (!card.classList.contains('selected-reagent') && !card.classList.contains('tapped') && !card.classList.contains('fusion-partner')) {
             card.style.border = '2px solid var(--accent)';
             card.style.boxShadow = '0 0 12px rgba(201,168,74,0.4)';
         }
     });
     card.addEventListener('mouseleave', () => {
-        if (!card.classList.contains('selected-reagent') && !card.classList.contains('tapped')) {
+        if (!card.classList.contains('selected-reagent') && !card.classList.contains('tapped') && !card.classList.contains('fusion-partner')) {
             card.style.border = '1px solid rgba(255,255,255,0.05)';
             card.style.boxShadow = 'none';
         }
@@ -3593,7 +3994,7 @@ function updateHintBox(encounterKey) {
         }
     }
 
-    const hintLevel = persistentHints[encounterKey] || 0;
+    const hintLevel = encounterHintLevel(encounterKey);
     if (hintLevel >= 0 && encounterData.hint1) {
         hintBox.innerHTML = `<span>${encounterData.hint1}</span>`;
     }
@@ -3741,7 +4142,8 @@ for (let idx = 0; idx < BOARD_TOTAL_CELL_COUNT; idx++) {
         }
 
         const remainingEncounters = countIncompleteEncounters();
-        const isBlockingActive = remainingEncounters > 2 && !bottomRowEncounterKeys.has(ek);
+        const isBlockingActive =
+            LOCATION_FAILURE_BLOCKING_ENABLED && remainingEncounters > 2 && !bottomRowEncounterKeys.has(ek);
 
         if (isBlockingActive) {
             if (locationFailureCounter[ek] >= LOCATION_FAILURE_STREAK_FORCE_MOVE && currentEncounterCell && currentEncounterCell.dataset.encounterKey === ek) {
@@ -3791,6 +4193,7 @@ if (!loadGameState()) {
     activeFinaleKey =
         finFromGrid && FINAL_ENCOUNTER_KEYS.has(finFromGrid) ? finFromGrid : 'AZ';
     activeChallengeN = CHALLENGE_NUM_BY_FINALE[activeFinaleKey] ?? 1;
+    applyChallenge1DefaultHint2Unlocks();
     updateChallengeButtonHighlight();
     saveGameState();
 }
@@ -3801,11 +4204,12 @@ fuseButton.addEventListener('click', () => {
     // 1. Clear ALL selection/highlighting *before* processing if there aren't two cards.
     if (selectedReagents.length !== 2) {
         document.querySelectorAll('.card-slot.selected-reagent').forEach(c => {
-             c.classList.remove('selected-reagent', 'fusable', 'unfusable');
+             c.classList.remove('selected-reagent', 'fusable', 'unfusable', 'fusion-partner');
              c.style.border = ''; // Clear custom border from single selection
              c.style.boxShadow = '';
         });
         selectedReagents = [];
+        updateCardHighlights();
         saveGameState();
         return;
     }
@@ -3847,12 +4251,13 @@ fuseButton.addEventListener('click', () => {
 
     // 2. Clear selection and highlighting after attempt (success or failure)
     document.querySelectorAll('.card-slot.selected-reagent').forEach(c => {
-        c.classList.remove('selected-reagent', 'fusable', 'unfusable');
+        c.classList.remove('selected-reagent', 'fusable', 'unfusable', 'fusion-partner');
         c.style.border = ''; // Clear custom border
         c.style.boxShadow = '';
     });
 
     selectedReagents = [];
+    updateCardHighlights();
     saveGameState();
 });
 
@@ -3863,13 +4268,14 @@ untapButton.addEventListener('click', () => {
 
     // 2. Untap all cards in the reagents row
     row1.querySelectorAll('.card-slot').forEach(card => {
-        card.classList.remove('tapped', 'selected-reagent', 'fusable', 'unfusable');
+        card.classList.remove('tapped', 'selected-reagent', 'fusable', 'unfusable', 'fusion-partner');
         card.style.border = ''; // Reset any highlight borders
         card.style.boxShadow = '';
     });
 
     // 3. Clear the selected reagents array
     selectedReagents = [];
+    updateCardHighlights();
     saveGameState();
 
 });
