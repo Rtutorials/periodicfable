@@ -33,8 +33,8 @@
   --color-orange: #FFA500; /* Orange */
   --color-purple: #800080; /* Purple */
   --color-cyan: #00FFFF;   /* Cyan */
-  --map-w: clamp(240px, 28vw, 320px);
-  --preview-w: clamp(260px, 28vw, 340px);
+  --map-w: min(96vw, 960px);
+  --preview-w: clamp(240px, 26vw, 300px);
   --sidebar-w: clamp(260px, 24vw, 340px);
   --card-h: clamp(108px, 12vh, 128px);
   --card-w: clamp(76px, 8.5vw, 90px);
@@ -48,7 +48,7 @@
 /* Shorter viewports: tighten vertical rhythm so map + cards fit with less scroll */
 @media (max-height: 860px) {
   :root {
-    --map-w: clamp(210px, 24vw, 280px);
+    --map-w: min(94vw, 820px);
     --preview-w: clamp(230px, 24vw, 300px);
     --card-h: clamp(100px, 11vh, 112px);
     --card-w: clamp(72px, 8vw, 84px);
@@ -68,7 +68,7 @@
 }
 @media (max-height: 720px) {
   :root {
-    --map-w: clamp(190px, 22vw, 250px);
+    --map-w: min(92vw, 720px);
     --preview-w: clamp(210px, 22vw, 270px);
     --card-h: 96px;
     --card-w: 68px;
@@ -221,11 +221,22 @@ p.subtitle{color:var(--muted);font-size:12px}
 
 /* Full-width main sections — without this, flex-start + intrinsic sizing makes .cards
    shrink to ~one card wide in Safari so reagents stack vertically */
-.main > .map-and-preview-container,
+.main > .map-play-row,
 .main > .cards {
   align-self: stretch;
   width: 100%;
   min-width: 0;
+}
+.main > .map-play-row {
+  align-self: flex-start;
+  width: auto;
+  max-width: 100%;
+}
+@media (max-width: 1100px) {
+  .main > .map-play-row {
+    align-self: stretch;
+    width: 100%;
+  }
 }
 
 /* --- Rules column toggle (close/open) --- */
@@ -377,6 +388,11 @@ p.subtitle{color:var(--muted);font-size:12px}
   background: rgba(65, 52, 24, 0.98);
   border-color: rgba(230, 200, 120, 0.95);
 }
+.floating-reset-btn.draft-stats-btn{
+  font-size:11px;
+  padding:8px 10px;
+  letter-spacing:0.02em;
+}
 
 body.rules-closed .sidebar{
   display:none;
@@ -413,20 +429,20 @@ body.rules-closed .main{
     margin: 0 auto;
     max-height: 40vh;
   }
-  .map-and-preview-container{
-    grid-template-columns: 1fr;
-    justify-items: center;
+  .map-play-row {
+    flex-direction: column;
     gap: 12px;
-    width: 100%;
   }
-  .grid{
-    max-width: min(360px, 100%);
-  }
-  .preview-and-message-wrap{
+  .encounter-dock {
     width: 100%;
     max-width: 420px;
+    align-self: center;
   }
-  .preview{
+  .encounter-dock .preview-and-message-wrap {
+    flex-direction: column;
+    width: 100%;
+  }
+  .encounter-dock .preview {
     width: 100%;
     min-height: 0;
   }
@@ -455,21 +471,85 @@ body.rules-closed .main{
   }
 }
 
-/* CONTAINER FOR MAP AND PREVIEW (CENTERED) */
+/* Map + encounter preview beside the map on wide screens */
+.map-play-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 8px;
+}
+.map-stage {
+    flex: 0 1 auto;
+    min-width: 0;
+    margin-bottom: 0;
+}
+.encounter-dock {
+    width: 100%;
+    max-width: 420px;
+    align-self: center;
+    margin-bottom: 0;
+}
+.encounter-dock .preview-and-message-wrap {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+}
+.encounter-dock .preview {
+    width: 100%;
+    min-height: 0;
+}
+.encounter-dock .encounter-message-box {
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (min-width: 1101px) {
+  .map-play-row {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .map-stage {
+    flex: 0 1 auto;
+  }
+  .encounter-dock {
+    flex: 0 0 var(--preview-w);
+    width: var(--preview-w);
+    max-width: var(--preview-w);
+    align-self: flex-start;
+    position: sticky;
+    top: 12px;
+  }
+  .encounter-dock .preview-and-message-wrap {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  .encounter-dock .preview {
+    width: 100%;
+  }
+}
+
+/* Legacy wrapper kept for narrow breakpoints */
 .map-and-preview-container {
-    display:grid;
-    /* Map (350px) | Preview (300px). Small gap. */
-    grid-template-columns: var(--map-w) var(--preview-w);
-    gap: 30px;
-    align-items:flex-start; /* Aligns map and preview top-to-top */
-    margin-bottom: 6px;
+    display: contents;
 }
 
 .grid-wrap{
     display:flex;
     flex-direction:column;
-    align-items:center;
+    align-items:stretch;
     gap:10px;
+    width:100%;
+    max-width:100%;
 }
 .grid-title {
     font-size: 18px;
@@ -481,15 +561,165 @@ body.rules-closed .main{
     text-align: center;
     text-transform: uppercase; /* ALL CAPS */
 }
-.grid{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:6px;
+.progression-map{
+  position:relative;
   width:100%;
-  max-width:var(--map-w);
+  max-width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:16px 8px 20px;
+}
+.progression-map-paths{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:0;
+  overflow:visible;
+}
+.progression-map-paths .connector-base{
+  stroke:rgba(255,255,255,0.1);
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  fill:none;
+}
+.progression-map-paths .connector-fill{
+  stroke:rgba(201,168,74,0.75);
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  fill:none;
+  transition:stroke-dashoffset .35s ease;
+}
+.progression-map-nodes{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  gap:0;
+  min-width:max(100%,860px);
+  width:max-content;
+  padding:12px 8px;
+}
+.progression-spine{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+}
+.progression-fork{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:28px 18px;
+  margin:0 10px;
+  padding:4px 0;
+}
+.cluster-bubble{
+  position:relative;
+  z-index:2;
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin:0 16px;
+  padding:12px 14px 14px;
+  border-radius:24px;
+  border:2px solid rgba(255,255,255,0.08);
+  background-color:#08060c;
+  background-image:radial-gradient(ellipse 90% 80% at 50% 28%, rgba(201,168,74,0.09), transparent);
+  min-width:108px;
+  transition:border-color .25s, box-shadow .25s, opacity .25s;
+}
+.cluster-bubble--fork{
+  min-width:96px;
+}
+.cluster-bubble--hints{
+  min-width:124px;
+}
+.cluster-bubble-header{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  margin-bottom:10px;
+  text-align:center;
+  min-height:18px;
+}
+.cluster-bubble-progress{
+  font-size:10px;
+  line-height:1.3;
+  color:rgba(255,255,255,0.58);
+  max-width:120px;
+}
+.cluster-bubble-note{
+  font-size:9px;
+  line-height:1.35;
+  color:rgba(201,168,74,0.78);
+  max-width:118px;
+  font-style:italic;
+}
+.cluster-bubble-note--hidden{
+  display:none;
+}
+.cluster-bubble--locked .cluster-bubble-note{
+  opacity:0.55;
+}
+.cluster-bubble-next-tag{
+  display:none !important;
+}
+.cluster-bubble-nodes{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:6px;
+}
+.cluster-bubble--active{
+  border-color:rgba(201,168,74,0.65);
+  box-shadow:0 0 22px rgba(201,168,74,0.18);
+}
+.cluster-bubble--active .cluster-bubble-label{color:var(--accent)}
+.cluster-bubble--active .cluster-bubble-progress{color:rgba(255,255,255,0.82)}
+.cluster-bubble--next{
+  border-color:rgba(201,168,74,0.45);
+  border-style:dashed;
+  box-shadow:0 0 14px rgba(201,168,74,0.1);
+}
+.cluster-bubble--next .cluster-bubble-next-tag{display:inline-block}
+.cluster-bubble--next .cluster-bubble-label{color:rgba(201,168,74,0.95)}
+.cluster-bubble--done{
+  border-color:rgba(120,170,110,0.35);
+  opacity:0.82;
+}
+.cluster-bubble--done .cluster-bubble-progress{color:rgba(160,210,150,0.75)}
+.cluster-bubble--locked{
+  opacity:0.48;
+}
+.cluster-bubble--finale{
+  min-width:72px;
+  padding:12px;
+}
+.cluster-bubble-finale-label{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:2px;
+}
+.cluster-bubble--finale .cluster-bubble-nodes{
+  grid-template-columns:1fr;
+}
+.progression-map-nodes .cell{
+  aspect-ratio:1/1;
+  width:48px;
+  height:48px;
+  font-size:24px;
 }
 .cell{
   aspect-ratio:1/1;
+  min-width:0;
+  min-height:0;
   background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.005));
   border-radius:10px;
   border:1px solid rgba(255,255,255,0.05);
@@ -525,7 +755,19 @@ body.rules-closed .main{
     cursor: default; /* NO HIGHLIGHT */
 }
 .cell.defeated:hover{border: none !important; box-shadow: none !important;} /* NO HIGHLIGHT */
-.pawn{position:absolute;bottom:6px;right:6px;font-size:20px;pointer-events:none; filter: drop-shadow(0 0 2px #000);}
+.cell.locked{
+  cursor:default;
+  opacity:0.62;
+  background:linear-gradient(180deg,rgba(255,255,255,0.015),rgba(255,255,255,0.004));
+}
+.cell.locked:hover{border:1px solid rgba(255,255,255,0.05) !important;box-shadow:none !important}
+.cell.mystery{
+  font-size:18px;
+  font-weight:800;
+  color:var(--accent);
+  letter-spacing:-1px;
+}
+.pawn{position:absolute;bottom:4px;right:4px;font-size:16px;pointer-events:none; filter: drop-shadow(0 0 2px #000);}
 
 /* Half Success Counter: Always visible, 1/2 style */
 .half-success-counter {
@@ -689,6 +931,32 @@ body.rules-closed .main{
 .hint-box span {
     display: block; /* Force the span (Second Hint) onto a new line */
     margin-top: 4px;
+}
+.hint-box .hint-spoiler-entry {
+    display: block;
+    margin-top: 6px;
+    text-align: left;
+}
+.hint-box .hint-spoiler-label {
+    display: block;
+    font-weight: 700;
+    color: rgba(201, 168, 74, 0.88);
+    margin-bottom: 2px;
+    user-select: none;
+}
+.hint-box .hint-spoiler {
+    display: block;
+    filter: blur(5px);
+    opacity: 0.55;
+    cursor: help;
+    transition: filter 0.2s ease, opacity 0.2s ease;
+    user-select: none;
+}
+.hint-box .hint-spoiler-entry:hover .hint-spoiler,
+.hint-box .hint-spoiler:focus-visible {
+    filter: none;
+    opacity: 1;
+    user-select: text;
 }
 /* Riddle encounters: stacked verse + revealed hint must not scroll inside this box */
 .hint-box.hint-box--riddle {
@@ -1114,6 +1382,153 @@ body.rules-closed .main{
     transform: scale(1.05);
 }
 
+/* ---------------- DRAFT STATS MODAL ---------------- */
+.draft-stats-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 12500;
+    padding: 16px;
+    box-sizing: border-box;
+}
+.draft-stats-overlay.visible {
+    display: flex;
+}
+.draft-stats-panel {
+    background: var(--panel);
+    border: 2px solid rgba(201, 168, 74, 0.45);
+    border-radius: var(--radius);
+    width: min(960px, 100%);
+    max-height: min(88vh, 900px);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 40px rgba(201, 168, 74, 0.12);
+}
+.draft-stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.draft-stats-header h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+}
+.draft-stats-close {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+}
+.draft-stats-close:hover {
+    color: #fff;
+}
+.draft-stats-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 12px;
+    color: var(--muted);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.draft-stats-toolbar label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.draft-stats-toolbar input[type='number'] {
+    width: 56px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: #fff;
+    padding: 4px 6px;
+}
+.draft-stats-run-btn {
+    background: rgba(201, 168, 74, 0.18);
+    border: 1px solid rgba(201, 168, 74, 0.45);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.draft-stats-run-btn:hover:not(:disabled) {
+    background: rgba(201, 168, 74, 0.28);
+}
+.draft-stats-run-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+.draft-stats-summary {
+    padding: 8px 16px 0;
+    font-size: 11px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.62);
+}
+.draft-stats-body {
+    overflow: auto;
+    padding: 8px 12px 14px;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+.draft-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+.draft-stats-table th,
+.draft-stats-table td {
+    padding: 5px 6px;
+    text-align: right;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    white-space: nowrap;
+}
+.draft-stats-table th:first-child,
+.draft-stats-table td:first-child,
+.draft-stats-table th:nth-child(2),
+.draft-stats-table td:nth-child(2) {
+    text-align: left;
+}
+.draft-stats-table th {
+    position: sticky;
+    top: 0;
+    background: #121018;
+    color: rgba(201, 168, 74, 0.88);
+    font-weight: 700;
+    z-index: 1;
+}
+.draft-stats-table tbody tr:hover {
+    background: rgba(201, 168, 74, 0.06);
+}
+.draft-stats-pct-bar {
+    display: inline-block;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(201, 168, 74, 0.75);
+    vertical-align: middle;
+    margin-left: 4px;
+    min-width: 2px;
+}
+.draft-stats-loading {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+}
+
 /* Notable-success overlay (paired with …x artwork in /alchemyart) */
 .nicely-done-overlay {
     position: fixed;
@@ -1235,6 +1650,7 @@ body.rules-closed .main{
     <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="4" data-finale-key="BZ" title="Hero finale">Challenge&nbsp;4</button>
     <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="5" data-finale-key="DZ" title="Landmark finale">Challenge&nbsp;5</button>
     <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="6" data-finale-key="FZ" title="Accident finale — Humpty Dumpty">Challenge&nbsp;6</button>
+    <button type="button" id="draftStatsBtn" class="floating-reset-btn draft-stats-btn" title="Simulate draft pools across all challenges">Draft&nbsp;Stats</button>
   </div>
 </div>
 <div class="sidebar">
@@ -1249,7 +1665,7 @@ body.rules-closed .main{
     <br>
     <br>
     <p>
-        The map is a grid of encounters, each with an element that is both the theme of the challenge and the element you get as a reward. For example, if you move to the “Fire” space of the map you face the Phoenix. Encounters that start with “The” are not combats and are more like physical puzzles. Encounters in the first rows are easier, while those in later rows are more difficult. Solving each encounter in the bottom row will unlock a hint to solve the final encounter, which is extra challenging. There is no way to lose in this game, you simply play until you win the last room on the bottom row.
+        The map is a grid of encounters, each with an element that is both the theme of the challenge and the element you get as a reward. For example, if you move to the “Fire” space of the map you face the Phoenix. Encounters that start with “The” are not combats and are more like physical puzzles. Encounters in the first rows are easier, while those in later rows are more difficult. Solving each encounter in the bottom row will unlock a hint to solve the final encounter, which is extra challenging. There is no way to lose in this game, you simply play until you win the last room on the bottom row. 
     </p>
     <br>
     <p>
@@ -1257,14 +1673,14 @@ body.rules-closed .main{
     </p>
     <br>
     <p>
-        If you choose a verb that wins the encounter, a “SUCCESS” message will appear, you receive that element as a permanent reward, and the encounter is removed from the map. You will receive a hint on the third failure. If you fail five times in a row, you must leave and try another encounter before you are allowed to try again. It is also possible to get a “half-success” for verbs that are partially effective. 
+        If you choose a verb that wins the encounter, a “SUCCESS” message will appear, you receive that element as a permanent reward, and the encounter is removed from the map. You will receive a hint on the third failure. If you fail five times in a row, you must leave and try another encounter before you are allowed to try again. If you get stuck, try moving around a lot! It is also possible to get a “half-success” for verbs that are partially effective. 
     <br>
     <strong>Fusing Elements</strong>
     <br>
     <br>
 
     <p>
-        In order to create a new element, click on two elements in your reagents row and click the “Fuse” button. The first element you clicked on will be temporarily deactivated as a cost. Some combinations of elements are not possible and will be highlighted in red when you select them.
+        In order to create a new element, click on two elements in your reagents row and click the “Fuse” button. The first element you clicked on will be temporarily deactivated as a cost. Some combinations of elements are not possible and will be highlighted in red when you select them. When you click an element, valid fusion elements will glow.
     </p>
     <br>
     <p>
@@ -1279,23 +1695,30 @@ body.rules-closed .main{
 </div>
 
 <div class="main">
-  <div class="map-and-preview-container">
-    <div class="grid-wrap">
-      <div class="grid" id="grid"></div>
+  <div class="map-play-row">
+    <div class="map-stage">
+      <div class="grid-wrap">
+        <div class="progression-map" id="progressionMap">
+          <svg class="progression-map-paths" id="progressionMapPaths" aria-hidden="true"></svg>
+          <div class="progression-map-nodes" id="progressionMapNodes"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="preview-and-message-wrap">
-        <div class="preview">
-            <div class="selected-encounter-hint" id="selectedEncounterHint"></div>
-            <div class="preview-title" id="previewTitle"></div>
-            <div class="preview-art-track preview-art-track--hidden" id="previewArtTrack" aria-hidden="true">
-            <img class="preview-art preview-art--empty" id="previewArt" alt="" decoding="async" fetchpriority="high">
-            </div>
-            <div class="big" id="previewGlyph">♙</div>
-            <div class="element-name-subtitle" id="elementNameSubtitle"></div> 
-            <div class="hint-box" id="hintBox"></div>
-        </div>
-      <div class="encounter-message-box" id="encounterMessageBox"></div>
+    <div class="encounter-dock">
+      <div class="preview-and-message-wrap">
+          <div class="preview">
+              <div class="selected-encounter-hint" id="selectedEncounterHint"></div>
+              <div class="preview-title" id="previewTitle"></div>
+              <div class="preview-art-track preview-art-track--hidden" id="previewArtTrack" aria-hidden="true">
+              <img class="preview-art preview-art--empty" id="previewArt" alt="" decoding="async" fetchpriority="high">
+              </div>
+              <div class="big" id="previewGlyph">♙</div>
+              <div class="element-name-subtitle" id="elementNameSubtitle"></div> 
+              <div class="hint-box" id="hintBox"></div>
+          </div>
+        <div class="encounter-message-box" id="encounterMessageBox"></div>
+      </div>
     </div>
   </div>
 
@@ -1379,7 +1802,7 @@ const elementData = {
     '6': { name: 'Steam', emoji: '💨', verbs: ['Puff', 'Boil'], terminal: false },
     '7': { name: 'Rock', emoji: '🪨', verbs: ['Block', 'Throw', 'Gift'], terminal: false },
     '8': { name: 'Plant', emoji: '🌿', verbs: ['Grow'], terminal: false },
-    '9': { name: 'Ice', emoji: '❄️', verbs: ['Cool', 'Freeze'], terminal: false },
+    '9': { name: 'Ice', emoji: '❄️', verbs: ['Freeze'], terminal: false },
     '10': { name: 'Dust', emoji: '✨', verbs: ['Dry', 'Blind'], terminal: false },
     '11': { name: 'Rope', emoji: '⛓️', verbs: ['Cross', 'Restrain'], terminal: false },
     '12': { name: 'Light', emoji: '💡', verbs: ['Shine', 'Daze'], terminal: false },
@@ -1495,12 +1918,12 @@ const fuseList = [
     '2 + 39 = 51', '4 + 8 = 17', '13 + 51 = 79', '1 + 62 = 94','1 + 74 = 94','1 + 52 = 111','2 + 32 = 106','2 + 73 = 101','3 + 7 = 115','3 + 27 = 115','3 + 35 = 115','4 + 32 = 99','4 + 52 = 113','5 + 52 = 93','6 + 7 = 97','6 + 32 = 97','6 + 34 = 97','6 + 35 = 97','6 + 73 = 101','7 + 27 = 65','7 + 37 = 65','7 + 52 = 73','8 + 35 = 17','8 + 52 = 93','9 + 52 = 114','10 + 13 = 24','10 + 34 = 24','11 + 17 = 96','12 + 13 = 105','12 + 30 = 105','12 + 34 = 105','12 + 36 = 105','14 + 52 = 103','14 + 66 = 95','14 + 73 = 100','17 + 32 = 96','17 + 34 = 96','17 + 52 = 93','26 + 37 = 65','26 + 73 = 100','27 + 66 = 85', '27 + 73 = 101','29 + 32 = 107','29 + 34 = 92','29 + 36 = 107','30 + 51 = 98','31 + 52 = 103','32 + 30 = 99','32 + 34 = 44','32 + 39 = 99','32 + 51 = 99','32 + 66 = 95','32 + 67 = 89','32 + 73 = 102','32 + 103 = 104','34 + 62 = 91','34 + 66 = 95','34 + 73 = 100','35 + 52 = 73','39 + 52 = 111','46 + 52 = 111','50 + 74 = 108','51 + 52 = 110','52 + 3 = 112','52 + 7 = 73','52 + 8 = 112','52 + 9 = 114','52 + 17 = 109',    '52 + 27 = 112',
     '62 + 66 = 95','77 + 115 = 116',
     '4 + 74 = 83','13 + 74 = 83','26 + 74 = 83','27 + 74 = 83','29 + 74 = 108','31 + 74 = 83','34 + 74 = 83','36 + 74 = 83','43 + 74 = 83','47 + 74 = 83',
-    '1 + 14 = 16','1 + 49 = 16','14 + 49 = 16','2 + 7 = 21'
+    '1 + 14 = 16','1 + 49 = 16','14 + 49 = 16','2 + 7 = 21','33 + 38 = 35'
 ];
 
 // Encounter Data
 const encounterEffects = {
-    'A': { name: 'Fire- Phoenix', difficultyLevel: 0, hint1: 'Physical damage seems to be ineffective against it, he is made not of solid material but flame itself.', hint2: 'You will need to put out his fire somehow.', effects: ['1A', '4A', '18A', '-9A', '-9B', '-35A', '-42A', '46B', '40A', '45A', '-28A', '-37A', '98A', '106A'] },
+    'A': { name: 'Fire- Phoenix', difficultyLevel: 0, hint1: 'Physical damage seems to be ineffective against it, he is made not of solid material but flame itself.', hint2: 'You will need to put out his fire somehow.', effects: ['1A', '4A', '18A', '-9A', '-35A', '-42A', '46B', '40A', '45A', '-28A', '-37A', '98A', '106A'] },
     'B': { name: 'Earth- Desert Golem', difficultyLevel: 0, hint1: 'A large tough humanoid creature made of tightly compacted sand.', hint2: 'No physical wounds seems to harm it, it must be separated.', effects: ['4A', '1A', '-3A', '26B', '28B', '-28A', '35B', '-37A', '38A', '42A', '47A', '40A', '24A', '106A'] },
     'C': { name: 'Water- Whispghost', difficultyLevel: 0, hint1: 'No physical wounds seem to harm it.', hint2: 'It is made of mist and smoke that need to be torn apart somehow.', effects: ['1A', '28B', '6A', '6B', '10A', '51A', '-28A', '-35B', '38A', '-42A', '-47A', '40A', '24A'] },
     'D': { name: 'Air- Sacmonster', difficultyLevel: 0, hint1: 'A beast that looks like a pair of giant lungs.', hint2: 'You will need to stop its air flow somehow.', effects: ['42A', '2A', '10A', '11B', '15A', '27A', '28A', '38A', '40A', '41A', '42A', '43A', '47A', '52A', '53A', '55A', '65A', '111A'] },
@@ -1510,18 +1933,18 @@ const encounterEffects = {
     'H': { name: 'Light- Gorgon', difficultyLevel: 5, hint1: 'The creature turns anyone it faces into stone.', hint2: 'The way it turns you to stone is by looking at you.', effects: ['-7A', '-29B', '-39A', '-40A', '-31A', '54A', '-37A', '-38A', '-10B', '51B', '-111A', '111B'] },
     'I': { name: 'Metal- Automaton', difficultyLevel: 2, hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A', '102A', '21A'] },
     'J': { name: 'Sound- Banshee', difficultyLevel: 3, hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '7A', '-13A', '-26A', '14A', '-40A', '-14A', '38A', '92A', '94A', '115A', '104A'] },
-    'K': { name: 'Glass- Illusionist', difficultyLevel: 3, hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11A', '9B', '26B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A', '104A'] },
-    'L': { name: 'Pressure- The Press', difficultyLevel: 2, hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B', '112A'] },
-    'M': { name: 'Chemical- The Valley', difficultyLevel: 1, hint1: 'Something invisible is causing you to get sick.', hint2: 'You must deal with the cloud of chemicals.', effects: ['1A', '28B', '6A', '29B', '39A', '24A', '94A', '115A'] },
+    'K': { name: 'Glass- Illusionist', difficultyLevel: 3, hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11A', '9A', '26B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A', '104A'] },
+    'L': { name: 'Pressure- The Press', difficultyLevel: 2, hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B', '112A', '-30B'] },
+    'M': { name: 'Chemical- The Valley', difficultyLevel: 1, hint1: 'Something invisible is causing you to get sick.', hint2: 'You must deal with the cloud of chemicals.', effects: ['1A', '28B', '6A', '29B', '39A', '24A', '94A', '115A', '-13A'] },
     'N': { name: 'Gravity- The Abnormality', difficultyLevel: 5, hint1: 'The gravitational abnormality is slamming you against the ceiling.', hint2: 'You will have to resist it while crossing somehow.', effects: ['-28A', '29A', '39A', '-11A', '-13A', '62A', '102A'] },
-    'O': { name: 'Oil- The Swamp', difficultyLevel: 2, hint1: 'You are trying to get to the other side of a swamp but you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '11A', '-11B', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9B', '70A', '94A', '92A'] },
+    'O': { name: 'Oil- The Swamp', difficultyLevel: 2, hint1: 'You are trying to get to the other side of a swamp but you feel yourself sinking into the earth.', hint2: 'You are in quicksand, if you move you will sink further.', effects: ['-2A', '11A', '-11B', '-27A', '29B', '39A', '35B', '-11A', '74A', '-9A', '70A', '94A', '92A'] },
     'P': { name: 'Darkness- Alucard', difficultyLevel: 4, hint1: 'You are facing off against a man in a cape and bat wings.', hint2: 'He is a vampire who has never left the darkness of the indoors.', effects: ['12A', '-37A', '38A', '41A', '40A', '54A', '104A', '111B'] },
     'Q': { name: 'Man- The Child', difficultyLevel: 4, hint1: 'The child is sad and asks for help.', hint2: 'He asks if you have anything for him.', effects: ['20A', '22A', '23A', '48A', '68B', '84A', '85A', '-19A', '-44A', '-52A', '-7C', '-59B', '-61A', '-49A', '-63B', '-66A', '-69A', '-74B', '-78B', '89A', '-91A', '96A', '100B', '104B', '108A', '114A'] },
     'R': { name: 'Energy- Terror of the Tides', difficultyLevel: 3, hint1: 'It takes the form of a deadly Eel.', hint2: 'It attacks using electricity.', effects: ['-4A', '-18A', '-10A', '-35A', '38A', '43A', '47A', '40A', '-37A', '104A', '106A', '111B', '114A'] },
     'S': { name: 'Life- The Exchange', difficultyLevel: 2, hint1: 'The being tells you that only life can pay for life.', hint2: 'You must give it life itself, or something living.', effects: ['-52A', '17A', '33B', '32B', '-68B', '-67B', '89A', '93A', '102B', '103A', '104B', '109A', '110A', '111C', '25A', '112B', '113A', '114A'] },
-    'T': { name: 'Machine- Geared Dragon', difficultyLevel: 2, hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from up the air.', effects: ['-28A', '35A', '35B', '5A', '40A', '-34A', '-39A', '-29A', '-11B', '65A', '24A', '92A', '94A', '111B', '115A', '-7B'] },
+    'T': { name: 'Machine- Geared Dragon', difficultyLevel: 2, hint1: 'This huge mechanical dragon attacks you from high in the sky.', hint2: 'It is hard to hit it from up the air.', effects: ['-28A', '35A', '35B', '-5A', '40A', '-34A', '-39A', '-29A', '-11B', '65A', '24A', '92A', '94A', '111B', '115A', '-7B'] },
     'U': { name: 'Time- Ritualists', difficultyLevel: 4, hint1: 'The magicians are about to complete their ritual, which will make it impossible to beat them.', hint2: 'They are putting together a large clock, you will need to disrupt them.', effects: ['-34A', '-31A', '10B', '35B', '51B', '14B', '38A', '43A', '40A', '-104A', '111B', '113A', '97A', '-60A'] },
-    'V': { name: 'Intelligence- Doppelganger', difficultyLevel: 4, hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-51B', '-54A', '-39A', '-29B', '11A', '36A', '32A', '62A', '37A', '70A', '91A', '-9B', '-11A', '-11B'] },
+    'V': { name: 'Intelligence- Doppelganger', difficultyLevel: 4, hint1: 'You encounter someone that looks exactly like you, and whatever you attack it with hits you back.', hint2: 'You will need to get past it in a way that doesn\'t hurt you.', effects: ['-31A', '-51B', '-54A', '-39A', '-29B', '11A', '36A', '32A', '62A', '37A', '70A', '91A', '-9A', '-11A', '-11B'] },
     'W': { name: 'Love- The Gift', difficultyLevel: 4, hint1: 'A lover tells you she feels heartbroken, she was expecting to receive something special from her valentine.', hint2: 'She wants to receive a heartfelt present.', effects: ['49A', '32B', '-15B', '-37A', '64A', '79A', '65C', '54B', '95A', '101A', '114A', '-33A', '-16A'] },
     'X': { name: 'Death- The Tribute', difficultyLevel: 5, hint1: 'A solemn ceremony is taking place, one might wonder what would be appropriate to do here.', hint2: "An old man requests something to commemorate and honor his friend's memory.", effects: ['77A', '33A', '-59A', '-78A', '-8A', '-64A', '-65C', '-33A', '-32A', '49A', '-90A'] },
     'Z': { name: 'FINAL ROOM: The Alchemists Endgame', difficultyLevel: 6, hint1: 'To win the game, enter this room and provide the alchemists most prized creation. Each completed encounter in the final row will reveal another hint.', hint2: "They say it is a metal that shines like the sun", hint3: "The sun itself is fire in the sky", hint4: "The sky is clouds and air", hint5: "Clouds are steam and air, steam is water and air, try to piece this all together into a metal that shines like the sun", hint6: "You will need to give it gold which can be formed by combining sun and metal",  unlocksHints: ['U', 'W', 'K', 'X'], effects: ['79A'] },
@@ -1534,21 +1957,21 @@ const encounterEffects = {
     'AC': { name: 'Machine- The Repairman', difficultyLevel: 4, hint1: "Someone needs to fix an engine. It won't power up.", hint2: 'They need something that will fuel it.', effects: ['-5A', '30A', '35B', '-6B', '-30B', '-36A', '-85A'] },
     'AD': { name: 'Time- The Hour', difficultyLevel: 5, hint1: 'An old lady politely asks you what time is it.', hint2: 'You will need to provide her with a timepiece.', effects: ['69A'] },
     'AE': { name: 'Intelligence- The Citation', difficultyLevel: 4, hint1: 'You have been stopped by the sheriff for committing a serious traffic violation.', hint2: 'He is susceptible to bribes.', effects: ['79A', '65C', '-31A', '-11B', '-10B', '32A', '36A', '35B', '39A', '37A', '38A', '-57B', '-64A', '-77A', '-49A', '94A', '-75B', '-15B', '89A', '104B'] },
-    'AF': { name: 'Metal- The Match', difficultyLevel: 3, hint1: 'An athlete challenges you to a game of Golf, you must find a way to give yourself the advantage.', hint2: 'No one ever said you had to play fair', effects: ['-3A', '7C', '-9B', '10B', '11B', '29A', '-31A', '-35B', '38A', '40A', '43A', '51B', '24A'] },
+    'AF': { name: 'Metal- The Match', difficultyLevel: 3, hint1: 'An athlete challenges you to a game of Golf, you must find a way to give yourself the advantage.', hint2: 'No one ever said you had to play fair', effects: ['-3A', '7C', '-9A', '10B', '11B', '29A', '-31A', '-35B', '38A', '40A', '43A', '51B', '24A'] },
     'AG': { name: 'Oil- The Mosquito', difficultyLevel: 2, hint1: 'A tiny bug is flying around the room.', hint2: 'It is very difficult to catch.', effects: ['5A', '-11B', '-29A', '-35A', '40A', '43A', '-7C', '-13A', '67B', '89A', '24A', '-7B', '38A'] },
     'AH': { name: 'Energy- The Sheep', difficultyLevel: 2, hint1: 'A large sheep is blocking the gate and needs to be gently removed.', hint2: 'Sheep are known for being fearful animals.', effects: ['-78A', '-35A', '-31A', '-26B', '-12A', '-7B', '-5A', '-3A', '-18A', '14B', '38A', '40A', '42A', '43A', '45B', '47A', '55A', '60A', '67A', '67B', '68A', '68B', '103A', '111B', '113A', '-90A'] },
     'AI': { name: 'Rope- The Hill', difficultyLevel: 2, hint1: 'There is no other way to go but up the steep hill.', hint2: 'You will need to get to the top somehow.', effects: ['62A', '29B', '39A', '-11A', '-42A', '-70A', '-76A'] },
-    'AJ': { name: 'Glass- The Pool', difficultyLevel: 2, hint1: 'You need to get across a large swimming pool.', hint2: 'It is made of glass and filled with water.', effects: ['9B', '10A', '2A', '24A', '41A', '7C', '11A', '70A', '74A'] },
-    'AK': { name: 'Ice- The Melting Scoop', difficultyLevel: 3, hint1: 'A scoop of ice cream is melting in the sun.', hint2: 'You must keep it from melting somehow.', effects: ['-9B', '46A', '18A', '76A', '72A'] },
-    'AL': { name: 'Dust- The Weather', difficultyLevel: 3, hint1: 'A friendly old man is sitting on a park bench, he looks warm.', hint2: 'He tells you he would prefer to sit in the shade.', effects: ['-1A', '-31A', '-54A', '17A', '76A', '75B', '46A', '-9A', '71A'] },
-    'AM': { name: 'Light- Laserbug', difficultyLevel: 3, hint1: 'You are attacked by a large beetle with a light beam coming from his back.', hint2: 'You will need to stop the light somehow.', effects: ['54A', '-76A', '75B', '46A', '31A', '38A', '-40A', '-43A'] },
+    'AJ': { name: 'Glass- The Pool', difficultyLevel: 2, hint1: 'You need to get across a large swimming pool.', hint2: 'It is made of glass and filled with water.', effects: ['9A', '10A', '2A', '24A', '41A', '7C', '11A', '70A', '74A'] },
+    'AK': { name: 'Ice- The Melting Scoop', difficultyLevel: 3, hint1: 'A scoop of ice cream is melting in the sun.', hint2: 'You must keep it from melting somehow.', effects: ['-9A', '46A', '18A', '76A', '72A', '-31A'] },
+    'AL': { name: 'Dust- The Weather', difficultyLevel: 3, hint1: 'A friendly old man is sitting on a park bench, he looks warm.', hint2: 'He tells you he would prefer to sit in the shade.', effects: ['-1A', '-31A', '-54A', '17A', '76A', '75B', '46A', '18A', '71A'] },
+    'AM': { name: 'Light- Laserbug', difficultyLevel: 3, hint1: 'You are attacked by a large beetle with a light beam coming from his back.', hint2: 'You will need to stop the light somehow.', effects: ['54A', '-76A', '75B', '46A', '31A', '38A', '-40A', '-43A', '-7A'] },
     'AN': { name: 'Love- The Proposal', difficultyLevel: 5, hint1: 'The time has come to pop the question to the love of your life.', hint2: 'It is customary to provide a particular gemstone.', effects: ['65C', '79A'] },
     'AO': { name: 'Man- The Explorer', difficultyLevel: 5, hint1: 'A navigator tells you he is lost.', hint2: 'He will need to find his way to the treasure.', effects: ['81A', '85A', '-68B', '-79A', '-65C', '-32A', '48A', '-39A', '-90A', '-62A'] },
     'AP': { name: 'Sound- The Critics', difficultyLevel: 4, hint1: 'Two old men are complaining to you that nothing is original or creative anymore.', hint2: 'They want to see something entertaining and avant-garde.', effects: ['59A', '78A', '49A', '-73A', '-32A', '-67A', '45A', '-14B', '16A'] },
     'AQ': { name: 'Death- The Wound', difficultyLevel: 4, hint1: 'A boxer tells you that he has been hurt in a fight.', hint2: 'You will need to help with the pain of the injury.', effects: ['33A', '35A', '35B', '-27A', '-30B', '-11B', '-58B', '-15B', '-56B'] },
-    'AR': { name: 'Pressure- The Experiment', difficultyLevel: 4, hint1: "There is a science contest where the winner's egg must survive a fall.", hint2: 'Find a way to prevent your egg from cracking when dropped.', effects: ['-13A', '27A', '-9B', '-35B', '6B', '29B', '46B', '39A', '72A', '85A'] },
+    'AR': { name: 'Pressure- The Experiment', difficultyLevel: 4, hint1: "There is a science contest where the winner's egg must survive a fall.", hint2: 'Find a way to prevent your egg from cracking when dropped.', effects: ['-13A', '27A', '-9A', '-35B', '6B', '29B', '46B', '39A', '72A', '85A'] },
     'AS': { name: 'Gravity- The Carnival', difficultyLevel: 2, hint1: 'If you can knock over a stack of milk containers, you can win a prize.', hint2: 'You could throw something at it.', effects: ['29A', '-1A', '-3A', '-34A', '-28B', '-7C', '73A', '56A', '57A', '63A', '40A', '43A', '-7B', '-42A', '65A'] },
-    'AT': { name: 'Plant- The Maze', difficultyLevel: 3, hint1: 'You need to find the exit of a large hedge maze.', hint2: 'There has to be a way to more easily see where the exit is.', effects: ['-2A', '36A', '39A', '29B', '81A', '111A', '-11A', '35B', '62A', '-90A', '-85A'] },
+    'AT': { name: 'Plant- The Maze', difficultyLevel: 3, hint1: 'You need to find the exit of a large hedge maze.', hint2: 'There has to be a way to more easily see where the exit is.', effects: ['-2A', '36A', '39A', '29B', '81A', '111A', '-11A', '35B', '62A', '-90A', '-85A', '-115A'] },
     'AU': { name: 'Chemical- The Stain', difficultyLevel: 4, hint1: 'Something has spilled onto the carpet and will not come out.', hint2: 'Remove the material somehow to make the floor clean.', effects: ['-30B', '24A', '28B', '106A', '-4A', '35B', '-6B', '84A'] },
     'AW': { name: 'Cloud- The Sign', difficultyLevel: 4, hint1: 'A woman prays for a sign that the heavens have heard her prayers.', hint2: 'Some kind of miracle would convince her that something divine is watching over her.', effects: ['12A', '6A', '105A', '111A', '-29B', '-3A', '-39A', '-60A', '-92A', '-97A'] },
     'AV': { name: 'Darkness- Riddle One', difficultyLevel: 2, hint1: 'I am always hungry, I must always be fed, the finger I lick will soon turn red.', hint2: 'You must find the element that answers the riddle — something that can harm you that needs to consume to survive.', effects: ['2A'] },
@@ -1557,11 +1980,11 @@ const encounterEffects = {
     'BC': { name: 'Time- The Slumber', difficultyLevel: 2, hint1: 'A cat has fallen deeply asleep in a field of flowers.', hint2: 'You will need to wake it up gently.', effects: ['35A', '35B', '26B', '12A', '-7C', '-51A', '-2A', '-3A', '-14B', '55A', '68A', '60A', '78A', '57B', '16A'] },
     'BD': { name: 'Intelligence- The Swap', difficultyLevel: 5, hint1: 'You are partaking in a gift exchange game.', hint2: 'After all the shuffling is complete, you want to have ended up with more than you spent.', effects: ['-7C', '55B', '56B', '-57B', '73B', '-61A', '58B', '-63B', '-66A', '72B', '82A', '19A', '23A', '103A', '93A', '67B'] },
     'BE': { name: 'Metal- The Distraction', difficultyLevel: 3, hint1: 'You are trying to steal precious metal and get away in the chaos.', hint2: 'You will need to create a distraction to slip away unnoticed.', effects: ['31A', '-12A', '-3A', '-42A', '-10B', '-39A', '-60A', '-65A', '-73A', '-67A', '-78A', '-104A', '-89A', '-57B', '-93A', '-103A', '-52A', '16A'] },
-    'BF': { name: 'Oil- The Mariner', difficultyLevel: 4, hint1: 'An old sailor tells you he used to work on a rig.', hint2: 'He misses the sea and wants to be reminded of it.', effects: ['74B', '74A', '22A', '25A', '81A', '15B', '83A', '-83A', '-70B'] },
+    'BF': { name: 'Oil- The Mariner', difficultyLevel: 4, hint1: 'An old sailor tells you he misses the sea.', hint2: 'He wants to be reminded of the ocean somehow.', effects: ['74B', '74A', '22A', '25A', '81A', '15B', '83A', '-83A', '-70B'] },
     'BG': { name: 'Energy- The Race', difficultyLevel: 3, hint1: 'You must win a race against a very fast feline.', hint2: 'It is still a cat at heart and can be distracted away from the finish line.', effects: ['-10B', '-11B', '-30B', '38A', '40A', '43A', '62A', '-51B', '57B', '63B', '68A'] },
-    'BH': { name: 'Rope- The Knot', difficultyLevel: 2, hint1: 'A confusing knot is giving you trouble.', hint2: 'You must find a way to untie it.', effects: ['41A', '28B', '34A', '36A', '52A', '-2A', '-5A', '30B', '35B'] },
+    'BH': { name: 'Rope- The Knot', difficultyLevel: 1, hint1: 'A confusing knot is giving you trouble.', hint2: 'You must find a way to untie it.', effects: ['41A', '28B', '34A', '36A', '52A', '-2A', '-5A', '30B', '35B'] },
     'BI': { name: 'Glass- The Unseen', difficultyLevel: 4, hint1: 'An invisible rodent runs rampant.', hint2: "You need to catch it somehow, it can't be seen.", effects: ['-11B', '-12A', '-27A', '68A', '-4A', '-2A', '53A', '24A'] },
-    'BJ': { name: 'Animal- The Rotting Meat', difficultyLevel: 3, hint1: 'A perfect cut of ribeye is sitting out in the open, about to go bad.', hint2: 'Someone really ought to put it in the fridge.', effects: ['18A', '-9B', '72A', '-31A', '-13A', '-15A'] },
+    'BJ': { name: 'Animal- The Rotting Meat', difficultyLevel: 3, hint1: 'A perfect cut of ribeye is sitting out in the open, about to go bad.', hint2: 'Someone really ought to put it in the fridge.', effects: ['18A', '-9A', '72A', '-31A', '-13A', '-15A'] },
     'BK': { name: 'Darkness- The Nuisance', difficultyLevel: 4, hint1: 'A customer is being a jerk to everyone.', hint2: 'You must get them to leave without harming them.', effects: ['80A', '51A', '-14B', '73A', '67A', '-3A', '35A', '32A', '-36A', '-5A', '55A', '56A', '56B', '57B', '58B', '-60A', '45A', '45B', '106A', '-7B'] },
     'BL': { name: 'Light- The Signal', difficultyLevel: 3, hint1: 'You are stranded on an island and an airplane is flying overhead.', hint2: 'You must make some kind of signal to be rescued.', effects: ['-2A', '12A', '-39A', '-32A', '-94A', '-54A', '78A', '42A', '-6A'] },
     'BM': { name: 'Love- The Break-Up', difficultyLevel: 5, hint1: 'A man tells you he misses someone dearly.', hint2: 'He wants to feel better and get over it.', effects: ['35A', '33A', '-36A', '-37A', '-68B', '-64A', '15B', '-20A', '-44A'] },
@@ -1583,13 +2006,13 @@ const encounterEffects = {
     'CC': { name: 'Death- The Excuse', difficultyLevel: 4, hint1: "A doctor doesn't believe you when you say that you are sick enough to miss school.", hint2: "To get a doctor's note, you must demonstrate that you are medically unwell.", effects: ['53A', '45A', '45B', '79A', '65C', '37A', '99A', '-51A', '10B', '14B', '28A', '-32A', '-36A', '55A'] },
     'CD': { name: 'Intelligence- The Prank', difficultyLevel: 4, hint1: 'Your neighbor is at home, it is time to get revenge.', hint2: 'You must bother him back for what he did to you.', effects: ['73A', '45A', '67A', '113A', '103A', '106A', '109A', '51A', '-12A', '-3A', '-34A', '-16A', '-60A', '-51A', '-46A', '-26B', '-18A', '-14B', '-7B'] },
     'CE': { name: 'Metal- The Vandalism', difficultyLevel: 5, hint1: 'You want to decrease the tax value of your home by defacing it somehow.', hint2: 'Find a way to temporarily spoil the desirability of living there.', effects: ['-28B', '34A', '42A', '-78A', '67A', '45A', '-113A', '-15A', '-102A', '109A', '-7B', '73A', '-4A'] },
-    'CF': { name: 'Life- The Diet', difficultyLevel: 4, hint1: 'You are brainstorming ways to lose weight and be healthier.', hint2: 'Perhaps some healthy food would help.', effects: ['56B', '73B', '19A', '113B', '101A', '58B', '-55B', '-57B', '-33A'] },
+    'CF': { name: 'Life- The Diet', difficultyLevel: 4, hint1: 'You are brainstorming ways to lose weight and be healthier.', hint2: 'Perhaps some healthy food would help.', effects: ['56B', '73B', '19A', '113B', '101A', '58B', '-55B', '-57B', '-33A', '115A'] },
     'CG': { name: 'Oil- The Checkpoint', difficultyLevel: 4, hint1: 'You are trying to get some contraband resources past a security checkpoint.', hint2: 'The guards may be more corrupt than they seem.', effects: ['79A', '37A', '38A', '65C', '80A', '49A', '46A', '64A', '-51B', '-74B', '-77A', '-36A', '-41A', '-32A', '-20A', '-10B'] },
     'CH': { name: 'Ice- The Stream', difficultyLevel: 5, hint1: 'You are very thirsty, but the water in the stream might not be clean.', hint2: 'You must find a way to get rid of bacteria.', effects: ['6B', '51A', '-28B', '-10A', '-71A', '-72A', '-38A', '-19A'] },
     'CI': { name: 'Glass- The Pawnshop', difficultyLevel: 4, hint1: 'You are at an old antiques shop that purchases valuables.', hint2: 'Perhaps you could provide them some item of worth.', effects: ['22A', '15B', '69A', '74B', '41B', '75B', '48A', '65C', '-24A', '-36A', '-44A', '-59A', '-60A', '-61A', '-64A', '-66A', '-71B', '-114A', '-40B', '-108A', '-100A', '-63A', '-63B'] },
     'CJ': { name: 'Art- The Sigil', difficultyLevel: 4, hint1: 'A sigil maker is looking for inspiration for emblems to engrave.', hint2: 'You could provide something that would look artistic on a shield.', effects: ['77A', '65C', '64A', '41A', '40A', '17A', '103A', '-74B', '-79A', '-60B', '49A'] },
     'CK': { name: 'Rope- The Hunter', difficultyLevel: 3, hint1: 'A hunter has tracked down his prey, but is unprepared.', hint2: 'They could urgently use a weapon.', effects: ['41B', '40B', '43B', '42A', '47A', '68A', '-11B', '-52A', '-38A', '-7B'] },
-    'CL': { name: 'Love- The Nihilist', difficultyLevel: 4, hint1: 'A despondent philosopher complains that everything feels meaningless.', hint2: 'They could use something that would make them feel alive again.', effects: ['37A', '33A', '33B', '51B', '12A', '64A', '68B', '-38A', '-31A', '-47A', '-85A', '-36A'] },
+    'CL': { name: 'Love- The Nihilist', difficultyLevel: 4, hint1: 'A despondent philosopher complains that everything feels meaningless.', hint2: 'They could use something that would make them feel alive again.', effects: ['37A', '33A', '33B', '51B', '12A', '64A', '68B', '-38A', '-31A', '-47A', '-85A', '-36A', '-49A'] },
     'CM': { name: 'Machine- The Nerd', difficultyLevel: 4, hint1: 'It is time to get your geeky friend a birthday present.', hint2: 'You know they like useful gear.', effects: ['48A', '44A', '69A', '104B', '108A', '95A', '107A', '114A', '112B', '41B', '40B', '59A', '-36A', '-20A', '-37A', '-49A', '-56B', '-60B', '-71B', '-77A', '-81A', '-96A', '-103A', '-110A', '-24A'] },
     'CN': { name: 'Sound- The Celebration', difficultyLevel: 4, hint1: 'You are at a New Year’s bash and want something that will get people to celebrate.', hint2: 'Maybe something grand and loud that gets people’s attention.', effects: ['78A', '60A', '100A', '16A', '-57B', '-39A', '-42A', '-26B', '-14B', '-12A', '-59A'] },
     'CO': { name: 'Darkness- The Cave', difficultyLevel: 3, hint1: 'You are trying to navigate through a dark cave.', hint2: 'It would be useful if you could see better.', effects: ['78A', '12A', '105A', '68A', '81A', '-111A', '-2A', '-36A', '-62A', '-11A'] },
@@ -1704,12 +2127,857 @@ function migrateCounterMapKeyedByEncounter(map) {
 }
 
 /**
- * 5×5 board (25 cells): classical Phoenix/Whispghost/Golem/Sacmonster (keys A/C/B/D in that order)
- * appear only if that element is not a starting reagent; otherwise they are omitted and the middle
- * band grows so the grid stays full. Draft encounters are unique by theme and sorted by difficulty.
+ * Progression map: starters → path1 → path2 → (CH2+: 4-way fork | CH1: hints) → finale.
  */
+const PROGRESSION_BODY_NODE_COUNT = 24;
+const PROGRESSION_HINT_NOTE = 'Each completed encounter here unlocks a final room hint.';
+const PROGRESSION_BUBBLE_IDS_FORK = ['starters', 'path1', 'path2', 'left1', 'right1', 'left2', 'right2', 'hints', 'finale'];
+const PROGRESSION_BUBBLE_IDS_LINEAR = ['starters', 'path1', 'path2', 'hints', 'finale'];
+const PROGRESSION_FORK_BUBBLE_IDS = ['left1', 'right1', 'left2', 'right2'];
+const PROGRESSION_CONNECTORS_FORK = [
+    ['starters', 'path1'],
+    ['path1', 'path2'],
+    ['path2', 'left1'],
+    ['path2', 'right1'],
+    ['path2', 'left2'],
+    ['path2', 'right2'],
+    ['left1', 'hints'],
+    ['right1', 'hints'],
+    ['left2', 'hints'],
+    ['right2', 'hints'],
+    ['hints', 'finale'],
+];
+const PROGRESSION_CONNECTORS_LINEAR = [
+    ['starters', 'path1'],
+    ['path1', 'path2'],
+    ['path2', 'hints'],
+    ['hints', 'finale'],
+];
+
+let progressionEncounterPlan = [];
+let progressionBodyKeys = [];
+let progressionFinaleKey = null;
+let progressionBubbleKeys = {};
+let progressionNodeSlots = [];
+let progressionRevealedBubbles = new Set(['starters']);
+let progressionFinaleRevealed = false;
+let progressionUseForkLayout = true;
+let progressionMapBuilt = false;
+let progressionMapLayoutMode = null;
+
+function getProgressionBubbleIds() {
+    return progressionUseForkLayout ? PROGRESSION_BUBBLE_IDS_FORK : PROGRESSION_BUBBLE_IDS_LINEAR;
+}
+
+function getProgressionConnectors() {
+    return progressionUseForkLayout ? PROGRESSION_CONNECTORS_FORK : PROGRESSION_CONNECTORS_LINEAR;
+}
+
+function getProgressionUnlockOrder() {
+    return progressionUseForkLayout
+        ? ['path1', 'path2', ...PROGRESSION_FORK_BUBBLE_IDS, 'hints', 'finale']
+        : ['path1', 'path2', 'hints', 'finale'];
+}
+
+function getActiveProgressBubbleIds() {
+    return progressionUseForkLayout
+        ? ['starters', 'path1', 'path2', ...PROGRESSION_FORK_BUBBLE_IDS, 'hints']
+        : ['starters', 'path1', 'path2', 'hints'];
+}
+
+function isForkSectionHalfCleared() {
+    let total = 0;
+    let defeated = 0;
+    for (const id of PROGRESSION_FORK_BUBBLE_IDS) {
+        total += getBubbleKeys(id).length;
+        defeated += countDefeatedInBubble(id);
+    }
+    if (!total) return true;
+    return defeated >= Math.ceil(total / 2);
+}
+
 const BOARD_GRID_COLUMNS = 5;
 const BOARD_TOTAL_CELL_COUNT = 25;
+
+function splitKeysIntoChunks(keys, chunkCount) {
+    if (chunkCount <= 0) return [];
+    if (chunkCount === 1) return [keys.slice()];
+    const chunks = Array.from({ length: chunkCount }, () => []);
+    const base = Math.floor(keys.length / chunkCount);
+    const extra = keys.length % chunkCount;
+    let start = 0;
+    for (let c = 0; c < chunkCount; c++) {
+        const size = base + (c < extra ? 1 : 0);
+        chunks[c] = keys.slice(start, start + size);
+        start += size;
+    }
+    return chunks;
+}
+
+function progressionMapModeForLayout() {
+    return progressionUseForkLayout ? 'fork4' : 'linear';
+}
+
+function progressionMapDomMatchesMode(gridEl, mode) {
+    if (!gridEl) return false;
+    const expectedIds = getProgressionBubbleIds();
+    if (!expectedIds.every((id) => gridEl.querySelector(`[data-bubble="${id}"]`))) return false;
+    if (mode === 'fork4' && gridEl.querySelector('[data-bubble="d4a"], [data-bubble="d4"], [data-bubble="path3"]')) {
+        return false;
+    }
+    if (mode === 'linear' && gridEl.querySelector('[data-bubble="left1"], [data-bubble="d4a"], [data-bubble="path3"], [data-bubble="d4"]')) {
+        return false;
+    }
+    return true;
+}
+
+function assignProgressionFromLayout(layout) {
+    if (!Array.isArray(layout) || layout.length !== BOARD_TOTAL_CELL_COUNT) return false;
+
+    const finaleKey = layout[layout.length - 1];
+    const body = layout.slice(0, -1);
+    const nextUseForkLayout = finaleKey !== 'AZ';
+    if (nextUseForkLayout !== progressionUseForkLayout) {
+        progressionMapBuilt = false;
+        progressionMapLayoutMode = null;
+    }
+    progressionUseForkLayout = nextUseForkLayout;
+
+    const starters = [];
+    let middleKeys;
+    if (progressionUseForkLayout) {
+        let starterEndIndex = 0;
+        while (starterEndIndex < body.length && BOARD_CLASSICAL_CORNER_KEYS.includes(body[starterEndIndex])) {
+            starters.push(body[starterEndIndex]);
+            starterEndIndex++;
+        }
+        middleKeys = body.slice(starterEndIndex);
+    } else {
+        const cornerSet = new Set(BOARD_CLASSICAL_CORNER_KEYS);
+        for (const key of body) {
+            if (cornerSet.has(key)) starters.push(key);
+        }
+        middleKeys = body.filter((key) => !cornerSet.has(key));
+    }
+
+    const hints = middleKeys.slice(-4);
+    const withoutHints = middleKeys.slice(0, -4);
+
+    const d4Keys = withoutHints.filter((k) => encounterEffects[k]?.difficultyLevel === 4);
+    const d4ForkKeys = d4Keys.slice(0, 4);
+    const d4Set = new Set(d4ForkKeys);
+    const linearPool = withoutHints.filter((k) => !d4Set.has(k));
+
+    if (progressionUseForkLayout) {
+        const pathChunks = splitKeysIntoChunks(linearPool, 2);
+        const forkKeys = d4ForkKeys.map((key) => (key ? [key] : []));
+        while (forkKeys.length < 4) forkKeys.push([]);
+        progressionBubbleKeys = {
+            starters,
+            path1: pathChunks[0] || [],
+            path2: pathChunks[1] || [],
+            left1: forkKeys[0],
+            right1: forkKeys[1],
+            left2: forkKeys[2],
+            right2: forkKeys[3],
+            hints,
+            finale: [finaleKey],
+        };
+        progressionEncounterPlan = [
+            ...starters,
+            ...pathChunks[0],
+            ...pathChunks[1],
+            ...forkKeys[0],
+            ...forkKeys[1],
+            ...forkKeys[2],
+            ...forkKeys[3],
+            ...hints,
+            finaleKey,
+        ];
+    } else {
+        const pathChunks = splitKeysIntoChunks(withoutHints, 2);
+        progressionBubbleKeys = {
+            starters,
+            path1: pathChunks[0] || [],
+            path2: pathChunks[1] || [],
+            hints,
+            finale: [finaleKey],
+        };
+        progressionEncounterPlan = [
+            ...starters,
+            ...pathChunks[0],
+            ...pathChunks[1],
+            ...hints,
+            finaleKey,
+        ];
+    }
+
+    progressionNodeSlots = [];
+    let boardIndex = 0;
+    for (const bubbleId of getProgressionBubbleIds()) {
+        if (bubbleId === 'finale') continue;
+        const keys = progressionBubbleKeys[bubbleId] || [];
+        keys.forEach((key, slot) => {
+            progressionNodeSlots.push({ bubbleId, slot, boardIndex, key });
+            boardIndex++;
+        });
+    }
+
+    progressionBodyKeys = progressionEncounterPlan.slice(0, -1);
+    progressionFinaleKey = finaleKey;
+    return progressionEncounterPlan.length === BOARD_TOTAL_CELL_COUNT;
+}
+
+function getProgressionBubbleEl(bubbleId) {
+    const gridEl = document.getElementById('progressionMapNodes');
+    if (!gridEl) return null;
+    return gridEl.querySelector(`[data-bubble="${bubbleId}"]`);
+}
+
+function getProgressionNodeEl(nodeRef) {
+    const gridEl = document.getElementById('progressionMapNodes');
+    if (!gridEl) return null;
+    if (typeof nodeRef === 'number') {
+        return gridEl.querySelector(`[data-node-index="${nodeRef}"]`);
+    }
+    if (nodeRef === 'finale') return gridEl.querySelector('[data-node-id="finale"]');
+    return gridEl.querySelector(`[data-node-id="${nodeRef}"]`);
+}
+
+function getBubbleKeys(bubbleId) {
+    return progressionBubbleKeys[bubbleId] || [];
+}
+
+function bubbleUnlockThreshold(bubbleId) {
+    const keys = getBubbleKeys(bubbleId);
+    if (!keys.length) return 0;
+    return Math.ceil(keys.length / 2);
+}
+
+function countDefeatedInBubble(bubbleId) {
+    return getBubbleKeys(bubbleId).filter((k) => defeatedEncounters.has(k)).length;
+}
+
+function isBubbleHalfCleared(bubbleId) {
+    const keys = getBubbleKeys(bubbleId);
+    if (!keys.length) return true;
+    return countDefeatedInBubble(bubbleId) >= bubbleUnlockThreshold(bubbleId);
+}
+
+function isBubbleRevealed(bubbleId) {
+    if (bubbleId === 'finale') return progressionFinaleRevealed;
+    return progressionRevealedBubbles.has(bubbleId);
+}
+
+function isProgressionNodeRevealed(nodeIndex) {
+    const slot = progressionNodeSlots[nodeIndex];
+    if (!slot) return nodeIndex === 'finale' ? progressionFinaleRevealed : false;
+    return isBubbleRevealed(slot.bubbleId);
+}
+
+function recomputeProgressionUnlocksFromDefeats() {
+    progressionRevealedBubbles = new Set(['starters']);
+    if (isBubbleHalfCleared('starters')) progressionRevealedBubbles.add('path1');
+    if (isBubbleRevealed('path1') && isBubbleHalfCleared('path1')) progressionRevealedBubbles.add('path2');
+    if (progressionUseForkLayout) {
+        if (isBubbleRevealed('path2') && isBubbleHalfCleared('path2')) {
+            for (const id of PROGRESSION_FORK_BUBBLE_IDS) progressionRevealedBubbles.add(id);
+        }
+        const forkRevealed = PROGRESSION_FORK_BUBBLE_IDS.every((id) => isBubbleRevealed(id));
+        if (forkRevealed && isForkSectionHalfCleared()) progressionRevealedBubbles.add('hints');
+    } else {
+        if (isBubbleRevealed('path2') && isBubbleHalfCleared('path2')) progressionRevealedBubbles.add('hints');
+    }
+    progressionFinaleRevealed = isBubbleRevealed('hints');
+}
+
+function inferFinalEncounterUnlockOverridesFromProgression() {
+    const fin = progressionFinaleKey || progressionEncounterPlan[BOARD_TOTAL_CELL_COUNT - 1];
+    if (!FINAL_ENCOUNTER_KEYS.has(fin)) return;
+    const hintKeys = getBubbleKeys('hints');
+    if (hintKeys.length === 4) runtimeFinalUnlockOverrides[fin] = hintKeys.slice();
+}
+
+function refreshBottomRowEncounterKeysFromProgression() {
+    bottomRowEncounterKeys.clear();
+    getBubbleKeys('hints').forEach((k) => bottomRowEncounterKeys.add(k));
+    if (progressionFinaleKey) bottomRowEncounterKeys.add(progressionFinaleKey);
+}
+
+function getNextBubbleToUnlock() {
+    for (const id of getProgressionUnlockOrder()) {
+        if (id === 'finale') {
+            if (!progressionFinaleRevealed) return 'finale';
+            continue;
+        }
+        if (!progressionRevealedBubbles.has(id)) return id;
+    }
+    return null;
+}
+
+function getActiveProgressBubble() {
+    for (const id of getActiveProgressBubbleIds()) {
+        if (!isBubbleRevealed(id)) return id === 'starters' ? 'starters' : id;
+        if (!isBubbleHalfCleared(id)) return id;
+    }
+    if (progressionFinaleRevealed && !defeatedEncounters.has(progressionFinaleKey)) return 'finale';
+    return 'hints';
+}
+
+function clearProgressionNodeDisplay(cell) {
+    cell.style.cursor = '';
+    cell.style.border = '';
+    cell.style.background = '';
+    cell.style.boxShadow = '';
+    cell.classList.remove('defeated', 'selected', 'dissolve', 'locked', 'mystery');
+    delete cell.dataset.encounterKey;
+    delete cell.dataset.encounterName;
+    delete cell.dataset.elementId;
+    delete cell.dataset.icon;
+    delete cell.dataset.boardIndex;
+    const half = cell.querySelector('.half-success-counter');
+    if (half) half.remove();
+    cell.textContent = '';
+}
+
+function populateProgressionNode(cell, encounterKey, revealed) {
+    clearProgressionNodeDisplay(cell);
+    if (!revealed) {
+        cell.classList.add('locked', 'mystery');
+        cell.textContent = '?';
+        cell.style.cursor = 'default';
+        return;
+    }
+    const encounter = encounterEffects[encounterKey];
+    if (!encounter) return;
+    const rewardId = encounterThemeRewardElementId(encounterKey);
+    cell.dataset.encounterKey = encounterKey;
+    cell.dataset.encounterName = encounter.name || '';
+    if (rewardId && elementData[rewardId]) {
+        cell.dataset.elementId = rewardId;
+        cell.dataset.icon = elementData[rewardId].emoji;
+    } else {
+        cell.dataset.elementId = '';
+        cell.dataset.icon = '🔚';
+    }
+    cell.style.cursor = 'pointer';
+    if (defeatedEncounters.has(encounterKey)) {
+        cell.classList.add('defeated');
+        cell.innerHTML = cell.dataset.icon;
+    } else {
+        cell.textContent = cell.dataset.icon || '';
+    }
+}
+
+function rebuildProgressionBubbleNodes() {
+    for (const bubbleId of getProgressionBubbleIds()) {
+        const bubble = getProgressionBubbleEl(bubbleId);
+        if (!bubble) continue;
+        const nodesWrap = bubble.querySelector('.cluster-bubble-nodes');
+        if (!nodesWrap) continue;
+        nodesWrap.innerHTML = '';
+        const keys = bubbleId === 'finale' ? getBubbleKeys('finale') : getBubbleKeys(bubbleId);
+        const gridCols = bubbleId === 'finale' ? 1 : keys.length <= 1 ? 1 : 2;
+        nodesWrap.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+
+        keys.forEach((key, slot) => {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            if (bubbleId === 'finale') {
+                cell.dataset.nodeId = 'finale';
+            } else {
+                cell.dataset.nodeId = `${bubbleId}-${slot}`;
+                const slotMeta = progressionNodeSlots.find((s) => s.bubbleId === bubbleId && s.slot === slot);
+                if (slotMeta) cell.dataset.nodeIndex = String(slotMeta.boardIndex);
+            }
+            cell.addEventListener('click', () => handleProgressionNodeClick(cell));
+            nodesWrap.appendChild(cell);
+        });
+    }
+}
+
+function refreshClusterBubbleChrome() {
+    const nextTarget = getNextBubbleToUnlock();
+    const activeBubble = getActiveProgressBubble();
+
+    for (const bubbleId of getProgressionBubbleIds()) {
+        const bubble = getProgressionBubbleEl(bubbleId);
+        if (!bubble) continue;
+        const progEl = bubble.querySelector('.cluster-bubble-progress');
+        const noteEl = bubble.querySelector('.cluster-bubble-note');
+        const revealed = isBubbleRevealed(bubbleId);
+        const defeated = countDefeatedInBubble(bubbleId);
+        const needed = bubbleUnlockThreshold(bubbleId);
+        const total = getBubbleKeys(bubbleId).length;
+
+        bubble.classList.remove('cluster-bubble--active', 'cluster-bubble--next', 'cluster-bubble--done', 'cluster-bubble--locked');
+
+        if (bubbleId === 'finale') {
+            if (!progressionFinaleRevealed) {
+                bubble.classList.add('cluster-bubble--locked');
+                if (nextTarget === 'finale') bubble.classList.add('cluster-bubble--next');
+            } else if (defeatedEncounters.has(progressionFinaleKey)) {
+                bubble.classList.add('cluster-bubble--done');
+            } else {
+                bubble.classList.add('cluster-bubble--active');
+            }
+            if (progEl) progEl.textContent = '';
+            continue;
+        }
+
+        if (bubbleId === 'hints' && noteEl) {
+            noteEl.classList.toggle('cluster-bubble-note--hidden', !revealed && nextTarget !== 'hints');
+        }
+
+        if (!revealed) {
+            bubble.classList.add('cluster-bubble--locked');
+            const isForkNext =
+                progressionUseForkLayout &&
+                PROGRESSION_FORK_BUBBLE_IDS.includes(bubbleId) &&
+                nextTarget &&
+                PROGRESSION_FORK_BUBBLE_IDS.includes(nextTarget);
+            if (nextTarget === bubbleId || isForkNext) bubble.classList.add('cluster-bubble--next');
+            if (progEl) progEl.textContent = '';
+        } else if (total > 0 && defeated >= total) {
+            bubble.classList.add('cluster-bubble--done');
+            if (progEl) progEl.textContent = bubbleId === 'hints' ? 'All hints available' : '';
+        } else if (bubbleId === activeBubble) {
+            bubble.classList.add('cluster-bubble--active');
+            const remaining = Math.max(0, needed - defeated);
+            if (progEl) {
+                if (bubbleId === 'hints') {
+                    progEl.textContent = `${defeated}/${total} cleared`;
+                } else if (remaining > 0) {
+                    progEl.textContent = `${defeated}/${needed} to unlock next`;
+                } else {
+                    progEl.textContent = `${defeated}/${total} cleared`;
+                }
+            }
+        } else if (progEl) {
+            progEl.textContent = defeated > 0 ? `${defeated}/${total} cleared` : '';
+        }
+    }
+}
+
+function refreshProgressionMapDisplay(options = {}) {
+    const gridEl = document.getElementById('progressionMapNodes');
+    if (!gridEl || progressionEncounterPlan.length !== BOARD_TOTAL_CELL_COUNT) return;
+
+    if (options.rebuildNodes) rebuildProgressionBubbleNodes();
+
+    for (const slot of progressionNodeSlots) {
+        const cell = getProgressionNodeEl(`${slot.bubbleId}-${slot.slot}`);
+        if (!cell) continue;
+        cell.dataset.boardIndex = String(slot.boardIndex);
+        populateProgressionNode(cell, slot.key, isBubbleRevealed(slot.bubbleId));
+    }
+
+    const finaleCell = getProgressionNodeEl('finale');
+    if (finaleCell) {
+        finaleCell.dataset.boardIndex = String(BOARD_TOTAL_CELL_COUNT - 1);
+        populateProgressionNode(finaleCell, progressionFinaleKey, progressionFinaleRevealed);
+    }
+
+    refreshClusterBubbleChrome();
+    restoreHalfSuccessCounters();
+    requestAnimationFrame(() => drawProgressionMapPaths());
+}
+
+function getConnectorFillProgress(fromId, toId) {
+    if (toId === 'finale') return progressionFinaleRevealed ? 1 : 0;
+    if (isBubbleRevealed(toId)) return 1;
+    if (progressionUseForkLayout) {
+        if (PROGRESSION_FORK_BUBBLE_IDS.includes(fromId) && toId === 'hints') {
+            if (!isBubbleRevealed('hints')) {
+                let total = 0;
+                let defeated = 0;
+                for (const id of PROGRESSION_FORK_BUBBLE_IDS) {
+                    total += getBubbleKeys(id).length;
+                    defeated += countDefeatedInBubble(id);
+                }
+                const needed = Math.ceil(total / 2);
+                return needed ? Math.min(1, defeated / needed) : 1;
+            }
+            return 1;
+        }
+        if (fromId === 'path2' && PROGRESSION_FORK_BUBBLE_IDS.includes(toId)) {
+            if (!PROGRESSION_FORK_BUBBLE_IDS.some((id) => isBubbleRevealed(id))) {
+                const needed = bubbleUnlockThreshold('path2');
+                return needed ? Math.min(1, countDefeatedInBubble('path2') / needed) : 1;
+            }
+            return isBubbleRevealed(toId) ? 1 : 0;
+        }
+    } else {
+        if (fromId === 'path2' && toId === 'hints') {
+            if (!isBubbleRevealed('hints')) {
+                const needed = bubbleUnlockThreshold('path2');
+                return needed ? Math.min(1, countDefeatedInBubble('path2') / needed) : 1;
+            }
+            return 1;
+        }
+    }
+    const needed = bubbleUnlockThreshold(fromId);
+    if (!needed) return 1;
+    return Math.min(1, countDefeatedInBubble(fromId) / needed);
+}
+
+function drawProgressionMapPaths() {
+    const svg = document.getElementById('progressionMapPaths');
+    const mapEl = document.getElementById('progressionMap');
+    if (!svg || !mapEl) return;
+
+    const mapRect = mapEl.getBoundingClientRect();
+    svg.setAttribute('width', String(mapRect.width));
+    svg.setAttribute('height', String(mapRect.height));
+    svg.innerHTML = '';
+
+    const bubbleConnectPoint = (bubble, side) => {
+        if (!bubble) return null;
+        const r = bubble.getBoundingClientRect();
+        const y = r.top + r.height / 2 - mapRect.top;
+        const inset = 3;
+        const x =
+            side === 'right'
+                ? r.right - mapRect.left - inset
+                : r.left - mapRect.left + inset;
+        return { x, y };
+    };
+
+    const polylineLength = (pts) => {
+        let len = 0;
+        for (let i = 1; i < pts.length; i++) {
+            len += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+        }
+        return len;
+    };
+
+    const drawPolylineConnector = (pts, progress) => {
+        if (!pts || pts.length < 2) return;
+        const totalLen = polylineLength(pts);
+        if (totalLen < 1) return;
+
+        let d = `M ${pts[0].x} ${pts[0].y}`;
+        for (let i = 1; i < pts.length; i++) {
+            d += ` L ${pts[i].x} ${pts[i].y}`;
+        }
+
+        const base = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        base.setAttribute('d', d);
+        base.setAttribute('class', 'connector-base');
+        base.setAttribute('fill', 'none');
+        svg.appendChild(base);
+
+        if (progress <= 0) return;
+
+        const fill = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        fill.setAttribute('d', d);
+        fill.setAttribute('class', 'connector-fill');
+        fill.setAttribute('fill', 'none');
+        fill.setAttribute('stroke-dasharray', String(totalLen));
+        fill.setAttribute('stroke-dashoffset', String(totalLen * (1 - progress)));
+        svg.appendChild(fill);
+    };
+
+    const drawStraightConnector = (fromId, toId) => {
+        const fromBubble = getProgressionBubbleEl(fromId);
+        const toBubble = getProgressionBubbleEl(toId);
+        if (!fromBubble || !toBubble) return;
+
+        const a = bubbleConnectPoint(fromBubble, 'right');
+        const b = bubbleConnectPoint(toBubble, 'left');
+        if (!a || !b) return;
+
+        const progress = getConnectorFillProgress(fromId, toId);
+        const gapMidX = (a.x + b.x) / 2;
+        if (Math.abs(a.y - b.y) < 0.5) {
+            drawPolylineConnector([a, b], progress);
+        } else {
+            drawPolylineConnector([a, { x: gapMidX, y: a.y }, { x: gapMidX, y: b.y }, b], progress);
+        }
+    };
+
+    const drawForkSplitJoinPaths = () => {
+        const path2Bubble = getProgressionBubbleEl('path2');
+        const hintsBubble = getProgressionBubbleEl('hints');
+        if (!path2Bubble || !hintsBubble) return;
+
+        const path2Right = bubbleConnectPoint(path2Bubble, 'right');
+        const hintsLeft = bubbleConnectPoint(hintsBubble, 'left');
+        if (!path2Right || !hintsLeft) return;
+
+        const forkArm = (id) => {
+            const bubble = getProgressionBubbleEl(id);
+            return {
+                id,
+                left: bubbleConnectPoint(bubble, 'left'),
+                right: bubbleConnectPoint(bubble, 'right'),
+            };
+        };
+
+        const left1 = forkArm('left1');
+        const right1 = forkArm('right1');
+        const left2 = forkArm('left2');
+        const right2 = forkArm('right2');
+        if (!left1.left || !right1.left || !left2.left || !right2.left || !left1.right || !right1.right || !left2.right || !right2.right) {
+            return;
+        }
+
+        const topRowY = (left1.left.y + right1.left.y) / 2;
+        const bottomRowY = (left2.left.y + right2.left.y) / 2;
+        const forkLeftX = Math.min(left1.left.x, left2.left.x);
+        const forkRightX = Math.max(right1.right.x, right2.right.x);
+
+        const splitGap = Math.max(18, (forkLeftX - path2Right.x) * 0.34);
+        const mergeGap = Math.max(18, (hintsLeft.x - forkRightX) * 0.34);
+        const splitX = path2Right.x + splitGap;
+        const mergeX = forkRightX + mergeGap;
+
+        const splitTop = { x: splitX, y: topRowY };
+        const splitBottom = { x: splitX, y: bottomRowY };
+        const mergeTop = { x: mergeX, y: topRowY };
+        const mergeBottom = { x: mergeX, y: bottomRowY };
+
+        const splitProgress = () => {
+            if (PROGRESSION_FORK_BUBBLE_IDS.some((id) => isBubbleRevealed(id))) return 1;
+            const needed = bubbleUnlockThreshold('path2');
+            return needed ? Math.min(1, countDefeatedInBubble('path2') / needed) : 1;
+        };
+
+        const mergeProgress = () => {
+            if (isBubbleRevealed('hints')) return 1;
+            let total = 0;
+            let defeated = 0;
+            for (const id of PROGRESSION_FORK_BUBBLE_IDS) {
+                total += getBubbleKeys(id).length;
+                defeated += countDefeatedInBubble(id);
+            }
+            const needed = Math.ceil(total / 2);
+            return needed ? Math.min(1, defeated / needed) : 1;
+        };
+
+        const rowParallelProgress = (armId) => (isBubbleRevealed(armId) ? 1 : splitProgress());
+
+        const drawHorizontalInGap = (fromPoint, toPoint, progress) => {
+            if (!fromPoint || !toPoint) return;
+            drawPolylineConnector([fromPoint, { x: toPoint.x, y: fromPoint.y }], progress);
+        };
+
+        const routeInGap = (fromPoint, toPoint, progress) => {
+            if (!fromPoint || !toPoint) return;
+            if (Math.abs(fromPoint.y - toPoint.y) < 0.5) {
+                drawPolylineConnector([fromPoint, toPoint], progress);
+                return;
+            }
+            const midX = (fromPoint.x + toPoint.x) / 2;
+            drawPolylineConnector(
+                [fromPoint, { x: midX, y: fromPoint.y }, { x: midX, y: toPoint.y }, toPoint],
+                progress
+            );
+        };
+
+        const topColGap = {
+            x: (left1.right.x + right1.left.x) / 2,
+            y: topRowY,
+        };
+        const bottomColGap = {
+            x: (left2.right.x + right2.left.x) / 2,
+            y: bottomRowY,
+        };
+
+        // Split (<): two lines from path2 to left-row buses (routed in gaps, not through bubbles)
+        routeInGap(path2Right, splitTop, splitProgress());
+        routeInGap(path2Right, splitBottom, splitProgress());
+
+        // Parallel (=): into left column, then across inter-column gaps only
+        drawPolylineConnector([splitTop, left1.left], rowParallelProgress('left1'));
+        drawPolylineConnector([splitBottom, left2.left], rowParallelProgress('left2'));
+        drawHorizontalInGap(left1.right, topColGap, rowParallelProgress('right1'));
+        drawHorizontalInGap(topColGap, right1.left, rowParallelProgress('right1'));
+        drawHorizontalInGap(left2.right, bottomColGap, rowParallelProgress('right2'));
+        drawHorizontalInGap(bottomColGap, right2.left, rowParallelProgress('right2'));
+
+        // Merge (>): from right column edges to merge buses, then into hints
+        drawHorizontalInGap(right1.right, mergeTop, mergeProgress());
+        drawHorizontalInGap(right2.right, mergeBottom, mergeProgress());
+        routeInGap(mergeTop, hintsLeft, mergeProgress());
+        routeInGap(mergeBottom, hintsLeft, mergeProgress());
+    };
+
+    const skipForkPairs = new Set();
+    if (progressionUseForkLayout) {
+        for (const id of PROGRESSION_FORK_BUBBLE_IDS) {
+            skipForkPairs.add(`path2|${id}`);
+            skipForkPairs.add(`${id}|hints`);
+        }
+    }
+
+    getProgressionConnectors().forEach(([fromId, toId]) => {
+        if (skipForkPairs.has(`${fromId}|${toId}`)) return;
+        drawStraightConnector(fromId, toId);
+    });
+
+    if (progressionUseForkLayout) drawForkSplitJoinPaths();
+}
+
+function handleProgressionNodeClick(cell) {
+    const ek = cell.dataset.encounterKey;
+    if (!ek || cell.classList.contains('locked') || cell.classList.contains('defeated')) return;
+
+    const remainingEncounters = countIncompleteEncounters();
+    const isBlockingActive =
+        LOCATION_FAILURE_BLOCKING_ENABLED && remainingEncounters > 2 && !bottomRowEncounterKeys.has(ek);
+
+    if (isBlockingActive) {
+        if (
+            locationFailureCounter[ek] >= LOCATION_FAILURE_STREAK_FORCE_MOVE &&
+            currentEncounterCell &&
+            currentEncounterCell.dataset.encounterKey === ek
+        ) {
+            displayMessage('Fifth failure in a row, must try another encounter!', 'default');
+            return;
+        }
+    }
+
+    selectProgressionEncounterCell(cell, { countMove: true });
+    saveGameState();
+}
+
+function createProgressionBubbleShell(bubbleId, extraClass = '') {
+    const bubble = document.createElement('div');
+    bubble.className = `cluster-bubble ${extraClass}`.trim();
+    bubble.dataset.bubble = bubbleId;
+
+    const header = document.createElement('div');
+    header.className = 'cluster-bubble-header';
+    header.innerHTML = '<span class="cluster-bubble-progress"></span>';
+    if (bubbleId === 'hints') {
+        const note = document.createElement('div');
+        note.className = 'cluster-bubble-note cluster-bubble-note--hidden';
+        note.textContent = PROGRESSION_HINT_NOTE;
+        header.appendChild(note);
+    }
+    if (bubbleId === 'finale') {
+        const finLabel = document.createElement('div');
+        finLabel.className = 'cluster-bubble-finale-label';
+        finLabel.textContent = 'Final Encounter';
+        header.insertBefore(finLabel, header.firstChild);
+    }
+    bubble.appendChild(header);
+
+    const nodesWrap = document.createElement('div');
+    nodesWrap.className = 'cluster-bubble-nodes';
+    nodesWrap.dataset.bubbleNodes = bubbleId;
+    bubble.appendChild(nodesWrap);
+    return bubble;
+}
+
+function ensureProgressionMapBuilt() {
+    const gridEl = document.getElementById('progressionMapNodes');
+    if (!gridEl) return;
+
+    const mode = progressionMapModeForLayout();
+    if (progressionMapBuilt && progressionMapLayoutMode === mode && progressionMapDomMatchesMode(gridEl, mode)) {
+        return;
+    }
+
+    gridEl.innerHTML = '';
+    progressionMapBuilt = false;
+
+    if (mode === 'fork4') {
+        const spineA = document.createElement('div');
+        spineA.className = 'progression-spine';
+        ['starters', 'path1', 'path2'].forEach((id) => spineA.appendChild(createProgressionBubbleShell(id)));
+
+        const fork = document.createElement('div');
+        fork.className = 'progression-fork';
+        PROGRESSION_FORK_BUBBLE_IDS.forEach((id) =>
+            fork.appendChild(createProgressionBubbleShell(id, 'cluster-bubble--fork'))
+        );
+
+        const spineB = document.createElement('div');
+        spineB.className = 'progression-spine';
+        spineB.appendChild(createProgressionBubbleShell('hints', 'cluster-bubble--hints'));
+        spineB.appendChild(createProgressionBubbleShell('finale', 'cluster-bubble--finale'));
+
+        gridEl.appendChild(spineA);
+        gridEl.appendChild(fork);
+        gridEl.appendChild(spineB);
+    } else {
+        const spineA = document.createElement('div');
+        spineA.className = 'progression-spine';
+        ['starters', 'path1', 'path2'].forEach((id) =>
+            spineA.appendChild(createProgressionBubbleShell(id))
+        );
+
+        const spineB = document.createElement('div');
+        spineB.className = 'progression-spine';
+        spineB.appendChild(createProgressionBubbleShell('hints', 'cluster-bubble--hints'));
+        spineB.appendChild(createProgressionBubbleShell('finale', 'cluster-bubble--finale'));
+
+        gridEl.appendChild(spineA);
+        gridEl.appendChild(spineB);
+    }
+
+    progressionMapBuilt = true;
+    progressionMapLayoutMode = mode;
+    if (!window.__progressionMapResizeHook) {
+        window.__progressionMapResizeHook = true;
+        window.addEventListener('resize', () => {
+            if (progressionEncounterPlan.length === BOARD_TOTAL_CELL_COUNT) drawProgressionMapPaths();
+        });
+    }
+}
+
+function findFirstSelectableProgressionNode() {
+    for (const slot of progressionNodeSlots) {
+        if (!isBubbleRevealed(slot.bubbleId)) continue;
+        if (slot.key && !defeatedEncounters.has(slot.key)) {
+            return getProgressionNodeEl(`${slot.bubbleId}-${slot.slot}`);
+        }
+    }
+    if (progressionFinaleRevealed && progressionFinaleKey && !defeatedEncounters.has(progressionFinaleKey)) {
+        return getProgressionNodeEl('finale');
+    }
+    return null;
+}
+
+function selectProgressionEncounterCell(cell, { countMove = true } = {}) {
+    const ek = cell?.dataset?.encounterKey;
+    if (!ek || cell.classList.contains('locked') || cell.classList.contains('defeated')) return false;
+
+    if (countMove && currentEncounterCell !== cell) {
+        moveCounter++;
+        recordBoardMoveToNewEncounterHex();
+    }
+
+    if (previousEncounterKey && previousEncounterKey !== ek) {
+        locationFailureCounter[previousEncounterKey] = 0;
+    }
+
+    document.querySelectorAll('.cell').forEach((c) => c.classList.remove('selected'));
+    cell.classList.add('selected');
+    currentEncounterCell = cell;
+    previousEncounterKey = ek;
+    halfSuccesses = {};
+    updatePreview(ek);
+
+    if (pawn) pawn.remove();
+    pawn = document.createElement('div');
+    pawn.className = 'pawn';
+    pawn.textContent = '♙';
+    cell.appendChild(pawn);
+    return true;
+}
+
+function selectProgressionEncounterByKey(encounterKey, { countMove = true } = {}) {
+    if (encounterKey === progressionFinaleKey && progressionFinaleRevealed) {
+        return selectProgressionEncounterCell(getProgressionNodeEl('finale'), { countMove });
+    }
+    const slot = progressionNodeSlots.find((s) => s.key === encounterKey);
+    if (!slot || !isBubbleRevealed(slot.bubbleId)) return false;
+    return selectProgressionEncounterCell(getProgressionNodeEl(`${slot.bubbleId}-${slot.slot}`), { countMove });
+}
+
 
 /** Keys in fixed compass order (Fire, Water, Earth, Air rewards) when those corners are still in play */
 const BOARD_CLASSICAL_CORNER_KEYS = ['A', 'C', 'B', 'D'];
@@ -1740,8 +3008,29 @@ function shrink27To25EncounterLayout(layout27) {
     return [...corners, ...inner20, fin];
 }
 
+function migrateIceVerbEffectKey(key) {
+    if (typeof key !== 'string') return key;
+    if (key === '9B') return '9A';
+    if (key === '-9B') return '-9A';
+    return key;
+}
+
+function migratePersistedHalfSuccessKeys(state) {
+    if (!state?.persistentHalfSuccesses || typeof state.persistentHalfSuccesses !== 'object') return;
+    const next = {};
+    Object.entries(state.persistentHalfSuccesses).forEach(([encounterKey, values]) => {
+        const migrated = new Set();
+        (Array.isArray(values) ? values : []).forEach((value) => {
+            migrated.add(migrateIceVerbEffectKey(value));
+        });
+        next[encounterKey] = [...migrated];
+    });
+    state.persistentHalfSuccesses = next;
+}
+
 function migratePersistedGameStateEncounterKeys(state) {
     if (!state || typeof state !== 'object') return;
+    migratePersistedHalfSuccessKeys(state);
     const gl = state.gridEncounterLayout;
     if (Array.isArray(gl)) {
         let next = migrateEncounterKeyArray(gl.slice());
@@ -1873,25 +3162,36 @@ function assignedChallengeRiddleKey(forcedFinalKey) {
 }
 /** Challenge 1 mandatory middle encounters: Butcher, Mosquito, Riddle One, Knot, Maze. */
 const CHALLENGE_1_MANDATORY_MIDDLE_KEYS = ['AB', 'AG', 'AV', 'BH', 'AT'];
-/** Sandwich challenge: never draft The Swap (BD), The Hour (AD), Riddle Two (CB), Cloud (AW), Sigil (CJ), or Performance (BO). */
-const CHALLENGE_1_FORBIDDEN_ENCOUNTER_KEYS = new Set(['BD', 'AD', 'CB', 'AW', 'CJ', 'BO']);
+/** The Hour (AD) is only drafted on Challenge 5 (Landmark) and Challenge 6 (Accident). */
+const THE_HOUR_ENCOUNTER_KEY = 'AD';
+const THE_HOUR_ALLOWED_FINALE_KEYS = new Set(['DZ', 'FZ']);
+/** Sandwich challenge: never draft The Swap (BD), Riddle Two (CB), Cloud (AW), Sigil (CJ), or Performance (BO). */
+const CHALLENGE_1_FORBIDDEN_ENCOUNTER_KEYS = new Set(['BD', 'CB', 'AW', 'CJ', 'BO']);
 const CHALLENGE_1_FORBIDDEN_THEME_SLUGS = new Set(['Cloud', 'Art']);
-/** Endgame challenge: never draft Time·The Hour (AD) in the random middle band */
-const CHALLENGE_2_FORBIDDEN_ENCOUNTER_KEYS = new Set(['AD']);
-/** Story pins for challenges 3–5 (seeded after assigned riddle, before difficulty/tier fill). */
+/** Story pins for challenges 2–5 (seeded after assigned riddle, before difficulty/tier fill). */
 const CHALLENGE_PINNED_MIDDLE_BY_FINALE = Object.freeze({
+    Z: ['U'],
     EZ: ['O', 'K', 'BE'],
     BZ: ['J'],
     DZ: ['AF', 'J'],
 });
+/** Challenges 3–6: fixed harder middle-band difficulty mix (rest = difficulty 4). */
+const CHALLENGES_HARD_DISTRIBUTION_FINALE_KEYS = new Set(['EZ', 'BZ', 'DZ', 'FZ']);
+const CHALLENGE_HARD_DIFF_QUOTAS = Object.freeze({ 2: 2, 3: 2, 5: 4 });
+/** Challenges 3–6: no difficulty‑1 middle encounters in the random pool. */
+const CHALLENGES_WITHOUT_DIFF1 = new Set(['EZ', 'BZ', 'DZ', 'FZ']);
+/** Challenges 3–6: never draft The Mosquito. */
+const CHALLENGE_MOSQUITO_FORBIDDEN_FINALE_KEYS = new Set(['EZ', 'BZ', 'DZ', 'FZ']);
+/** Challenges 4–6: never draft The Slumber (still allowed on Challenge 3). */
+const CHALLENGE_SLUMBER_FORBIDDEN_FINALE_KEYS = new Set(['BZ', 'DZ', 'FZ']);
 /** Sigil & Weather: soft‑weighted in random fill (never blocked). Low on CH2–5; normal on CH6. */
 const OPTIONAL_ENCOUNTER_KEYS = new Set(['CJ', 'AL']);
 const OPTIONAL_ENCOUNTER_WEIGHT_DEFAULT = 0.08;
 const OPTIONAL_ENCOUNTER_WEIGHT_BY_FINALE = Object.freeze({ FZ: 1, AZ: 1 });
-/** Cloud theme (The Sign): lower theme lottery weight on CH2–5; normal on CH6 (FZ). */
+/** Cloud theme (The Sign): lower theme lottery weight on CH4–6; normal on CH3. */
 const OPTIONAL_THEME_SLUGS = new Set(['Cloud']);
 const OPTIONAL_THEME_WEIGHT_DEFAULT = 0.011;
-const OPTIONAL_THEME_WEIGHT_BY_FINALE = Object.freeze({ FZ: 1 });
+const OPTIONAL_THEME_WEIGHT_BY_FINALE = Object.freeze({ EZ: 1, FZ: 1 });
 /** Minimum difficulty‑4 encounters on the middle band (no maximum — remainder may add more). */
 const MIN_DIFF4_ENCOUNTER_COUNT = 5;
 /** Challenge 1 (Sandwich): no difficulty‑5 middle encounters; exactly four difficulty‑4; diff 1–3 uncapped. */
@@ -1914,23 +3214,45 @@ const DEPRIORITIZED_ENCOUNTER_KEYS = new Set(['CF']);
 const DEPRIORITIZED_ENCOUNTER_WEIGHT = 0.25;
 /** Pull down over‑represented picks (tier‑5 keys capped individually — uniform tier‑5 multiplier does nothing). */
 const SPREAD_CAP_ENCOUNTER_KEYS = new Set([
-    'S', 'F', 'AA', 'U', 'CA', 'BK', 'AH', 'AD', 'P', 'G',
-    'BD', 'BT', 'BB', 'H', 'X', 'N', 'BS', 'CH', 'BN', 'BM', 'CO',
-    'M', 'E', 'BC', 'AN', 'BJ', 'R', 'CE', 'BG', 'BL', 'AB',
+    'S', 'F', 'AA', 'U', 'CA', 'BK', 'AH', 'P',
+    'BD', 'BT', 'BB', 'H', 'X', 'N', 'CH', 'BM',
+    'M', 'BC', 'BJ', 'R', 'CE', 'BG', 'BL', 'AB',
 ]);
 const SPREAD_CAP_WEIGHT = 0.38;
 const SPREAD_BOOST_ENCOUNTER_KEYS = new Set([
     'BO', 'I', 'AG', 'AT', 'BR', 'BY', 'BP', 'AU', 'AO', 'Q', 'AE', 'V',
     'CK', 'BH', 'AI', 'CD', 'AP', 'BF', 'CN', 'CQ', 'BI',
+    'AD', 'G', 'BN', 'E', 'BS', 'CO', 'AN',
 ]);
 const SPREAD_BOOST_WEIGHT = 2.0;
-const SPREAD_STRONG_BOOST_ENCOUNTER_KEYS = new Set(['BO', 'I']);
+const SPREAD_STRONG_BOOST_ENCOUNTER_KEYS = new Set(['BO', 'I', 'BM', 'G', 'BB', 'AM']);
 const SPREAD_STRONG_BOOST_WEIGHT = 3.5;
 /** Under‑picked diff‑4 encounters pushed toward the middle of the pool. */
-const SPREAD_PRIORITY_BOOST_ENCOUNTER_KEYS = new Set(['BY', 'W', 'CL']);
+const SPREAD_PRIORITY_BOOST_ENCOUNTER_KEYS = new Set(['BY', 'W', 'CL', 'BO', 'BM', 'BN', 'BL', 'CE']);
 const SPREAD_PRIORITY_BOOST_WEIGHT = 9.0;
+/** Extra duck / boost applied only outside hard‑tier fill (CH1, CH2, and CH2+ remainder). */
+const SPREAD_DUCK_ENCOUNTER_KEYS = new Set(['CF', 'CJ', 'AW', 'U', 'CA', 'AI', 'BT', 'H', 'CH', 'J', 'AB', 'AH', 'Q']);
+const SPREAD_DUCK_WEIGHT = 0.15;
+const SPREAD_RARE_BOOST_ENCOUNTER_KEYS = new Set([
+    'BM', 'BD', 'BB', 'X', 'G', 'BJ', 'BL', 'F', 'E', 'L', 'CK', 'CE', 'N', 'AD', 'BX', 'AN', 'BR', 'AP', 'CC', 'CN', 'BE', 'O', 'AF', 'BO', 'BP', 'AM',
+]);
+const SPREAD_RARE_BOOST_WEIGHT = 8.0;
+/** Gentle rare boost during CH3–6 tier fill only (no duck — keeps generation stable). */
+const HARD_TIER_RARE_BOOST_ENCOUNTER_KEYS = new Set(['BM', 'BD', 'BB', 'X', 'G', 'BJ', 'CE', 'BO', 'BP', 'BL', 'F', 'E', 'L', 'CK', 'AO', 'BS', 'AK', 'AM', 'BN']);
+const HARD_TIER_RARE_BOOST_WEIGHT = 2.5;
+/** Trim over‑represented keys during CH3–6 fill (never story pins / riddles). */
+const HARD_TIER_DUCK_ENCOUNTER_KEYS = new Set(['CF', 'CJ', 'AW', 'CA', 'H', 'CH', 'U', 'AI', 'BT', 'AB', 'AH']);
+/** Always present on Challenge 3 (Voyage) — do not duck there or generation collapses. */
+const CH3_STRUCTURAL_ENCOUNTER_KEYS = new Set(['CF', 'CJ', 'AW', 'U', 'CH', 'H', 'N', 'BT']);
+const HARD_TIER_DUCK_WEIGHT = 0.12;
+
+function hardTierDuckMultiplier(key, forcedFinalKey) {
+    if (!HARD_TIER_DUCK_ENCOUNTER_KEYS.has(key)) return 1;
+    if (forcedFinalKey === 'EZ' && CH3_STRUCTURAL_ENCOUNTER_KEYS.has(key)) return 1;
+    return HARD_TIER_DUCK_WEIGHT;
+}
 /** Tier‑5 staples that stay hot even with the general cap. */
-const SPREAD_EXTRA_CAP_ENCOUNTER_KEYS = new Set(['BD', 'H', 'BB', 'AD', 'X', 'N', 'BS', 'CH', 'BN', 'AB', 'AN', 'BM', 'CE']);
+const SPREAD_EXTRA_CAP_ENCOUNTER_KEYS = new Set(['BD', 'H', 'BB', 'X', 'N', 'CH', 'AB', 'BM', 'CE']);
 const SPREAD_EXTRA_CAP_WEIGHT = 0.28;
 
 function optionalThemePickMultiplier(themeSlug, forcedFinalKey) {
@@ -1938,13 +3260,26 @@ function optionalThemePickMultiplier(themeSlug, forcedFinalKey) {
     return OPTIONAL_THEME_WEIGHT_BY_FINALE[forcedFinalKey ?? ''] ?? OPTIONAL_THEME_WEIGHT_DEFAULT;
 }
 
-function encounterPickWeight(key, forcedFinalKey, picks = []) {
+function isChallengeMiddleEncounterBlocked(key, forcedFinalKey) {
+    const fin = forcedFinalKey ?? '';
+    const diff = encounterEffects[key]?.difficultyLevel;
+    if (CHALLENGES_WITHOUT_DIFF1.has(fin) && diff === 1) return true;
+    if (CHALLENGE_MOSQUITO_FORBIDDEN_FINALE_KEYS.has(fin) && key === 'AG') return true;
+    if (CHALLENGE_SLUMBER_FORBIDDEN_FINALE_KEYS.has(fin) && key === 'BC') return true;
+    return false;
+}
+
+function encounterPickWeight(key, forcedFinalKey, picks = [], options = {}) {
     let w = 1;
+    if (isChallengeMiddleEncounterBlocked(key, forcedFinalKey)) return 0;
     if (forcedFinalKey === 'AZ' && CHALLENGE_1_FORBIDDEN_ENCOUNTER_KEYS.has(key)) return 0;
     if (
         forcedFinalKey === 'AZ' &&
         CHALLENGE_1_FORBIDDEN_THEME_SLUGS.has(getEncounterThemeDedupSlug(key))
     ) {
+        return 0;
+    }
+    if (key === THE_HOUR_ENCOUNTER_KEY && !THE_HOUR_ALLOWED_FINALE_KEYS.has(forcedFinalKey ?? '')) {
         return 0;
     }
     if (OPTIONAL_ENCOUNTER_KEYS.has(key)) {
@@ -1957,12 +3292,22 @@ function encounterPickWeight(key, forcedFinalKey, picks = []) {
             return 0;
         }
     }
-    if (DEPRIORITIZED_ENCOUNTER_KEYS.has(key)) w *= DEPRIORITIZED_ENCOUNTER_WEIGHT;
-    if (SPREAD_CAP_ENCOUNTER_KEYS.has(key)) w *= SPREAD_CAP_WEIGHT;
-    if (SPREAD_EXTRA_CAP_ENCOUNTER_KEYS.has(key)) w *= SPREAD_EXTRA_CAP_WEIGHT;
-    if (SPREAD_BOOST_ENCOUNTER_KEYS.has(key)) w *= SPREAD_BOOST_WEIGHT;
-    if (SPREAD_STRONG_BOOST_ENCOUNTER_KEYS.has(key)) w *= SPREAD_STRONG_BOOST_WEIGHT;
-    if (SPREAD_PRIORITY_BOOST_ENCOUNTER_KEYS.has(key)) w *= SPREAD_PRIORITY_BOOST_WEIGHT;
+    const hardTierFill = options.hardTierFill === true;
+    if (!hardTierFill) {
+        if (DEPRIORITIZED_ENCOUNTER_KEYS.has(key)) w *= DEPRIORITIZED_ENCOUNTER_WEIGHT;
+        if (SPREAD_CAP_ENCOUNTER_KEYS.has(key)) w *= SPREAD_CAP_WEIGHT;
+        if (SPREAD_EXTRA_CAP_ENCOUNTER_KEYS.has(key)) w *= SPREAD_EXTRA_CAP_WEIGHT;
+        if (SPREAD_BOOST_ENCOUNTER_KEYS.has(key)) w *= SPREAD_BOOST_WEIGHT;
+        if (SPREAD_STRONG_BOOST_ENCOUNTER_KEYS.has(key)) w *= SPREAD_STRONG_BOOST_WEIGHT;
+        if (SPREAD_PRIORITY_BOOST_ENCOUNTER_KEYS.has(key)) w *= SPREAD_PRIORITY_BOOST_WEIGHT;
+        if (SPREAD_DUCK_ENCOUNTER_KEYS.has(key)) w *= SPREAD_DUCK_WEIGHT;
+        if (SPREAD_RARE_BOOST_ENCOUNTER_KEYS.has(key)) w *= SPREAD_RARE_BOOST_WEIGHT;
+    } else {
+        if (SPREAD_CAP_ENCOUNTER_KEYS.has(key)) w *= SPREAD_CAP_WEIGHT;
+        if (SPREAD_EXTRA_CAP_ENCOUNTER_KEYS.has(key)) w *= SPREAD_EXTRA_CAP_WEIGHT;
+        if (HARD_TIER_RARE_BOOST_ENCOUNTER_KEYS.has(key)) w *= HARD_TIER_RARE_BOOST_WEIGHT;
+        if (HARD_TIER_DUCK_ENCOUNTER_KEYS.has(key)) w *= hardTierDuckMultiplier(key, forcedFinalKey);
+    }
     return w;
 }
 
@@ -2005,6 +3350,38 @@ function pickThemeBalancedEncounter(eligibleKeys, forcedFinalKey, weightForKey) 
     return pickWeightedRandomKey(byTheme.get(theme), weightForKey);
 }
 
+/** Uniform theme lottery, then soft key weight — used when flattening hot themes. */
+function pickUniformThemeEncounter(eligibleKeys, weightForKey) {
+    if (!eligibleKeys?.length) return null;
+    const byTheme = new Map();
+    for (const key of eligibleKeys) {
+        const slug = getEncounterThemeDedupSlug(key);
+        if (!byTheme.has(slug)) byTheme.set(slug, []);
+        byTheme.get(slug).push(key);
+    }
+    const themes = shuffleArrayInPlace([...byTheme.keys()]);
+    const themeKeys = byTheme.get(themes[0]);
+    return pickWeightedRandomKey(themeKeys, weightForKey ?? (() => 1));
+}
+
+/** CH3–6 tier fill: weighted theme lottery (respects optional themes) + soft key weights. */
+function pickHardTierSpreadEncounter(eligibleKeys, forcedFinalKey, weightForKey) {
+    if (!eligibleKeys?.length) return null;
+    const byTheme = new Map();
+    for (const key of eligibleKeys) {
+        const slug = getEncounterThemeDedupSlug(key);
+        if (!byTheme.has(slug)) byTheme.set(slug, []);
+        byTheme.get(slug).push(key);
+    }
+    const theme = pickWeightedRandomKey([...byTheme.keys()], (t) => {
+        const themeKeys = byTheme.get(t);
+        let sum = 0;
+        for (const k of themeKeys) sum += weightForKey(k);
+        return (sum / themeKeys.length) * optionalThemePickMultiplier(t, forcedFinalKey);
+    });
+    return pickWeightedRandomKey(byTheme.get(theme), weightForKey);
+}
+
 function validateMandatoryMiddleEncounters(mandatoryKeys, forcedFinalKey, cornerThemeSlugs, baseMiddlePoolNoRiddle) {
     for (const rk of mandatoryKeys) {
         const ev = encounterEffects[rk];
@@ -2033,13 +3410,15 @@ function seedAtLeastOnePerDifficultyIfNeeded(picks, usedEncounterKeys, usedTheme
         picks.map((k) => encounterEffects[k]?.difficultyLevel).filter((d) => typeof d === 'number')
     );
     const seedWeight = (k) => encounterPickWeight(k, forcedFinalKey, picks);
-    const maxDifficulty =
-        forcedFinalKey === 'AZ' ? 4 : 5;
-    for (let d = 1; d <= maxDifficulty; d++) {
+    const maxDifficulty = forcedFinalKey === 'AZ' ? 4 : 5;
+    const minDifficulty = CHALLENGES_WITHOUT_DIFF1.has(forcedFinalKey ?? '') ? 2 : 1;
+    for (let d = minDifficulty; d <= maxDifficulty; d++) {
         if (covered.has(d)) continue;
         const eligibleBase = (canonByDiff[d] || []).filter(
             (key) =>
-                !usedEncounterKeys.has(key) && !usedThemes.has(getEncounterThemeDedupSlug(key))
+                !usedEncounterKeys.has(key) &&
+                !usedThemes.has(getEncounterThemeDedupSlug(key)) &&
+                encounterPickWeight(key, forcedFinalKey, picks) > 0
         );
         let eligible = eligibleBase;
         const nonWeather = eligibleBase.filter((key) => key !== 'AL');
@@ -2052,6 +3431,62 @@ function seedAtLeastOnePerDifficultyIfNeeded(picks, usedEncounterKeys, usedTheme
         covered.add(d);
     }
     return true;
+}
+
+function challengeHardDiff4Quota(innerTarget) {
+    const fixed =
+        CHALLENGE_HARD_DIFF_QUOTAS[2] + CHALLENGE_HARD_DIFF_QUOTAS[3] + CHALLENGE_HARD_DIFF_QUOTAS[5];
+    return innerTarget - fixed;
+}
+
+function challengeHardMiddleDiffCountsAreValid(picks, innerTarget) {
+    const need4 = challengeHardDiff4Quota(innerTarget);
+    return (
+        countPicksAtDifficulty(picks, 1) === 0 &&
+        countPicksAtDifficulty(picks, 2) === CHALLENGE_HARD_DIFF_QUOTAS[2] &&
+        countPicksAtDifficulty(picks, 3) === CHALLENGE_HARD_DIFF_QUOTAS[3] &&
+        countPicksAtDifficulty(picks, 4) === need4 &&
+        countPicksAtDifficulty(picks, 5) === CHALLENGE_HARD_DIFF_QUOTAS[5]
+    );
+}
+
+/** Challenges 3–6: exactly two d2, two d3, four d5; all remaining middle slots are d4. */
+function fillChallengeHardMiddleBand(
+    picks,
+    usedEncounterKeys,
+    usedThemes,
+    canonByDiff,
+    forcedFinalKey,
+    innerTarget
+) {
+    const quotas = {
+        5: CHALLENGE_HARD_DIFF_QUOTAS[5],
+        3: CHALLENGE_HARD_DIFF_QUOTAS[3],
+        2: CHALLENGE_HARD_DIFF_QUOTAS[2],
+        4: challengeHardDiff4Quota(innerTarget),
+    };
+    const slots = [];
+    for (const tier of [5, 3, 2, 4]) {
+        const need = Math.max(0, quotas[tier] - countPicksAtDifficulty(picks, tier));
+        for (let i = 0; i < need; i++) slots.push(tier);
+    }
+    shuffleArrayInPlace(slots);
+    for (const tier of slots) {
+        const eligible = (canonByDiff[tier] || []).filter(
+            (key) =>
+                !usedEncounterKeys.has(key) &&
+                !usedThemes.has(getEncounterThemeDedupSlug(key)) &&
+                encounterPickWeight(key, forcedFinalKey, picks, { hardTierFill: true }) > 0
+        );
+        const chosen = pickHardTierSpreadEncounter(eligible, forcedFinalKey, (k) =>
+            encounterPickWeight(k, forcedFinalKey, picks, { hardTierFill: true })
+        );
+        if (!chosen) return false;
+        picks.push(chosen);
+        usedEncounterKeys.add(chosen);
+        usedThemes.add(getEncounterThemeDedupSlug(chosen));
+    }
+    return picks.length === innerTarget && challengeHardMiddleDiffCountsAreValid(picks, innerTarget);
 }
 
 /** Challenge 1 band order: starter classicals first (top row after corners), then difficulty 1–3 rise toward the finale; exactly four difficulty‑4 on the bottom row. */
@@ -2305,8 +3740,8 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
             (key) => !CHALLENGE_1_FORBIDDEN_THEME_SLUGS.has(getEncounterThemeDedupSlug(key))
         );
     }
-    if (forcedFinalKey === 'Z') {
-        baseMiddlePool = baseMiddlePool.filter((key) => !CHALLENGE_2_FORBIDDEN_ENCOUNTER_KEYS.has(key));
+    if (!THE_HOUR_ALLOWED_FINALE_KEYS.has(forcedFinalKey ?? '')) {
+        baseMiddlePool = baseMiddlePool.filter((key) => key !== THE_HOUR_ENCOUNTER_KEY);
     }
     const baseMiddlePoolNoRiddle = baseMiddlePool.filter((k) => !RIDDLE_ENCOUNTER_KEYS.has(k));
     const DISTINCT_THEMES = new Set(baseMiddlePoolNoRiddle.map((k) => getEncounterThemeDedupSlug(k)));
@@ -2422,7 +3857,7 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
             }
         }
 
-        if (forcedFinalKey !== 'AZ') {
+        if (forcedFinalKey !== 'AZ' && !CHALLENGES_HARD_DISTRIBUTION_FINALE_KEYS.has(forcedFinalKey ?? '')) {
             if (!seedAtLeastOnePerDifficultyIfNeeded(picks, usedEncounterKeys, usedThemes, canonByDiff, forcedFinalKey)) {
                 continue;
             }
@@ -2430,6 +3865,19 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
 
         if (forcedFinalKey === 'AZ') {
             if (!fillChallenge1MiddleBand(picks, usedEncounterKeys, usedThemes, poolKeys, canonByDiff, INNER_TARGET)) {
+                continue;
+            }
+        } else if (CHALLENGES_HARD_DISTRIBUTION_FINALE_KEYS.has(forcedFinalKey ?? '')) {
+            if (
+                !fillChallengeHardMiddleBand(
+                    picks,
+                    usedEncounterKeys,
+                    usedThemes,
+                    canonByDiff,
+                    forcedFinalKey,
+                    INNER_TARGET
+                )
+            ) {
                 continue;
             }
         } else {
@@ -2535,7 +3983,8 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
                     (key) =>
                         !usedEncounterKeys.has(key) &&
                         !usedThemes.has(getEncounterThemeDedupSlug(key)) &&
-                        encounterEffects[key].difficultyLevel !== 5
+                        encounterEffects[key].difficultyLevel !== 5 &&
+                        encounterPickWeight(key, forcedFinalKey, picks) > 0
                 );
                 const chosen = pickThemeBalancedEncounter(eligible, forcedFinalKey, (k) =>
                     encounterRestPickWeight(k, forcedFinalKey, picks)
@@ -2563,6 +4012,12 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
                 continue;
             }
         } else {
+            if (
+                CHALLENGES_HARD_DISTRIBUTION_FINALE_KEYS.has(forcedFinalKey ?? '') &&
+                !challengeHardMiddleDiffCountsAreValid(picks, INNER_TARGET)
+            ) {
+                continue;
+            }
             picks.sort((a, b) => {
                 const da = encounterEffects[a].difficultyLevel;
                 const db = encounterEffects[b].difficultyLevel;
@@ -2597,13 +4052,17 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
     throw new Error(
         forcedFinalKey === 'AZ'
             ? 'Could not assemble Challenge 1 map: need Butcher, Mosquito, Riddle One, Knot, Maze, starter classical encounters, exactly 4 difficulty‑4 encounters (no difficulty‑5), each with a unique theme.'
-            : 'Could not assemble a random map: need a full draft middle band (distinct themed encounters — at least one each of difficulty 1–5, exactly four difficulty‑5, at least five difficulty‑4, remainder difficulty ≤4) after applying starting-element classical omissions.'
+            : CHALLENGES_HARD_DISTRIBUTION_FINALE_KEYS.has(forcedFinalKey ?? '')
+              ? 'Could not assemble Challenges 3–6 map: need exactly two difficulty‑2, two difficulty‑3, four difficulty‑5, remainder difficulty‑4 (distinct themed encounters after pins/riddle).'
+              : 'Could not assemble a random map: need a full draft middle band (distinct themed encounters — at least one each of difficulty 1–5, exactly four difficulty‑5, at least five difficulty‑4, remainder difficulty ≤4) after applying starting-element classical omissions.'
     );
 }
 
 function serializeGridEncounterLayout() {
-    if (!grid) return [];
-    return Array.from(grid.children).map((cell) => cell.dataset.encounterKey || '');
+    if (progressionEncounterPlan.length === BOARD_TOTAL_CELL_COUNT) {
+        return progressionEncounterPlan.slice();
+    }
+    return [];
 }
 
 
@@ -2632,7 +4091,7 @@ let successfulCombinations = [];
 
 // --- END: DATA SETUP ---
 
-const grid = document.getElementById("grid");
+const grid = document.getElementById("progressionMapNodes");
 const preview = document.getElementById("previewGlyph");
 const previewTitle = document.getElementById("previewTitle");
 const selectedEncounterHint = document.getElementById("selectedEncounterHint");
@@ -2751,7 +4210,7 @@ const nicelyDoneArtByEncounterVerb = Object.freeze({
     'AF|11B': 'alchemyart/matchx.png',
     'AG|43A': 'alchemyart/mosquitox.png',
     'AH|14B': 'alchemyart/sheepx.png',
-    'AJ|9B': 'alchemyart/poolx.png',
+    'AJ|9A': 'alchemyart/poolx.png',
     'AE|37A': 'alchemyart/citationx.png',
     'AR|46B': 'alchemyart/experimentx.png',
     'AT|39A': 'alchemyart/mazex.png',
@@ -2865,6 +4324,10 @@ let startingElements = rollStartingElementsPair();
 const verbLetters = ['A', 'B', 'C'];
 
 function refreshBottomRowEncounterKeysFromLayout(encounterKeys) {
+    if (progressionBodyKeys.length === PROGRESSION_BODY_NODE_COUNT) {
+        refreshBottomRowEncounterKeysFromProgression();
+        return;
+    }
     bottomRowEncounterKeys.clear();
     const bottomStart = boardBottomRowStartIndex(encounterKeys);
     const n = encounterKeys.length;
@@ -2874,52 +4337,32 @@ function refreshBottomRowEncounterKeysFromLayout(encounterKeys) {
 }
 
 function placeInitialPawnOnCenterCellIfNeeded() {
-    if (!grid || grid.children.length < BOARD_TOTAL_CELL_COUNT) return;
     if (pawn) pawn.remove();
-    const mid = Math.floor(BOARD_TOTAL_CELL_COUNT / 2);
-    const centerCell = grid.children[mid];
-    centerCell.textContent = centerCell.dataset.icon || '';
+    const finKey = progressionFinaleKey || activeFinaleKey;
+    if (finKey === 'AZ' && selectProgressionEncounterByKey('A', { countMove: false })) return;
+    const cell = findFirstSelectableProgressionNode();
+    if (!cell || cell.classList.contains('defeated')) return;
     pawn = document.createElement('div');
     pawn.className = 'pawn';
     pawn.textContent = '♙';
-    centerCell.appendChild(pawn);
+    cell.appendChild(pawn);
 }
 
 function applyEncounterKeysToDOM(encounterKeys) {
-    if (!grid || !Array.isArray(encounterKeys) || encounterKeys.length !== BOARD_TOTAL_CELL_COUNT) return;
+    if (!Array.isArray(encounterKeys) || encounterKeys.length !== BOARD_TOTAL_CELL_COUNT) return;
+    if (!assignProgressionFromLayout(encounterKeys)) return;
+    ensureProgressionMapBuilt();
     inferFinalEncounterUnlockOverridesFromLayout(encounterKeys);
-    refreshBottomRowEncounterKeysFromLayout(encounterKeys);
-
-    for (let idx = 0; idx < BOARD_TOTAL_CELL_COUNT; idx++) {
-        const cell = grid.children[idx];
-        if (!cell || !cell.classList.contains('cell')) continue;
-
-        const encounterKey = encounterKeys[idx];
-        const encounter = encounterEffects[encounterKey];
-        if (!encounter) continue;
-
-        cell.dataset.boardIndex = String(idx);
-
-        const rewardId = encounterThemeRewardElementId(encounterKey);
-        cell.dataset.encounterKey = encounterKey;
-        cell.dataset.encounterName = encounter.name || '';
-        if (rewardId && elementData[rewardId]) {
-            cell.dataset.elementId = rewardId;
-            cell.dataset.icon = elementData[rewardId].emoji;
-        } else {
-            cell.dataset.elementId = '';
-            cell.dataset.icon = '🔚';
-        }
-        cell.style.cursor = 'pointer';
-        cell.style.border = '';
-        cell.style.background = '';
-        cell.style.boxShadow = '';
-        cell.classList.remove('defeated', 'selected', 'dissolve');
-        const half = cell.querySelector('.half-success-counter');
-        if (half) half.remove();
-        cell.textContent = cell.dataset.icon || '';
-    }
+    inferFinalEncounterUnlockOverridesFromProgression();
+    refreshBottomRowEncounterKeysFromProgression();
+    recomputeProgressionUnlocksFromDefeats();
+    refreshProgressionMapDisplay({ rebuildNodes: true });
     placeInitialPawnOnCenterCellIfNeeded();
+}
+
+function refreshProgressionAfterEncounterDefeat() {
+    recomputeProgressionUnlocksFromDefeats();
+    refreshProgressionMapDisplay();
 }
 
 function wipeGameplayProgress() {
@@ -2980,7 +4423,7 @@ function confirmAndApplyRandomEncounterMap(finKey, challengeNum) {
     activeFinaleKey = finKey;
     activeChallengeN = CHALLENGE_NUM_BY_FINALE[finKey] ?? null;
     applyChallenge1DefaultHint2Unlocks();
-    updatePreview(null);
+    if (finKey !== 'AZ') updatePreview(null);
     updateChallengeButtonHighlight();
     saveGameState();
 }
@@ -3380,14 +4823,11 @@ function loadGameState() {
     }
 
     defeatedEncounters.clear();
-    document.querySelectorAll('.cell[data-encounter-key]').forEach(cell => {
-        const key = cell.dataset.encounterKey;
-        if (state.defeatedEncounters?.includes(key)) {
-            defeatedEncounters.add(key);
-            cell.classList.add('defeated');
-            cell.innerHTML = cell.dataset.icon;
-        }
-    });
+    if (Array.isArray(state.defeatedEncounters)) {
+        state.defeatedEncounters.forEach((key) => defeatedEncounters.add(key));
+    }
+    recomputeProgressionUnlocksFromDefeats();
+    refreshProgressionMapDisplay();
     restoreHalfSuccessCounters();
 
     updateCombinationsList();
@@ -3466,6 +4906,8 @@ function getFusionPartnerIds(elementId) {
     });
     for (const pairKey of Object.keys(fuseMap)) {
         const [a, b] = pairKey.split('+');
+        const productId = fuseMap[pairKey];
+        if (productId && findCardById(productId)) continue;
         if (a === elementId && ownedIds.has(b)) partners.add(b);
         if (b === elementId && ownedIds.has(a)) partners.add(a);
     }
@@ -3889,6 +5331,7 @@ function handleEncounter(card, verbKey) {
             if (rewardId) addCardToRow(rewardId, row1);
             defeatedEncounters.add(encounterKey);
             recordEncounterCleared();
+            refreshProgressionAfterEncounterDefeat();
             if (finaleWin) displayWinScreen(encounterKey);
 
             refreshFinalEncounterHintsIfSelected();
@@ -3927,6 +5370,7 @@ function handleEncounter(card, verbKey) {
                     encounterCell.innerHTML = encounterCell.dataset.icon;
                     defeatedEncounters.add(encounterKey);
                     recordEncounterCleared();
+                    refreshProgressionAfterEncounterDefeat();
                     if (FINAL_ENCOUNTER_KEYS.has(encounterKey)) {
                         displayWinScreen(encounterKey);
                     }
@@ -3981,15 +5425,22 @@ function updateHintBox(encounterKey) {
                 if (defeatedEncounters.has(key)) unlockCount++;
             });
             const maxHints = unlockCount + 1;
-            const hintsToShow = [];
             for (let i = 1; i <= maxHints; i++) {
                 const hintText = encounterData[`hint${i}`];
                 if (!hintText) break;
-                hintsToShow.push(`<span>${hintText}</span>`);
+                const entry = document.createElement('div');
+                entry.className = 'hint-spoiler-entry';
+                const label = document.createElement('span');
+                label.className = 'hint-spoiler-label';
+                label.textContent = `Hint ${i} (hover to view):`;
+                const text = document.createElement('span');
+                text.className = 'hint-spoiler';
+                text.textContent = hintText;
+                text.tabIndex = 0;
+                entry.appendChild(label);
+                entry.appendChild(text);
+                hintBox.appendChild(entry);
             }
-            hintsToShow.forEach((html) => {
-                hintBox.innerHTML += html;
-            });
             return;
         }
     }
@@ -4126,55 +5577,6 @@ if (BOOT_STORED.layout && BOOT_STORED.layout.length === BOARD_TOTAL_CELL_COUNT) 
 
 initPlayMetricsSession();
 installTelemetryPageExitHooks();
-
-for (let idx = 0; idx < BOARD_TOTAL_CELL_COUNT; idx++) {
-    const cell = document.createElement('div');
-    cell.className = 'cell';
-
-    cell.addEventListener('click', () => {
-        const ek = cell.dataset.encounterKey;
-        if (!ek) return;
-        if (cell.classList.contains('defeated')) return;
-
-        if (currentEncounterCell !== cell) {
-            moveCounter++;
-            recordBoardMoveToNewEncounterHex();
-        }
-
-        const remainingEncounters = countIncompleteEncounters();
-        const isBlockingActive =
-            LOCATION_FAILURE_BLOCKING_ENABLED && remainingEncounters > 2 && !bottomRowEncounterKeys.has(ek);
-
-        if (isBlockingActive) {
-            if (locationFailureCounter[ek] >= LOCATION_FAILURE_STREAK_FORCE_MOVE && currentEncounterCell && currentEncounterCell.dataset.encounterKey === ek) {
-                displayMessage('Fifth failure in a row, must try another encounter!', 'default');
-                return;
-            }
-        }
-
-        if (previousEncounterKey && previousEncounterKey !== ek) {
-            locationFailureCounter[previousEncounterKey] = 0;
-        }
-
-        document.querySelectorAll('.cell').forEach((c) => c.classList.remove('selected'));
-        cell.classList.add('selected');
-        currentEncounterCell = cell;
-        previousEncounterKey = ek;
-
-        halfSuccesses = {};
-
-        updatePreview(ek);
-
-        if (pawn) pawn.remove();
-        pawn = document.createElement('div');
-        pawn.className = 'pawn';
-        pawn.textContent = '♙';
-        cell.appendChild(pawn);
-        saveGameState();
-    });
-
-    grid.appendChild(cell);
-}
 
 applyEncounterKeysToDOM(INITIAL_ENCOUNTER_KEYS);
 
@@ -4366,6 +5768,183 @@ document.querySelectorAll('.js-start-challenge[data-finale-key]').forEach((btn) 
     });
 });
 
+const DRAFT_STATS_CHALLENGES = FINAL_ENCOUNTER_KEYS_ORDERED.map((fin) => ({
+    fin,
+    label: `CH${CHALLENGE_NUM_BY_FINALE[fin] ?? '?'}`,
+    name: FINALE_CHALLENGE_LABEL[fin] || fin,
+}));
+const DRAFT_STATS_STARTER_PAIRS = [
+    ['1', '2'],
+    ['1', '3'],
+    ['1', '4'],
+    ['2', '3'],
+    ['2', '4'],
+    ['3', '4'],
+];
+
+function middleKeysFromGeneratedLayout(layout, finKey) {
+    const body = layout.slice(0, -1);
+    if (finKey === 'AZ') {
+        const cornerSet = new Set(BOARD_CLASSICAL_CORNER_KEYS);
+        return body.filter((key) => !cornerSet.has(key));
+    }
+    let i = 0;
+    while (i < body.length && BOARD_CLASSICAL_CORNER_KEYS.includes(body[i])) i++;
+    return body.slice(i);
+}
+
+function encounterDraftDisplayName(key) {
+    const full = encounterEffects[key]?.name || key;
+    return full.includes('-') ? full.split('-').slice(1).join('-').trim() : full;
+}
+
+function yieldToBrowser() {
+    return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+async function runGlobalDraftStatsAnalysis(trialsPerChallenge) {
+    const trials = Math.max(10, Math.min(300, trialsPerChallenge | 0));
+    const byChallenge = Object.fromEntries(DRAFT_STATS_CHALLENGES.map((ch) => [ch.fin, new Map()]));
+    const globalCounts = new Map();
+    let totalBoards = 0;
+    let failures = 0;
+
+    for (const ch of DRAFT_STATS_CHALLENGES) {
+        for (let t = 0; t < trials; t++) {
+            const starters = DRAFT_STATS_STARTER_PAIRS[t % DRAFT_STATS_STARTER_PAIRS.length];
+            try {
+                const layout = generateRandomEncounterLayoutInner(ch.fin, starters);
+                if (layout.length !== BOARD_TOTAL_CELL_COUNT) throw new Error('bad layout');
+                totalBoards++;
+                const seen = new Set();
+                for (const key of middleKeysFromGeneratedLayout(layout, ch.fin)) {
+                    if (seen.has(key)) continue;
+                    seen.add(key);
+                    byChallenge[ch.fin].set(key, (byChallenge[ch.fin].get(key) || 0) + 1);
+                    globalCounts.set(key, (globalCounts.get(key) || 0) + 1);
+                }
+            } catch {
+                failures++;
+            }
+            if (t % 8 === 7) await yieldToBrowser();
+        }
+        await yieldToBrowser();
+    }
+
+    const rows = [...globalCounts.entries()]
+        .map(([key, globalCount]) => {
+            const perChallenge = {};
+            for (const ch of DRAFT_STATS_CHALLENGES) {
+                perChallenge[ch.fin] = byChallenge[ch.fin].get(key) || 0;
+            }
+            return {
+                key,
+                name: encounterDraftDisplayName(key),
+                diff: encounterEffects[key]?.difficultyLevel ?? '',
+                globalCount,
+                globalPct: totalBoards ? (100 * globalCount) / totalBoards : 0,
+                perChallenge,
+            };
+        })
+        .sort((a, b) => b.globalCount - a.globalCount || String(a.key).localeCompare(String(b.key)));
+
+    return { trials, totalBoards, failures, rows };
+}
+
+function renderDraftStatsResults(report) {
+    const bodyEl = document.getElementById('draftStatsBody');
+    const summaryEl = document.getElementById('draftStatsSummary');
+    if (!bodyEl || !summaryEl || !report) return;
+
+    const maxGlobal = report.rows[0]?.globalPct || 1;
+    summaryEl.textContent = `${report.totalBoards} simulated boards (${report.trials} per challenge, ${DRAFT_STATS_CHALLENGES.length} challenges). Global % = boards containing that encounter across all challenges. ${report.failures ? `${report.failures} generation failures skipped.` : ''}`;
+
+    const headCols = DRAFT_STATS_CHALLENGES.map((ch) => `<th>${ch.label}</th>`).join('');
+    const bodyRows = report.rows
+        .map((row) => {
+            const barWidth = Math.max(2, Math.round((row.globalPct / maxGlobal) * 72));
+            const chCells = DRAFT_STATS_CHALLENGES.map((ch) => {
+                const count = row.perChallenge[ch.fin] || 0;
+                const pct = report.trials ? (100 * count) / report.trials : 0;
+                return `<td>${pct.toFixed(1)}%</td>`;
+            }).join('');
+            return `<tr>
+                <td>${row.key}</td>
+                <td>${row.name}</td>
+                <td>d${row.diff}</td>
+                <td>${row.globalPct.toFixed(1)}%<span class="draft-stats-pct-bar" style="width:${barWidth}px"></span></td>
+                ${chCells}
+            </tr>`;
+        })
+        .join('');
+
+    bodyEl.innerHTML = `<table class="draft-stats-table">
+        <thead><tr>
+            <th>Key</th><th>Encounter</th><th>Tier</th><th>Global</th>${headCols}
+        </tr></thead>
+        <tbody>${bodyRows}</tbody>
+    </table>`;
+}
+
+let draftStatsRunInFlight = false;
+
+async function runDraftStatsFromUI() {
+    if (draftStatsRunInFlight) return;
+    const trialsInput = document.getElementById('draftStatsTrials');
+    const runBtn = document.getElementById('draftStatsRunBtn');
+    const bodyEl = document.getElementById('draftStatsBody');
+    const summaryEl = document.getElementById('draftStatsSummary');
+    const trials = trialsInput ? parseInt(trialsInput.value, 10) : 60;
+
+    draftStatsRunInFlight = true;
+    if (runBtn) runBtn.disabled = true;
+    if (summaryEl) summaryEl.textContent = '';
+    if (bodyEl) bodyEl.innerHTML = '<div class="draft-stats-loading">Simulating draft pools…</div>';
+
+    try {
+        const report = await runGlobalDraftStatsAnalysis(trials);
+        renderDraftStatsResults(report);
+    } catch (err) {
+        console.error(err);
+        if (bodyEl) {
+            bodyEl.innerHTML = '<div class="draft-stats-loading">Could not run draft analysis (see console).</div>';
+        }
+    } finally {
+        draftStatsRunInFlight = false;
+        if (runBtn) runBtn.disabled = false;
+    }
+}
+
+function setDraftStatsModalOpen(open) {
+    const modal = document.getElementById('draftStatsModal');
+    if (!modal) return;
+    modal.classList.toggle('visible', open);
+    modal.setAttribute('aria-hidden', open ? 'false' : 'true');
+}
+
+const draftStatsBtn = document.getElementById('draftStatsBtn');
+const draftStatsCloseBtn = document.getElementById('draftStatsCloseBtn');
+const draftStatsRunBtn = document.getElementById('draftStatsRunBtn');
+const draftStatsModal = document.getElementById('draftStatsModal');
+
+if (draftStatsBtn) {
+    draftStatsBtn.addEventListener('click', () => {
+        setDraftStatsModalOpen(true);
+        if (!document.querySelector('#draftStatsBody table')) runDraftStatsFromUI();
+    });
+}
+if (draftStatsCloseBtn) {
+    draftStatsCloseBtn.addEventListener('click', () => setDraftStatsModalOpen(false));
+}
+if (draftStatsRunBtn) {
+    draftStatsRunBtn.addEventListener('click', () => runDraftStatsFromUI());
+}
+if (draftStatsModal) {
+    draftStatsModal.addEventListener('click', (e) => {
+        if (e.target === draftStatsModal) setDraftStatsModalOpen(false);
+    });
+}
+
 </script>
 
 <div id="nicely-done-overlay" class="nicely-done-overlay" aria-hidden="true">
@@ -4383,6 +5962,24 @@ document.querySelectorAll('.js-start-challenge[data-finale-key]').forEach((btn) 
         <p id="win-challenge-display" class="win-challenge"></p>
         <p id="win-moves-display" class="win-moves"></p>
         <button id="win-close-button" class="win-close-button">Continue</button>
+    </div>
+</div>
+<div id="draftStatsModal" class="draft-stats-overlay" role="dialog" aria-modal="true" aria-labelledby="draft-stats-title" aria-hidden="true">
+    <div class="draft-stats-panel">
+        <div class="draft-stats-header">
+            <h2 id="draft-stats-title">Global Draft Stats</h2>
+            <button type="button" id="draftStatsCloseBtn" class="draft-stats-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="draft-stats-toolbar">
+            <label>Trials per challenge
+                <input type="number" id="draftStatsTrials" min="10" max="300" value="60" />
+            </label>
+            <button type="button" id="draftStatsRunBtn" class="draft-stats-run-btn">Re-run simulation</button>
+        </div>
+        <div id="draftStatsSummary" class="draft-stats-summary"></div>
+        <div id="draftStatsBody" class="draft-stats-body">
+            <div class="draft-stats-loading">Open to simulate draft pools across all six challenges.</div>
+        </div>
     </div>
 </div>
 </body>
