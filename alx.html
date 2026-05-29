@@ -1749,7 +1749,7 @@ body.rules-closed .main{
 </div>
 
 <script>
-const SAVE_KEY = 'alxGameStateV1';
+const SAVE_KEY = 'alxGameStateV2';
 
 /**
  * Playtesting / analytics (no third party). Each exit stores one JSON blob in localStorage
@@ -5499,10 +5499,10 @@ function displayWinScreen(encounterKeyOverride) {
     if (flavorEl) {
         if (finKey === 'Z') {
             flavorEl.textContent =
-                "You delivered the alchemists' prize and escaped The Alchemists Endgame.";
+                "You have created gold!";
         } else if (finKey === 'FZ') {
             flavorEl.textContent =
-                "You handled the alchemist's accident—all the king's urgency, settled by one nursery rhyme.";
+                "You found a way to put Humpty Dumpty back together again!";
         } else if (meta?.name) {
             flavorEl.textContent = `You triumphed in ${meta.name}.`;
         } else {
@@ -5568,7 +5568,7 @@ if (BOOT_STORED.layout && BOOT_STORED.layout.length === BOARD_TOTAL_CELL_COUNT) 
     INITIAL_ENCOUNTER_KEYS = BOOT_STORED.layout.slice();
 } else {
     try {
-        INITIAL_ENCOUNTER_KEYS = generateRandomEncounterLayout('AZ');
+        INITIAL_ENCOUNTER_KEYS = generateRandomEncounterLayout('Z');
     } catch (e) {
         console.error(e);
         INITIAL_ENCOUNTER_KEYS = DEFAULT_GRID_ENCOUNTER_KEYS.slice();
@@ -5593,8 +5593,8 @@ if (!loadGameState()) {
     const finFromGrid =
         finIx >= 0 && INITIAL_ENCOUNTER_KEYS ? INITIAL_ENCOUNTER_KEYS[finIx] : null;
     activeFinaleKey =
-        finFromGrid && FINAL_ENCOUNTER_KEYS.has(finFromGrid) ? finFromGrid : 'AZ';
-    activeChallengeN = CHALLENGE_NUM_BY_FINALE[activeFinaleKey] ?? 1;
+        finFromGrid && FINAL_ENCOUNTER_KEYS.has(finFromGrid) ? finFromGrid : 'Z';
+    activeChallengeN = CHALLENGE_NUM_BY_FINALE[activeFinaleKey] ?? 2;
     applyChallenge1DefaultHint2Unlocks();
     updateChallengeButtonHighlight();
     saveGameState();
