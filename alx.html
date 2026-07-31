@@ -40,8 +40,7 @@
   --card-w: clamp(76px, 8.5vw, 90px);
   --card-verb-row-h: 17px;
   --preview-art-h: clamp(108px, 13vh, 150px);
-  --floating-dock-pad-bottom: clamp(84px, 14vh, 132px);
-  --floating-dock-offset-right: calc(var(--sidebar-w) + 42px); /* sidebar + gap + breathing room */
+  --floating-dock-pad-bottom: 16px;
   /* Second grid column: rules panel width, or 0 when hidden (keeps column 1 width math stable) */
   --rules-track: minmax(240px, var(--sidebar-w));
 }
@@ -53,7 +52,6 @@
     --card-h: clamp(100px, 11vh, 112px);
     --card-w: clamp(72px, 8vw, 84px);
     --preview-art-h: clamp(92px, 11vh, 118px);
-    --floating-dock-pad-bottom: clamp(72px, 12vh, 96px);
   }
   body { padding-top: 10px; padding-bottom: 10px; gap: 10px; }
   .main { gap: 6px; padding-top: 4px; }
@@ -73,13 +71,59 @@
     --card-h: 96px;
     --card-w: 68px;
     --preview-art-h: 84px;
-    --floating-dock-pad-bottom: 68px;
   }
   .card-slot .emoji { font-size: 1.35rem; }
   .card-slot .label { font-size: 0.62rem; }
   .card-slot .action-btn { font-size: 0.68em; padding: 2px 3px; }
 }
 *{box-sizing:border-box;margin:0;padding:0}
+/* Dark scrollbars everywhere — the default light track clashes badly with the panel art */
+html{
+  color-scheme: dark;
+}
+*{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201,168,74,0.35) rgba(255,255,255,0.04);
+}
+::-webkit-scrollbar{
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track{
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb{
+  background: rgba(201,168,74,0.35);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover{
+  background: rgba(201,168,74,0.6);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner{
+  background: transparent;
+}
+/* The map only overflows by a hair, so its bar reads as a stray rule unless it stays faint */
+.progression-map{
+  scrollbar-color: rgba(255,255,255,0.10) transparent;
+}
+.progression-map::-webkit-scrollbar{
+  height: 6px;
+}
+.progression-map::-webkit-scrollbar-track{
+  background: transparent;
+}
+.progression-map::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,0.10);
+  border: none;
+}
+.progression-map::-webkit-scrollbar-thumb:hover{
+  background: rgba(255,255,255,0.2);
+}
+
 body{
   /* FONT REVERTED: Simple sans-serif font */
   font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
@@ -271,66 +315,51 @@ p.subtitle{color:var(--muted);font-size:12px}
   border-color: rgba(201,168,74,0.5) !important;
 }
 
+/* Scenario dock: docked directly under the encounter box, matching its width */
 .floating-controls{
-  position: fixed;
-  top: auto;
-  bottom: 14px;
-  right: 14px;
-  z-index: 3000;
+  position: static;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 0;
-  padding: 10px 12px;
+  padding: 6px;
   margin: 0;
   box-sizing: border-box;
-  max-width: calc(100vw - 28px);
-  background: rgba(8, 5, 9, 0.92);
+  width: 100%;
+  max-width: 100%;
+  background: rgba(8, 5, 9, 0.75);
   border: 1px solid rgba(201,168,74,0.14);
-  border-radius: var(--radius);
-  box-shadow:
-    var(--glow),
-    0 -4px 32px rgba(0,0,0,0.45);
-}
-
-/* Side-by-side layout: tuck dock above the sidebar column so rules never obscure it */
-@media (min-width: 1201px) {
-  body:not(.rules-closed) .floating-controls{
-    right: var(--floating-dock-offset-right);
-    max-width: min(
-      840px,
-      max(280px, calc(100vw - var(--floating-dock-offset-right) - 48px))
-    );
-  }
-}
-
-@media (max-width: 1200px) {
-  body:not(.rules-closed) .floating-controls{
-    max-width: calc(100vw - 28px);
-  }
+  border-radius: 10px;
 }
 
 .floating-dock-row--dock-bar{
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
   min-width: 0;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
 }
 .floating-dock-rules-btn{
-  flex: 0 0 auto;
+  min-width: 0;
 }
-/* Compact Rules chip — matches challenge row height */
+/* Every dock chip shares one compact footprint so the 3-wide grid stays even.
+   Sized down to fit the full "Challenge N" label inside a third of the encounter box. */
+.floating-dock-row--dock-bar .floating-reset-btn{
+  min-width: 0;
+  padding: 6px 4px !important;
+  font-size: 10.5px !important;
+  min-height: 26px !important;
+  border-radius: 7px;
+  line-height: 1.1;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: none;
+}
 .floating-dock-row--dock-bar .floating-reset-btn.rules-open-inline{
-  padding: 7px 11px !important;
-  font-size: 11px !important;
-  min-height: 36px !important;
   font-weight: 700;
-  letter-spacing: 0.02em;
 }
 .floating-dock-row--dock-bar .floating-reset-btn.rules-open-inline.rules-toggle-active{
   border-color: rgba(201, 168, 74, 0.55) !important;
@@ -338,16 +367,6 @@ p.subtitle{color:var(--muted);font-size:12px}
     0 0 0 1px rgba(201, 168, 74, 0.25),
     0 0 14px rgba(201, 168, 74, 0.28),
     var(--glow);
-}
-
-.floating-dock-row--dock-bar .floating-reset-btn.challenge-map-btn{
-  flex: 1 1 72px;
-  min-width: 72px;
-  padding: 7px 5px !important;
-  font-size: 9.5px !important;
-  min-height: 36px !important;
-  line-height: 1.2;
-  white-space: nowrap;
 }
 
 .floating-reset-btn{
@@ -491,6 +510,9 @@ body.rules-closed .main{
     max-width: 420px;
     align-self: center;
     margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 .encounter-dock .preview-and-message-wrap {
     flex-direction: column;
@@ -1282,7 +1304,7 @@ body.rules-closed .main{
     display:flex;
     gap:8px;
     width: 100%;
-    justify-content: space-between; /* Space out the fuse button and the untap group */
+    justify-content: flex-start; /* Keep untap/past-combinations beside the fuse button */
 }
 /* Wrapper for Untap/Past Combinations */
 .right-buttons {
@@ -1614,6 +1636,130 @@ body.rules-closed .main{
 .btn.silver{background:#444;color:#eee}
 .btn.silver:hover{background:#666}
 
+/* ---------------- GUIDED TUTORIAL (coach marks over the live UI) ---------------- */
+/* The wrapper stays unpositioned on purpose: every child is fixed and carries its own
+   z-index, so the encounter panel can slot between the shade and the popup. */
+.tutorial-coach {
+    pointer-events: none;
+}
+.tutorial-coach[hidden] { display: none; }
+
+/* Four panes form a frame around the highlighted rect, leaving a clickable hole */
+.tutorial-shade {
+    position: fixed;
+    z-index: 13000;
+    background: rgba(4, 2, 6, 0.78);
+    pointer-events: auto;
+    transition: opacity .2s ease;
+}
+.tutorial-rings {
+    pointer-events: none;
+}
+.tutorial-ring {
+    position: fixed;
+    z-index: 13005;
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    pointer-events: none;
+    will-change: transform, box-shadow;
+    animation: tutorialRingPulse 1.25s ease-in-out infinite;
+}
+@keyframes tutorialRingPulse {
+    0%, 100% {
+        border-color: rgba(201,168,74,0.8);
+        box-shadow: 0 0 0 2px rgba(201,168,74,0.16), 0 0 16px 2px rgba(201,168,74,0.45);
+        transform: scale(1);
+    }
+    50% {
+        border-color: #ffeaa7;
+        box-shadow: 0 0 0 8px rgba(201,168,74,0.3), 0 0 36px 10px rgba(201,168,74,0.95);
+        transform: scale(1.035);
+    }
+}
+
+.tutorial-pop {
+    position: fixed;
+    z-index: 13010;
+    width: min(340px, calc(100vw - 24px));
+    box-sizing: border-box;
+    background: var(--panel);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.7), var(--glow);
+    padding: 12px 14px 13px;
+    color: var(--muted);
+    pointer-events: auto;
+}
+.tutorial-pop-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+.tutorial-pop-exit {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    opacity: .75;
+}
+.tutorial-pop-exit:hover { color: var(--accent); opacity: 1; }
+.tutorial-pop-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+}
+.tutorial-pop-body { font-size: 12.5px; line-height: 1.5; }
+.tutorial-pop-body p { margin: 0 0 8px; }
+.tutorial-pop-body p:last-child { margin-bottom: 0; }
+.tutorial-pop-body strong { color: var(--accent); font-weight: 600; }
+.tutorial-pop-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 11px;
+    min-height: 24px;
+}
+.tutorial-pop-dots { display: flex; gap: 4px; }
+.tutorial-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+}
+.tutorial-dot.done { background: rgba(201,168,74,0.5); }
+.tutorial-dot.active { background: var(--accent); }
+.tutorial-btn {
+    padding: 5px 13px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 12.5px;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: #2a5032;
+    color: #9ff88b;
+    transition: background .2s;
+}
+.tutorial-btn:hover { background: #356a42; }
+.tutorial-btn[hidden] { display: none; }
+
+/* The encounter panel and its message box stay above the dim — the steps keep referring to them.
+   Sticky positioning on .encounter-dock makes it a stacking context, so it has to be the lifted
+   element, which means the scenario chips inside it need to be muted out by hand. */
+body.tutorial-running .encounter-dock {
+    z-index: 13001;
+}
+body.tutorial-running .floating-controls {
+    visibility: hidden;
+}
+
 /* Keep game layout inline and stable at all widths. */
 @media (max-width: 900px) {
   :root {
@@ -1641,18 +1787,6 @@ body.rules-closed .main{
 </style>
 </head>
 <body>
-<div class="floating-controls" role="toolbar" aria-label="Game controls">
-  <div class="floating-dock-row floating-dock-row--dock-bar" role="group" aria-label="Rules and challenges">
-    <button id="rulesOpenBtn" type="button" class="floating-reset-btn rules-open-inline floating-dock-rules-btn" aria-label="Open rules panel">Rules</button>
-    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="1" data-finale-key="AZ" title="Sandwich finale">Challenge&nbsp;1</button>
-    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="2" data-finale-key="Z" title="The Alchemists Endgame finale">Challenge&nbsp;2</button>
-    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="3" data-finale-key="EZ" title="The Alchemists Voyage finale">Challenge&nbsp;3</button>
-    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="4" data-finale-key="BZ" title="Hero finale">Challenge&nbsp;4</button>
-    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="5" data-finale-key="DZ" title="Landmark finale">Challenge&nbsp;5</button>
-    <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="6" data-finale-key="FZ" title="Accident finale — Humpty Dumpty">Challenge&nbsp;6</button>
-    <button type="button" id="draftStatsBtn" class="floating-reset-btn draft-stats-btn" title="Simulate draft pools across all challenges">Draft&nbsp;Stats</button>
-  </div>
-</div>
 <div class="sidebar">
   <div class="rules-header">
     <h1>HOW TO PLAY</h1>
@@ -1718,6 +1852,19 @@ body.rules-closed .main{
               <div class="hint-box" id="hintBox"></div>
           </div>
         <div class="encounter-message-box" id="encounterMessageBox"></div>
+      </div>
+      <div class="floating-controls" role="toolbar" aria-label="Game controls">
+        <div class="floating-dock-row floating-dock-row--dock-bar" role="group" aria-label="Rules and challenges">
+          <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="1" data-finale-key="AZ" title="Sandwich finale — opens the tutorial">Challenge&nbsp;1</button>
+          <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="2" data-finale-key="Z" title="The Alchemists Endgame finale">Challenge&nbsp;2</button>
+          <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="3" data-finale-key="EZ" title="The Alchemists Voyage finale">Challenge&nbsp;3</button>
+          <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="4" data-finale-key="BZ" title="Hero finale">Challenge&nbsp;4</button>
+          <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="5" data-finale-key="DZ" title="Landmark finale">Challenge&nbsp;5</button>
+          <button type="button" class="floating-reset-btn challenge-map-btn js-start-challenge" data-challenge-n="6" data-finale-key="FZ" title="Accident finale — Humpty Dumpty">Challenge&nbsp;6</button>
+          <button id="rulesOpenBtn" type="button" class="floating-reset-btn rules-open-inline floating-dock-rules-btn" aria-label="Open rules panel">Rules</button>
+          <button type="button" id="tutorialBtn" class="floating-reset-btn" title="Play a short guided walkthrough">Tutorial</button>
+          <button type="button" id="draftStatsBtn" class="floating-reset-btn draft-stats-btn" title="Simulate draft pools across all challenges">Stats</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1931,7 +2078,7 @@ const encounterEffects = {
     'F': { name: 'Ice- Frozen Tower', difficultyLevel: 1, hint1: "This narrow siege tower is made of slippery ice", hint2: 'It seems easy to knock over', effects: ['-1A', '-2A', '3A', '26B', '-28B', '-30B', '-51A', '40A', '47A','-34A', '78A', '42A', '-43A', '104A', '97A'] },
     'G': { name: 'Rope- Mummy', difficultyLevel: 1, hint1: 'This creature seems to be wrapped in many strips.', hint2: 'The ropes and fabrics are its defences.', effects: ['2A', '-4A', '-1A', '-5A', '11A', '42A', '84A', '-30B', '-37A', '47A', '78A', '38A', '104A', '24A', '106A'] },
     'H': { name: 'Light- Gorgon', difficultyLevel: 5, hint1: 'The creature turns anyone it faces into stone.', hint2: 'The way it turns you to stone is by looking at you.', effects: ['-7A', '-29B', '-39A', '-40A', '-31A', '54A', '-37A', '-38A', '-10B', '51B', '-111A', '111B'] },
-    'I': { name: 'Metal- Automaton', difficultyLevel: 2, hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A', '102A', '21A'] },
+    'I': { name: 'Metal- Automaton', difficultyLevel: 2, hint1: 'It is made of very sturdy metal.', hint2: 'You will need to break open its tough exterior.', effects: ['-41A', '-26B', '28B', '-34A', '-40A', '41A', '42A', '-47A', '-52A', '65A', '102A', '21A', '-7B'] },
     'J': { name: 'Sound- Banshee', difficultyLevel: 3, hint1: 'Its screams are unbearable.', hint2: 'You will have to find a way to stop hearing its screams.', effects: ['-7A', '7A', '-13A', '-26A', '14A', '-40A', '-14A', '38A', '92A', '94A', '115A', '104A'] },
     'K': { name: 'Glass- Illusionist', difficultyLevel: 3, hint1: 'It creates multiple copies, you do not know which one to attack', hint2: 'The illusion must be dealt with somehow', effects: ['-11B', '-11A', '9A', '26B', '-40A', '-42A', '-35A', '-31A', '-46A', '32A', '36A', '35A', '35B', '-37A', '38A', '104A'] },
     'L': { name: 'Pressure- The Press', difficultyLevel: 2, hint1: 'A mechanical arm compresses you from all directions.', hint2: 'Eventually the force will stop, you must survive it.', effects: ['7A', '-13A', '-26A', '34A', '35A', '46B', '65B', '112A', '-30B'] },
@@ -4560,6 +4707,8 @@ function serializeHalfSuccesses() {
 }
 
 function saveGameState() {
+    // The tutorial runs on a scripted throwaway board; never let it overwrite the real save.
+    if (window.__alxTutorialActive) return;
     try {
         const state = {
             row1: serializeCards(row1),
@@ -5764,7 +5913,13 @@ if (rulesCloseBtn)
     });
 document.querySelectorAll('.js-start-challenge[data-finale-key]').forEach((btn) => {
     btn.addEventListener('click', () => {
-        randomEncounterMapResetWithForcedFinal(btn.dataset.finaleKey || '', btn.dataset.challengeN || '');
+        const challengeN = btn.dataset.challengeN || '';
+        // Challenge 1 doubles as the on-ramp, so it opens the walkthrough first.
+        if (challengeN === '1') {
+            startChallenge1WithTutorial();
+            return;
+        }
+        randomEncounterMapResetWithForcedFinal(btn.dataset.finaleKey || '', challengeN);
     });
 });
 
@@ -5945,6 +6100,467 @@ if (draftStatsModal) {
     });
 }
 
+/* ---------------- GUIDED TUTORIAL ---------------- */
+
+const TUTORIAL_PHOENIX_KEY = 'A';
+const TUTORIAL_VALLEY_KEY = 'M';
+const TUTORIAL_FINALE_KEY = 'AZ';
+const TUTORIAL_WATER_ID = '4';
+const TUTORIAL_FIRE_ID = '2';
+const TUTORIAL_STEAM_ID = '6';
+const TUTORIAL_ADVANCE_DELAY_MS = 900;
+
+let tutorialStepIndex = 0;
+let tutorialSavedSave = null;
+let tutorialTicker = null;
+let tutorialDoneAt = 0;
+let tutorialFinishInto = null;
+
+function tutorialEl(id) {
+    return document.getElementById(id);
+}
+
+function tutorialCardEl(elementId) {
+    return document.querySelector(`.card-slot[data-element-id="${elementId}"]`);
+}
+
+function tutorialNodeEl(encounterKey) {
+    return document.querySelector(`.cell[data-encounter-key="${encounterKey}"]`);
+}
+
+/** The reagents row spans the viewport, so spotlight the two starter cards instead. */
+function tutorialStarterCards() {
+    return [tutorialCardEl(TUTORIAL_WATER_ID), tutorialCardEl(TUTORIAL_FIRE_ID)];
+}
+
+function tutorialAllCards() {
+    return [...document.querySelectorAll('#row1 .card-slot, #row2 .card-slot')];
+}
+
+const tutorialFlow = [
+    {
+        title: 'Welcome to Periodic Fable',
+        body: `
+            <p>Welcome to Periodic Fable, an alchemy puzzle game. Here's a simple walkthrough on how to play.</p>
+            <p>In this encounter, you are up against the <strong>Phoenix</strong>, a fearsome bird made of flame itself.</p>
+            <p>To win an encounter, you must find the correct <strong>verb</strong> on your elements that defeats or solves whatever you are facing.</p>
+            <p>Go ahead and choose the <strong>Flood</strong> verb on your <strong>Water</strong> element to put it out.</p>
+        `,
+        center: true,
+        target: () => [tutorialCardEl(TUTORIAL_WATER_ID)],
+        done: () => defeatedEncounters.has(TUTORIAL_PHOENIX_KEY),
+    },
+    {
+        title: 'Travel to a new encounter',
+        body: `
+            <p>Defeating the Phoenix gave you the <strong>Fire</strong> element as a permanent reward.</p>
+            <p>Clearing an encounter can open up harder encounters on the map. The <strong>Chemical</strong> themed encounter just unlocked — click it to move there.</p>
+        `,
+        // Both cards sit in the lit area so the shade edge lands past them instead of
+        // slicing the reagents row in half; only the node you have to click gets a ring.
+        target: () => [...tutorialStarterCards(), tutorialNodeEl(TUTORIAL_VALLEY_KEY)],
+        highlight: () => [tutorialNodeEl(TUTORIAL_VALLEY_KEY)],
+        done: () => currentEncounterCell?.dataset?.encounterKey === TUTORIAL_VALLEY_KEY,
+    },
+    {
+        title: 'Making New Elements',
+        body: `
+            <p>In this encounter, flooding and burning will not be enough. You will need to make a new element.</p>
+            <p>Click both <strong>Fire</strong> and <strong>Water</strong> and click the <strong>Fuse</strong> button and see what happens…</p>
+        `,
+        target: () => [
+            ...tutorialStarterCards(),
+            document.getElementById('fuseButton'),
+            document.querySelector('.right-buttons'),
+        ],
+        highlight: () => [document.getElementById('fuseButton'), ...tutorialStarterCards()],
+        done: () => !!tutorialCardEl(TUTORIAL_STEAM_ID),
+    },
+    {
+        title: 'Clear The Valley with Puff',
+        body: `
+            <p>Steam carries a verb neither parent had: <strong>Puff</strong>, which is exactly what moves a cloud of gas.</p>
+            <p>Click <strong>Puff</strong> on your new Steam card.</p>
+        `,
+        target: () => [tutorialCardEl(TUTORIAL_STEAM_ID)],
+        done: () => defeatedEncounters.has(TUTORIAL_VALLEY_KEY),
+    },
+    {
+        title: 'Reading the fusion board',
+        body: `
+            <p>The number next to an element shows how many products can be made with it. Elements with a dot symbol are final products and cannot be used to make new fusions.</p>
+            <p>Whenever you fuse, the first element you clicked on will be temporarily deactivated as a cost. When you click an element, valid fusion partners will glow, and combinations that aren't possible are highlighted in red when you select them.</p>
+            <p>If you want your deactivated elements back, click <strong>Untap All</strong>. That reactivates all of them, but gets rid of every new element in your Products row.</p>
+        `,
+        target: () => [
+            ...tutorialAllCards(),
+            document.getElementById('fuseButton'),
+            document.querySelector('.right-buttons'),
+        ],
+        highlight: () => [document.getElementById('clearButton')],
+    },
+    {
+        title: "That's it!",
+        body: `
+            <p>There's no way to lose, if you get stuck, travel to another encounter or fuse something else.</p>
+            <p>To beat the whole challenge you must solve the <strong>final room</strong>. It holds an especially hard puzzle, but you can unlock hints for it as you go.</p>
+        `,
+        center: true,
+        target: () => [],
+    },
+];
+
+/** Phoenix in the starters bubble, Valley first in path1 so it unlocks the moment the Phoenix falls. */
+function buildTutorialLayout() {
+    const reserved = new Set([TUTORIAL_PHOENIX_KEY, TUTORIAL_VALLEY_KEY, ...BOARD_CLASSICAL_CORNER_KEYS]);
+    const filler = Object.keys(encounterEffects)
+        .filter((key) => !reserved.has(key) && !FINAL_ENCOUNTER_KEYS.has(key))
+        .filter((key) => !String(encounterEffects[key]?.name || '').startsWith('FINAL ROOM'))
+        .slice(0, BOARD_TOTAL_CELL_COUNT - 3);
+    return [TUTORIAL_PHOENIX_KEY, TUTORIAL_VALLEY_KEY, ...filler, TUTORIAL_FINALE_KEY];
+}
+
+function startTutorial({ finishInto = null } = {}) {
+    if (window.__alxTutorialActive) return;
+    tutorialFinishInto = finishInto;
+    try {
+        tutorialSavedSave = localStorage.getItem(SAVE_KEY);
+    } catch (e) {
+        tutorialSavedSave = null;
+    }
+    // Guarded so the player's real save survives the scripted board untouched.
+    window.__alxTutorialActive = true;
+    document.body.classList.add('tutorial-running');
+    // An open rules panel squeezes the board into the top half, which cramps every spotlight.
+    setRulesClosed(true);
+
+    runtimeFinalUnlockOverrides = {};
+    wipeGameplayProgress();
+    startingElements = [TUTORIAL_WATER_ID];
+    addCardToRow(TUTORIAL_WATER_ID, row1);
+    applyEncounterKeysToDOM(buildTutorialLayout());
+    updateCombinationsList();
+    initializeDefeatedEncounters();
+    activeFinaleKey = TUTORIAL_FINALE_KEY;
+    activeChallengeN = finishInto === 'challenge1' ? 1 : null;
+    updateChallengeButtonHighlight();
+    refreshAllCardVerbLayouts();
+
+    tutorialStepIndex = 0;
+    tutorialDoneAt = 0;
+    const coach = tutorialEl('tutorialCoach');
+    if (coach) coach.hidden = false;
+    renderTutorialStep();
+    if (tutorialTicker) clearInterval(tutorialTicker);
+    tutorialTicker = setInterval(tutorialTick, 120);
+}
+
+function endTutorial() {
+    if (!window.__alxTutorialActive) return;
+    window.__alxTutorialActive = false;
+    document.body.classList.remove('tutorial-running');
+    if (tutorialTicker) {
+        clearInterval(tutorialTicker);
+        tutorialTicker = null;
+    }
+    const coach = tutorialEl('tutorialCoach');
+    if (coach) coach.hidden = true;
+
+    // Launched from Challenge 1, the walkthrough is the intro to that run, so drop the player
+    // onto a fresh Challenge 1 board instead of whatever they were on beforehand.
+    const intoChallenge1 = tutorialFinishInto === 'challenge1';
+    tutorialFinishInto = null;
+
+    let restored = false;
+    if (!intoChallenge1 && tutorialSavedSave) {
+        try {
+            localStorage.setItem(SAVE_KEY, tutorialSavedSave);
+            restored = loadGameState();
+        } catch (e) {
+            restored = false;
+        }
+    }
+    if (!restored) {
+        runtimeFinalUnlockOverrides = {};
+        wipeGameplayProgress();
+        repopulateStartingDeck();
+        let layout;
+        try {
+            layout = generateRandomEncounterLayout(TUTORIAL_FINALE_KEY);
+        } catch (e) {
+            layout = DEFAULT_GRID_ENCOUNTER_KEYS.slice();
+        }
+        applyEncounterKeysToDOM(layout);
+        recordMapRegeneration();
+        updateCombinationsList();
+        initializeDefeatedEncounters();
+        activeFinaleKey = TUTORIAL_FINALE_KEY;
+        activeChallengeN = CHALLENGE_NUM_BY_FINALE[TUTORIAL_FINALE_KEY] ?? 1;
+        applyChallenge1DefaultHint2Unlocks();
+        updateChallengeButtonHighlight();
+        refreshAllCardVerbLayouts();
+        saveGameState();
+    }
+    tutorialSavedSave = null;
+}
+
+function startChallenge1WithTutorial() {
+    if (
+        !confirm(
+            'Erase all progress and start Challenge 1? The walkthrough will guide you through the first two encounters.'
+        )
+    ) {
+        return;
+    }
+    startTutorial({ finishInto: 'challenge1' });
+}
+
+function tutorialTick() {
+    if (!window.__alxTutorialActive) return;
+    const step = tutorialFlow[tutorialStepIndex];
+    if (step?.done) {
+        if (step.done()) {
+            if (!tutorialDoneAt) tutorialDoneAt = Date.now();
+            if (Date.now() - tutorialDoneAt >= TUTORIAL_ADVANCE_DELAY_MS) {
+                advanceTutorialStep();
+                return;
+            }
+        } else {
+            tutorialDoneAt = 0;
+        }
+    }
+    layoutTutorialCoach();
+}
+
+function advanceTutorialStep() {
+    tutorialDoneAt = 0;
+    if (tutorialStepIndex >= tutorialFlow.length - 1) {
+        endTutorial();
+        return;
+    }
+    tutorialStepIndex += 1;
+    renderTutorialStep();
+}
+
+function renderTutorialStep() {
+    const step = tutorialFlow[tutorialStepIndex];
+    if (!step) return;
+
+    const titleEl = tutorialEl('tutorialPopTitle');
+    const bodyEl = tutorialEl('tutorialPopBody');
+    const nextBtn = tutorialEl('tutorialPopNext');
+    const dotsEl = tutorialEl('tutorialPopDots');
+
+    if (titleEl) titleEl.textContent = step.title;
+    if (bodyEl) bodyEl.innerHTML = step.body;
+
+    const isLast = tutorialStepIndex === tutorialFlow.length - 1;
+    if (nextBtn) {
+        nextBtn.hidden = !!step.done;
+        nextBtn.textContent = isLast ? 'Finish' : 'Next';
+    }
+
+    if (dotsEl) {
+        dotsEl.innerHTML = '';
+        tutorialFlow.forEach((_, i) => {
+            const dot = document.createElement('span');
+            dot.className = 'tutorial-dot';
+            if (i < tutorialStepIndex) dot.classList.add('done');
+            if (i === tutorialStepIndex) dot.classList.add('active');
+            dotsEl.appendChild(dot);
+        });
+    }
+
+    const first = (step.target?.() || []).find(Boolean);
+    if (first?.scrollIntoView) first.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    layoutTutorialCoach();
+}
+
+function tutorialSetBox(el, left, top, width, height) {
+    if (!el) return;
+    el.style.left = `${Math.max(0, left)}px`;
+    el.style.top = `${Math.max(0, top)}px`;
+    el.style.width = `${Math.max(0, width)}px`;
+    el.style.height = `${Math.max(0, height)}px`;
+}
+
+function tutorialUnionRect(els, pad = 8) {
+    const visible = (els || []).filter((el) => el && el.getClientRects().length);
+    if (!visible.length) return null;
+    let top = Infinity;
+    let left = Infinity;
+    let right = -Infinity;
+    let bottom = -Infinity;
+    visible.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        top = Math.min(top, r.top);
+        left = Math.min(left, r.left);
+        right = Math.max(right, r.right);
+        bottom = Math.max(bottom, r.bottom);
+    });
+    return {
+        top: Math.max(0, top - pad),
+        left: Math.max(0, left - pad),
+        right: Math.min(window.innerWidth, right + pad),
+        bottom: Math.min(window.innerHeight, bottom + pad),
+    };
+}
+
+function tutorialTargetRect() {
+    const step = tutorialFlow[tutorialStepIndex];
+    return tutorialUnionRect(step?.target?.() || []);
+}
+
+/** Neighbours like the two reagent cards would draw rings that clip each other, so fold
+    any pair that touches (within a ring's own glow) into one bubble around both. */
+const TUTORIAL_RING_MERGE_SLACK = 12;
+
+function mergeTutorialRects(rects) {
+    const merged = [];
+    rects.forEach((rect) => {
+        let cur = rect;
+        for (let i = merged.length - 1; i >= 0; i--) {
+            const other = merged[i];
+            const apart =
+                cur.left > other.right + TUTORIAL_RING_MERGE_SLACK ||
+                other.left > cur.right + TUTORIAL_RING_MERGE_SLACK ||
+                cur.top > other.bottom + TUTORIAL_RING_MERGE_SLACK ||
+                other.top > cur.bottom + TUTORIAL_RING_MERGE_SLACK;
+            if (apart) continue;
+            merged.splice(i, 1);
+            cur = {
+                top: Math.min(cur.top, other.top),
+                left: Math.min(cur.left, other.left),
+                right: Math.max(cur.right, other.right),
+                bottom: Math.max(cur.bottom, other.bottom),
+            };
+        }
+        merged.push(cur);
+    });
+    return merged;
+}
+
+/** One ring per highlighted element, so a step can spotlight the Fuse button on its own. */
+function renderTutorialRings() {
+    const host = tutorialEl('tutorialRings');
+    if (!host) return;
+    const step = tutorialFlow[tutorialStepIndex];
+    const els = step?.highlight?.() || step?.target?.() || [];
+    const rects = mergeTutorialRects(
+        els.map((el) => tutorialUnionRect([el], 4)).filter(Boolean)
+    );
+    while (host.children.length > rects.length) host.lastElementChild.remove();
+    while (host.children.length < rects.length) {
+        const ring = document.createElement('div');
+        ring.className = 'tutorial-ring';
+        host.appendChild(ring);
+    }
+    rects.forEach((r, i) => {
+        tutorialSetBox(host.children[i], r.left, r.top, r.right - r.left, r.bottom - r.top);
+    });
+}
+
+function positionTutorialPop(rect) {
+    const pop = tutorialEl('tutorialPop');
+    if (!pop) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const { width: w, height: h } = pop.getBoundingClientRect();
+    const gap = 14;
+    const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
+    if (tutorialFlow[tutorialStepIndex]?.center || !rect) {
+        let left = (vw - w) / 2;
+        let top = (vh - h) / 2;
+        // A centered card must still not sit on top of the thing it is telling you to click.
+        const overlaps =
+            rect &&
+            left + w > rect.left &&
+            left < rect.right &&
+            top + h > rect.top &&
+            top < rect.bottom;
+        if (overlaps) {
+            top =
+                rect.top > vh - rect.bottom
+                    ? Math.max(8, rect.top - gap - h)
+                    : Math.min(vh - h - 8, rect.bottom + gap);
+        }
+        pop.style.left = `${clamp(left, 8, Math.max(8, vw - w - 8))}px`;
+        pop.style.top = `${clamp(top, 8, Math.max(8, vh - h - 8))}px`;
+        return;
+    }
+
+    let top;
+    let left;
+    if (rect.bottom + gap + h <= vh - 8) {
+        top = rect.bottom + gap;
+        left = rect.left + (rect.right - rect.left) / 2 - w / 2;
+    } else if (rect.top - gap - h >= 8) {
+        top = rect.top - gap - h;
+        left = rect.left + (rect.right - rect.left) / 2 - w / 2;
+    } else if (vw - rect.right >= w + gap + 8) {
+        left = rect.right + gap;
+        top = rect.top;
+    } else if (rect.left >= w + gap + 8) {
+        left = rect.left - gap - w;
+        top = rect.top;
+    } else {
+        left = (vw - w) / 2;
+        top = vh - h - 12;
+    }
+
+    pop.style.left = `${clamp(left, 8, Math.max(8, vw - w - 8))}px`;
+    pop.style.top = `${clamp(top, 8, Math.max(8, vh - h - 8))}px`;
+}
+
+function layoutTutorialCoach() {
+    const coach = tutorialEl('tutorialCoach');
+    if (!coach || coach.hidden) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const shadeTop = coach.querySelector('[data-shade="top"]');
+    const shadeBottom = coach.querySelector('[data-shade="bottom"]');
+    const shadeLeft = coach.querySelector('[data-shade="left"]');
+    const shadeRight = coach.querySelector('[data-shade="right"]');
+    const rect = tutorialTargetRect();
+
+    if (!rect) {
+        tutorialSetBox(shadeTop, 0, 0, vw, vh);
+        tutorialSetBox(shadeBottom, 0, 0, 0, 0);
+        tutorialSetBox(shadeLeft, 0, 0, 0, 0);
+        tutorialSetBox(shadeRight, 0, 0, 0, 0);
+    } else {
+        tutorialSetBox(shadeTop, 0, 0, vw, rect.top);
+        tutorialSetBox(shadeBottom, 0, rect.bottom, vw, vh - rect.bottom);
+        tutorialSetBox(shadeLeft, 0, rect.top, rect.left, rect.bottom - rect.top);
+        tutorialSetBox(shadeRight, rect.right, rect.top, vw - rect.right, rect.bottom - rect.top);
+    }
+    renderTutorialRings();
+    positionTutorialPop(rect);
+}
+
+function initTutorialUI() {
+    const openBtn = tutorialEl('tutorialBtn');
+    const nextBtn = tutorialEl('tutorialPopNext');
+    const exitBtn = tutorialEl('tutorialExitBtn');
+
+    if (openBtn) openBtn.addEventListener('click', startTutorial);
+    if (nextBtn) nextBtn.addEventListener('click', advanceTutorialStep);
+    if (exitBtn) exitBtn.addEventListener('click', endTutorial);
+
+    window.addEventListener('resize', layoutTutorialCoach);
+    window.addEventListener('scroll', layoutTutorialCoach, true);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && window.__alxTutorialActive) endTutorial();
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTutorialUI);
+} else {
+    initTutorialUI();
+}
+
 </script>
 
 <div id="nicely-done-overlay" class="nicely-done-overlay" aria-hidden="true">
@@ -5979,6 +6595,24 @@ if (draftStatsModal) {
         <div id="draftStatsSummary" class="draft-stats-summary"></div>
         <div id="draftStatsBody" class="draft-stats-body">
             <div class="draft-stats-loading">Open to simulate draft pools across all six challenges.</div>
+        </div>
+    </div>
+</div>
+<div id="tutorialCoach" class="tutorial-coach" hidden>
+    <div class="tutorial-shade" data-shade="top"></div>
+    <div class="tutorial-shade" data-shade="bottom"></div>
+    <div class="tutorial-shade" data-shade="left"></div>
+    <div class="tutorial-shade" data-shade="right"></div>
+    <div class="tutorial-rings" id="tutorialRings"></div>
+    <div class="tutorial-pop" id="tutorialPop" role="dialog" aria-live="polite" aria-labelledby="tutorialPopTitle">
+        <div class="tutorial-pop-head">
+            <h3 class="tutorial-pop-title" id="tutorialPopTitle"></h3>
+            <button type="button" class="tutorial-pop-exit" id="tutorialExitBtn">Exit tutorial</button>
+        </div>
+        <div class="tutorial-pop-body" id="tutorialPopBody"></div>
+        <div class="tutorial-pop-foot">
+            <div class="tutorial-pop-dots" id="tutorialPopDots"></div>
+            <button type="button" class="tutorial-btn" id="tutorialPopNext">Next</button>
         </div>
     </div>
 </div>
