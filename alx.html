@@ -407,6 +407,31 @@ p.subtitle{color:var(--muted);font-size:12px}
   background: rgba(65, 52, 24, 0.98);
   border-color: rgba(230, 200, 120, 0.95);
 }
+.floating-controls.floating-controls--nudge{
+  z-index: 2;
+  border-color: rgba(230, 200, 120, 0.95);
+  box-shadow: 0 0 0 3px rgba(201, 168, 74, 0.9), 0 0 22px rgba(201, 168, 74, 0.6);
+  animation: challengesBoxNudge 1.4s ease-in-out infinite;
+}
+@keyframes challengesBoxNudge {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(201, 168, 74, 0.7), 0 0 14px rgba(201, 168, 74, 0.4);
+    border-color: rgba(201, 168, 74, 0.75);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(201, 168, 74, 0.95), 0 0 26px rgba(201, 168, 74, 0.75);
+    border-color: rgba(255, 232, 176, 0.98);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .floating-controls.floating-controls--nudge{
+    animation: none;
+  }
+}
+.message-item.message-item--sticky {
+  animation: none !important;
+  opacity: 1 !important;
+}
 .floating-reset-btn.draft-stats-btn{
   font-size:11px;
   padding:8px 10px;
@@ -2133,7 +2158,7 @@ const encounterEffects = {
     'BI': { name: 'Glass- The Unseen', difficultyLevel: 4, hint1: 'An invisible rodent runs rampant.', hint2: "You need to catch it somehow, it can't be seen.", effects: ['-11B', '-12A', '-27A', '68A', '-4A', '-2A', '53A', '24A'] },
     'BJ': { name: 'Animal- The Rotting Meat', difficultyLevel: 3, hint1: 'A perfect cut of ribeye is sitting out in the open, about to go bad.', hint2: 'Someone really ought to put it in the fridge.', effects: ['18A', '-9A', '72A', '-31A', '-13A', '-15A'] },
     'BK': { name: 'Darkness- The Nuisance', difficultyLevel: 4, hint1: 'A customer is being a jerk to everyone.', hint2: 'You must get them to leave without harming them.', effects: ['80A', '51A', '-14B', '73A', '67A', '-3A', '35A', '32A', '-36A', '-5A', '55A', '56A', '56B', '57B', '58B', '-60A', '45A', '45B', '106A', '-7B'] },
-    'BL': { name: 'Light- The Signal', difficultyLevel: 3, hint1: 'You are stranded on an island and an airplane is flying overhead.', hint2: 'You must make some kind of signal to be rescued.', effects: ['-2A', '12A', '-39A', '-32A', '-94A', '-54A', '78A', '42A', '-6A'] },
+    'BL': { name: 'Light- The Signal', difficultyLevel: 3, hint1: 'You are stranded on an island and an airplane is flying overhead.', hint2: 'You must make some kind of signal to be rescued.', effects: ['-2A', '12A', '-39A', '-32A', '-94A', '-54A', '78A', '42A', '-6A', '-105A'] },
     'BM': { name: 'Love- The Break-Up', difficultyLevel: 5, hint1: 'A man tells you he misses someone dearly.', hint2: 'He wants to feel better and get over it.', effects: ['35A', '33A', '-36A', '-37A', '-68B', '-64A', '15B', '-20A', '-44A'] },
     'BN': { name: 'Man- The Fraternity', difficultyLevel: 5, hint1: 'You must signal your status to gain entry into a society of elites.', hint2: 'The members are impressed by style and class.', effects: ['15A', '79A', '65C', '-32A', '-36A', '-37A', '74B', '-49A', '-59A', '-57B', '75A'] },
     'BO': { name: 'Sound- The Performance', difficultyLevel: 3, hint1: 'The man singing to the crowd is an old enemy from your past.', hint2: 'You will need to humiliate him.', effects: ['-14A', '-14B', '-34A', '52A', '45B', '55A', '56B', '57B', '68B', '73A', '67A', '-7C', '-29A'] },
@@ -2156,7 +2181,7 @@ const encounterEffects = {
     'CF': { name: 'Life- The Diet', difficultyLevel: 4, hint1: 'You are brainstorming ways to lose weight and be healthier.', hint2: 'Perhaps some healthy food would help.', effects: ['56B', '73B', '19A', '113B', '101A', '58B', '-55B', '-57B', '-33A', '115A'] },
     'CG': { name: 'Oil- The Checkpoint', difficultyLevel: 4, hint1: 'You are trying to get some contraband resources past a security checkpoint.', hint2: 'The guards may be more corrupt than they seem.', effects: ['79A', '37A', '38A', '65C', '80A', '49A', '46A', '64A', '-51B', '-74B', '-77A', '-36A', '-41A', '-32A', '-20A', '-10B'] },
     'CH': { name: 'Ice- The Stream', difficultyLevel: 5, hint1: 'You are very thirsty, but the water in the stream might not be clean.', hint2: 'You must find a way to get rid of bacteria.', effects: ['6B', '51A', '-28B', '-10A', '-71A', '-72A', '-38A', '-19A'] },
-    'CI': { name: 'Glass- The Pawnshop', difficultyLevel: 4, hint1: 'You are at an old antiques shop that purchases valuables.', hint2: 'Perhaps you could provide them some item of worth.', effects: ['22A', '15B', '69A', '74B', '41B', '75B', '48A', '65C', '-24A', '-36A', '-44A', '-59A', '-60A', '-61A', '-64A', '-66A', '-71B', '-114A', '-40B', '-108A', '-100A', '-63A', '-63B'] },
+    'CI': { name: 'Glass- The Pawnshop', difficultyLevel: 4, hint1: 'You are at an old antiques shop that purchases valuables.', hint2: 'Perhaps you could provide them some item of worth.', effects: ['22A', '15B', '69A', '74B', '41B', '75B', '48A', '65C', '-24A', '-36A', '-44A', '-59A', '-60A', '-61A', '-64A', '-66A', '-71B', '-114A', '-40B', '-108A', '-100A', '-63A', '-63B', '-49A', '-77A'] },
     'CJ': { name: 'Art- The Sigil', difficultyLevel: 4, hint1: 'A sigil maker is looking for inspiration for emblems to engrave.', hint2: 'You could provide something that would look artistic on a shield.', effects: ['77A', '65C', '64A', '41A', '40A', '17A', '103A', '-74B', '-79A', '-60B', '49A'] },
     'CK': { name: 'Rope- The Hunter', difficultyLevel: 3, hint1: 'A hunter has tracked down his prey, but is unprepared.', hint2: 'They could urgently use a weapon.', effects: ['41B', '40B', '43B', '42A', '47A', '68A', '-11B', '-52A', '-38A', '-7B'] },
     'CL': { name: 'Love- The Nihilist', difficultyLevel: 4, hint1: 'A despondent philosopher complains that everything feels meaningless.', hint2: 'They could use something that would make them feel alive again.', effects: ['37A', '33A', '33B', '51B', '12A', '64A', '68B', '-38A', '-31A', '-47A', '-85A', '-36A', '-49A'] },
@@ -4552,6 +4577,7 @@ function confirmAndApplyRandomEncounterMap(finKey, challengeNum) {
     const num = String(challengeNum || '').trim();
     const challengePhrase = num ? `Challenge ${num}` : 'this challenge setup';
     if (!confirm(`Erase all progress and shuffle the map for ${challengePhrase}? This cannot be undone.`)) return;
+    clearChallengeNudge();
     runtimeFinalUnlockOverrides = {};
     wipeGameplayProgress();
     repopulateStartingDeck();
@@ -4611,6 +4637,15 @@ function displayMessage(text, type = 'default', holdMs) {
     const msgItem = document.createElement('div');
     msgItem.className = `message-item ${type}`;
     msgItem.textContent = text;
+    msgItem.dataset.messageId = Date.now();
+
+    // holdMs === Infinity (or 'sticky') keeps the banner until the next message.
+    const sticky = holdMs === Infinity || holdMs === 'sticky';
+    if (sticky) {
+        msgItem.classList.add('message-item--sticky');
+        encounterMessageBox.appendChild(msgItem);
+        return;
+    }
 
     const totalMs = holdMs != null ? holdMs : (type === 'blocked' ? 4500 : type === 'warning' ? 4200 : 3000);
     const fadeSec = Math.min(6, Math.max(2, totalMs / 1000));
@@ -4618,8 +4653,6 @@ function displayMessage(text, type = 'default', holdMs) {
         type === 'blocked'
             ? `blockedPulse 2.2s ease-in-out infinite, fadeout ${fadeSec}s forwards`
             : `fadeout ${fadeSec}s forwards`;
-
-    msgItem.dataset.messageId = Date.now();
 
     encounterMessageBox.appendChild(msgItem);
 
@@ -5577,6 +5610,13 @@ function updateHintBox(encounterKey) {
             for (let i = 1; i <= maxHints; i++) {
                 const hintText = encounterData[`hint${i}`];
                 if (!hintText) break;
+                // Hint 1 is always readable; later slots stay spoiler-blurred until hover.
+                if (i === 1) {
+                    const open = document.createElement('span');
+                    open.textContent = hintText;
+                    hintBox.appendChild(open);
+                    continue;
+                }
                 const entry = document.createElement('div');
                 entry.className = 'hint-spoiler-entry';
                 const label = document.createElement('span');
@@ -5689,7 +5729,22 @@ function hideWinScreen() {
         winArt.hidden = true;
     }
 
-    // Optional: You could reload the page or reset the game state here
+    nudgeTowardOtherChallenges();
+}
+
+/** After a finale win, point the player at the challenges dock (stays until they pick one). */
+function nudgeTowardOtherChallenges() {
+    displayMessage('Try a more difficult challenge!', 'success', Infinity);
+
+    const dock = document.querySelector('.floating-controls');
+    if (!dock) return;
+    dock.classList.add('floating-controls--nudge');
+}
+
+function clearChallengeNudge() {
+    document.querySelector('.floating-controls')?.classList.remove('floating-controls--nudge');
+    const sticky = encounterMessageBox?.querySelector('.message-item--sticky');
+    if (sticky) sticky.remove();
 }
 
 
@@ -6312,6 +6367,7 @@ function startChallenge1WithTutorial() {
     ) {
         return;
     }
+    clearChallengeNudge();
     startTutorial({ finishInto: 'challenge1' });
 }
 
