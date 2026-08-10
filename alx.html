@@ -3332,20 +3332,40 @@ const CHALLENGE_RIDDLE_BY_FINALE = Object.freeze({
 function assignedChallengeRiddleKey(forcedFinalKey) {
     return forcedFinalKey != null ? CHALLENGE_RIDDLE_BY_FINALE[forcedFinalKey] ?? null : null;
 }
-/** Challenge 1 mandatory middle encounters: Butcher, Mosquito, Riddle One, Knot, Maze. */
-const CHALLENGE_1_MANDATORY_MIDDLE_KEYS = ['AB', 'AG', 'AV', 'BH', 'AT'];
+/** Challenge 1 mandatory middle encounters: Butcher, Mosquito, Riddle One, Knot, Maze, Fish. */
+const CHALLENGE_1_MANDATORY_MIDDLE_KEYS = ['AB', 'AG', 'AV', 'BH', 'AT', 'AA'];
 /** The Hour (AD) is only drafted on Challenge 5 (Landmark) and Challenge 6 (Accident). */
 const THE_HOUR_ENCOUNTER_KEY = 'AD';
 const THE_HOUR_ALLOWED_FINALE_KEYS = new Set(['DZ', 'FZ']);
 /** Sandwich challenge: never draft The Swap (BD), Riddle Two (CB), Cloud (AW), Sigil (CJ), or Performance (BO). */
 const CHALLENGE_1_FORBIDDEN_ENCOUNTER_KEYS = new Set(['BD', 'CB', 'AW', 'CJ', 'BO']);
 const CHALLENGE_1_FORBIDDEN_THEME_SLUGS = new Set(['Cloud', 'Art']);
-/** Story pins for challenges 2–5 (seeded after assigned riddle, before difficulty/tier fill). */
+/** Story pins for challenges 2–6 (seeded after assigned riddle, before difficulty/tier fill).
+ *  Expanded so rare encounters get a guaranteed home without breaking tier/riddle rules. */
 const CHALLENGE_PINNED_MIDDLE_BY_FINALE = Object.freeze({
-    Z: ['U'],
-    EZ: ['O', 'K', 'BE'],
-    BZ: ['J'],
-    DZ: ['AF', 'J'],
+    // CH2: story rares + low-pick anchors (Pressure/Glass/Hammer) + Exchange (Life)
+    Z: ['U', 'CO', 'E', 'G', 'BN', 'BO', 'I', 'AN', 'BS', 'L', 'AJ', 'BP', 'S'],
+    // CH3: voyage pins + Chemical rare (Odor)
+    EZ: ['O', 'K', 'BE', 'BR'],
+    // CH4: avoid pinning Banshee (J) — it locks Gorgon/Stream into every d5 fill.
+    // BL covers Light so Gorgon is not forced; X/BY lift Tribute/Mine.
+    BZ: ['AO', 'X', 'BY', 'BL'],
+    // CH5: AK covers Ice so Stream is not forced; BM lifts Break-Up; AF keeps Match.
+    DZ: ['AF', 'AK', 'BM'],
+    // CH6: AD covers Time so Ritualists can be banned; drop CE (still weight-boosted).
+    FZ: ['BD', 'BB', 'AD'],
+});
+/**
+ * Hard bans per challenge for over-represented encounters that are only optional there.
+ * CH3 (EZ) is omitted — those keys are structurally required by Voyage tier/theme fill.
+ * Split Cloud vs Art bans across CH4/CH5 (banning both on one map collapses generation).
+ * CH6 bans Ritualists once The Hour is pinned for Time.
+ * Note: banning Diet (CF) on CH4 while also pinning BL collapses CH4 generation.
+ */
+const CHALLENGE_FORBIDDEN_ENCOUNTER_KEYS_BY_FINALE = Object.freeze({
+    BZ: ['U', 'AW'],
+    DZ: ['U', 'CJ'],
+    FZ: ['CA', 'U'],
 });
 /** Challenges 3–6: fixed harder middle-band difficulty mix (rest = difficulty 4). */
 const CHALLENGES_HARD_DISTRIBUTION_FINALE_KEYS = new Set(['EZ', 'BZ', 'DZ', 'FZ']);
@@ -3354,16 +3374,16 @@ const CHALLENGE_HARD_DIFF_QUOTAS = Object.freeze({ 2: 2, 3: 2, 5: 4 });
 const CHALLENGES_WITHOUT_DIFF1 = new Set(['EZ', 'BZ', 'DZ', 'FZ']);
 /** Challenges 3–6: never draft The Mosquito. */
 const CHALLENGE_MOSQUITO_FORBIDDEN_FINALE_KEYS = new Set(['EZ', 'BZ', 'DZ', 'FZ']);
-/** Challenges 4–6: never draft The Slumber (still allowed on Challenge 3). */
-const CHALLENGE_SLUMBER_FORBIDDEN_FINALE_KEYS = new Set(['BZ', 'DZ', 'FZ']);
+/** Challenges 5–6: never draft The Slumber (CH4 keeps it so Time can appear without Ritualists). */
+const CHALLENGE_SLUMBER_FORBIDDEN_FINALE_KEYS = new Set(['DZ', 'FZ']);
 /** Sigil & Weather: soft‑weighted in random fill (never blocked). Low on CH2–5; normal on CH6. */
 const OPTIONAL_ENCOUNTER_KEYS = new Set(['CJ', 'AL']);
 const OPTIONAL_ENCOUNTER_WEIGHT_DEFAULT = 0.08;
 const OPTIONAL_ENCOUNTER_WEIGHT_BY_FINALE = Object.freeze({ FZ: 1, AZ: 1 });
-/** Cloud theme (The Sign): lower theme lottery weight on CH4–6; normal on CH3. */
-const OPTIONAL_THEME_SLUGS = new Set(['Cloud']);
+/** Cloud + Art: lower theme lottery weight where not hard-banned; normal on CH3/CH6. */
+const OPTIONAL_THEME_SLUGS = new Set(['Cloud', 'Art']);
 const OPTIONAL_THEME_WEIGHT_DEFAULT = 0.011;
-const OPTIONAL_THEME_WEIGHT_BY_FINALE = Object.freeze({ EZ: 1, FZ: 1 });
+const OPTIONAL_THEME_WEIGHT_BY_FINALE = Object.freeze({ EZ: 1 });
 /** Minimum difficulty‑4 encounters on the middle band (no maximum — remainder may add more). */
 const MIN_DIFF4_ENCOUNTER_COUNT = 5;
 /** Challenge 1 (Sandwich): no difficulty‑5 middle encounters; exactly four difficulty‑4; diff 1–3 uncapped. */
@@ -3413,10 +3433,10 @@ const SPREAD_RARE_BOOST_WEIGHT = 8.0;
 const HARD_TIER_RARE_BOOST_ENCOUNTER_KEYS = new Set(['BM', 'BD', 'BB', 'X', 'G', 'BJ', 'CE', 'BO', 'BP', 'BL', 'F', 'E', 'L', 'CK', 'AO', 'BS', 'AK', 'AM', 'BN']);
 const HARD_TIER_RARE_BOOST_WEIGHT = 2.5;
 /** Trim over‑represented keys during CH3–6 fill (never story pins / riddles). */
-const HARD_TIER_DUCK_ENCOUNTER_KEYS = new Set(['CF', 'CJ', 'AW', 'CA', 'H', 'CH', 'U', 'AI', 'BT', 'AB', 'AH']);
+const HARD_TIER_DUCK_ENCOUNTER_KEYS = new Set(['CF', 'CJ', 'AW', 'AU', 'CA', 'H', 'CH', 'U', 'AI', 'BT', 'AB', 'AH']);
 /** Always present on Challenge 3 (Voyage) — do not duck there or generation collapses. */
 const CH3_STRUCTURAL_ENCOUNTER_KEYS = new Set(['CF', 'CJ', 'AW', 'U', 'CH', 'H', 'N', 'BT']);
-const HARD_TIER_DUCK_WEIGHT = 0.12;
+const HARD_TIER_DUCK_WEIGHT = 0.01;
 
 function hardTierDuckMultiplier(key, forcedFinalKey) {
     if (!HARD_TIER_DUCK_ENCOUNTER_KEYS.has(key)) return 1;
@@ -3438,6 +3458,8 @@ function isChallengeMiddleEncounterBlocked(key, forcedFinalKey) {
     if (CHALLENGES_WITHOUT_DIFF1.has(fin) && diff === 1) return true;
     if (CHALLENGE_MOSQUITO_FORBIDDEN_FINALE_KEYS.has(fin) && key === 'AG') return true;
     if (CHALLENGE_SLUMBER_FORBIDDEN_FINALE_KEYS.has(fin) && key === 'BC') return true;
+    const banned = CHALLENGE_FORBIDDEN_ENCOUNTER_KEYS_BY_FINALE[fin];
+    if (banned?.includes(key)) return true;
     return false;
 }
 
@@ -3914,6 +3936,10 @@ function generateRandomEncounterLayoutInner(forcedFinalKey = null, starterElemen
     }
     if (!THE_HOUR_ALLOWED_FINALE_KEYS.has(forcedFinalKey ?? '')) {
         baseMiddlePool = baseMiddlePool.filter((key) => key !== THE_HOUR_ENCOUNTER_KEY);
+    }
+    const finaleBans = CHALLENGE_FORBIDDEN_ENCOUNTER_KEYS_BY_FINALE[forcedFinalKey ?? ''];
+    if (finaleBans?.length) {
+        baseMiddlePool = baseMiddlePool.filter((key) => !finaleBans.includes(key));
     }
     const baseMiddlePoolNoRiddle = baseMiddlePool.filter((k) => !RIDDLE_ENCOUNTER_KEYS.has(k));
     const DISTINCT_THEMES = new Set(baseMiddlePoolNoRiddle.map((k) => getEncounterThemeDedupSlug(k)));
@@ -6132,27 +6158,43 @@ function setDraftStatsModalOpen(open) {
     modal.setAttribute('aria-hidden', open ? 'false' : 'true');
 }
 
-const draftStatsBtn = document.getElementById('draftStatsBtn');
-const draftStatsCloseBtn = document.getElementById('draftStatsCloseBtn');
-const draftStatsRunBtn = document.getElementById('draftStatsRunBtn');
-const draftStatsModal = document.getElementById('draftStatsModal');
+function initDraftStatsUI() {
+    const draftStatsBtn = document.getElementById('draftStatsBtn');
+    const draftStatsCloseBtn = document.getElementById('draftStatsCloseBtn');
+    const draftStatsRunBtn = document.getElementById('draftStatsRunBtn');
+    const draftStatsModal = document.getElementById('draftStatsModal');
+    const draftStatsPanel = draftStatsModal?.querySelector('.draft-stats-panel');
 
-if (draftStatsBtn) {
-    draftStatsBtn.addEventListener('click', () => {
-        setDraftStatsModalOpen(true);
-        if (!document.querySelector('#draftStatsBody table')) runDraftStatsFromUI();
+    if (draftStatsBtn) {
+        draftStatsBtn.addEventListener('click', () => {
+            setDraftStatsModalOpen(true);
+            if (!document.querySelector('#draftStatsBody table')) runDraftStatsFromUI();
+        });
+    }
+    if (draftStatsCloseBtn) {
+        draftStatsCloseBtn.addEventListener('click', () => setDraftStatsModalOpen(false));
+    }
+    if (draftStatsRunBtn) {
+        draftStatsRunBtn.addEventListener('click', () => runDraftStatsFromUI());
+    }
+    if (draftStatsModal) {
+        draftStatsModal.addEventListener('click', (e) => {
+            if (e.target === draftStatsModal) setDraftStatsModalOpen(false);
+        });
+    }
+    // Keep panel clicks from hitting the backdrop handler.
+    draftStatsPanel?.addEventListener('click', (e) => e.stopPropagation());
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const modal = document.getElementById('draftStatsModal');
+        if (modal?.classList.contains('visible')) setDraftStatsModalOpen(false);
     });
 }
-if (draftStatsCloseBtn) {
-    draftStatsCloseBtn.addEventListener('click', () => setDraftStatsModalOpen(false));
-}
-if (draftStatsRunBtn) {
-    draftStatsRunBtn.addEventListener('click', () => runDraftStatsFromUI());
-}
-if (draftStatsModal) {
-    draftStatsModal.addEventListener('click', (e) => {
-        if (e.target === draftStatsModal) setDraftStatsModalOpen(false);
-    });
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDraftStatsUI);
+} else {
+    initDraftStatsUI();
 }
 
 /* ---------------- GUIDED TUTORIAL ---------------- */
